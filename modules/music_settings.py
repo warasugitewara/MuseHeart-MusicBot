@@ -42,7 +42,7 @@ def check_channel_perm(channel: Union[disnake.StageChannel, disnake.VoiceChannel
 
     if missing_perms:
         raise GenericError(
-            f"**{channel.guild.me.mention} não possui as seguintes permissões necessárias no canal {channel.mention}** ```ansi\n" +
+            f"**{channel.guild.me.mention} はチャンネル {channel.mention}で以下の必要な権限を持っていません** ```ansi\n" +
             "\n".join(f"[0;33m{perms_translations.get(p, p)}[0m" for p in missing_perms) + "```")
 
 
@@ -90,7 +90,7 @@ class SkinSelector(disnake.ui.View):
         self.clear_items()
 
         if not self.global_mode:
-            self.embed.title = "Seletor de skin (Aplicar no bot selecionado)"
+            self.embed.title = "スキン選択 (選択したボットに適用)"
 
             for s in self.select_opts:
                 s.default = self.skin_selected == s.value
@@ -102,7 +102,7 @@ class SkinSelector(disnake.ui.View):
             static_select_opts = self.static_select_opts
 
         else:
-            self.embed.title = "Seletor de skin (Aplicar em todos os bots do servidor)"
+            self.embed.title = "スキン選択 (サーバーの全ボットに適用)"
 
             for s in self.global_select_opts:
                 s.default = self.skin_selected == s.value
@@ -121,15 +121,15 @@ class SkinSelector(disnake.ui.View):
         static_select_opts.callback = self.static_skin_callback
         self.add_item(static_select_opts)
 
-        global_mode = disnake.ui.Button(label=("Desativar" if self.global_mode else "Ativar") + " modo Global ", emoji="🌐")
+        global_mode = disnake.ui.Button(label=("無効化" if self.global_mode else "有効化") + " グローバルモード ", emoji="🌐")
         global_mode.callback = self.mode_callback
         self.add_item(global_mode)
 
-        confirm_button = disnake.ui.Button(label="Salvar", emoji="💾")
+        confirm_button = disnake.ui.Button(label="保存", emoji="💾")
         confirm_button.callback = self.confirm_callback
         self.add_item(confirm_button)
 
-        cancel_button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_button = disnake.ui.Button(label="キャンセル", emoji="❌")
         cancel_button.callback = self.stop_callback
         self.add_item(cancel_button)
 
@@ -138,7 +138,7 @@ class SkinSelector(disnake.ui.View):
         if inter.author.id == self.ctx.author.id:
             return True
 
-        await inter.send(f"Apenas {self.ctx.author.mention} pode interagir aqui!", ephemeral=True)
+        await inter.send(f"{self.ctx.author.mention} のみがここで操作できます！", ephemeral=True)
         return False
 
     async def skin_callback(self, inter: disnake.MessageInteraction):
@@ -184,13 +184,13 @@ class PlayerSettings(disnake.ui.View):
         self.clear_items()
 
         player_volume_select = disnake.ui.Select(
-            placeholder="Selecione um volume padrão.",
+            placeholder="デフォルトの音量を選択してください。",
             options=[
-                        disnake.SelectOption(label=f"Volume padrão: {i}", default=i == self.default_player_volume,
+                        disnake.SelectOption(label=f"デフォルト音量: {i}", default=i == self.default_player_volume,
                                              value=str(i)) for i in range(5, 101, 5)
                     ] + [
-                disnake.SelectOption(label=f"Volume padrão: {i}", default=i == self.default_player_volume,
-                                     description="Nota: Acima de 100% o audio pode ficar ruim.",
+                disnake.SelectOption(label=f"デフォルト音量: {i}", default=i == self.default_player_volume,
+                                     description="注意: 100%を超えると音質が悪くなる可能性があります。",
                                      value=str(i)) for i in range(110, 151, 10)
             ]
         )
@@ -198,22 +198,22 @@ class PlayerSettings(disnake.ui.View):
         player_volume_select.callback = self.volume_callback
         self.add_item(player_volume_select)
 
-        check_other_bots_button = disnake.ui.Button(label="Não conectar com bots incompatíveis.",
+        check_other_bots_button = disnake.ui.Button(label="互換性のないボットと接続しない。",
                                                     emoji="✅" if self.check_other_bots_in_vc else "🚫")
         check_other_bots_button.callback = self.check_other_bots_callback
         self.add_item(check_other_bots_button)
 
-        restrict_mode_button = disnake.ui.Button(label="Modo restrito",
+        restrict_mode_button = disnake.ui.Button(label="制限モード",
                                                     emoji="✅" if self.enable_restrict_mode else "🚫")
         restrict_mode_button.callback = self.restrict_mode_callback
         self.add_item(restrict_mode_button)
 
-        check_autoplay_button = disnake.ui.Button(label="Autoplay.",
+        check_autoplay_button = disnake.ui.Button(label="自動再生",
                                                     emoji="✅" if self.enable_autoplay else "🚫")
         check_autoplay_button.callback = self.autoplay_callback
         self.add_item(check_autoplay_button)
 
-        close_button = disnake.ui.Button(label="Salvar/Fechar", emoji="💾")
+        close_button = disnake.ui.Button(label="保存/閉じる", emoji="💾")
         close_button.callback = self.close_callback
         self.add_item(close_button)
 
@@ -241,9 +241,9 @@ class PlayerSettings(disnake.ui.View):
 
         try:
             if isinstance(self.ctx, CustomContext):
-                await self.message.edit(content="Alterações salvas com sucesso!", view=None, embed=None)
+                await self.message.edit(content="変更が正常に保存されました！", view=None, embed=None)
             else:
-                await self.ctx.edit_original_message(content="Alterações salvas com sucesso!", view=None, embed=None)
+                await self.ctx.edit_original_message(content="変更が正常に保存されました！", view=None, embed=None)
         except Exception:
             traceback.print_exc()
         await self.save_data()
@@ -254,7 +254,7 @@ class PlayerSettings(disnake.ui.View):
         if inter.author.id == self.ctx.author.id:
             return True
 
-        await inter.send(f"Apenas {self.ctx.author.mention} pode interagir aqui!", ephemeral=True)
+        await inter.send(f"{self.ctx.author.mention} のみがここで操作できます！", ephemeral=True)
         return False
 
     async def save_data(self):
@@ -277,11 +277,11 @@ class PlayerSettings(disnake.ui.View):
 
         if isinstance(self.ctx, CustomContext):
             await self.message.edit(
-                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
+                embed=disnake.Embed(description="**タイムアウト...**", color=self.bot.get_color()), view=None
             )
         else:
             await self.ctx.edit_original_message(
-                embed=disnake.Embed(description="**Tempo esgotado...**", color=self.bot.get_color()), view=None
+                embed=disnake.Embed(description="**タイムアウト...**", color=self.bot.get_color()), view=None
             )
 
         await self.save_data()
@@ -292,7 +292,7 @@ class PlayerSettings(disnake.ui.View):
 class MusicSettings(commands.Cog):
 
     emoji = "🔧"
-    name = "Configurações"
+    name = "設定"
     desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
@@ -305,14 +305,14 @@ class MusicSettings(commands.Cog):
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(
         name="playersettings", aliases=["ps", "settings"],
-        description="Alterar algumas configurações padrões do player.",
+        description="プレイヤーのデフォルト設定を変更します。",
         cooldown=player_settings_cd, max_concurrency=player_settings_mc
     )
     async def player_settings_legacy(self, ctx: CustomContext):
         await self.player_settings.callback(self=self, interaction=ctx)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Alterar algumas configurações padrões do player.",
+        description=f"{desc_prefix}プレイヤーのデフォルト設定を変更します。",
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     @commands.contexts(guild=True)
@@ -339,7 +339,7 @@ class MusicSettings(commands.Cog):
 
         view.message = await func(
             embed=disnake.Embed(
-                description="**Ajustar configurações padrão do player:**",
+                description="**プレイヤーのデフォルト設定を調整:**",
                 color=self.bot.get_color()
             ).set_author(name=str(bot.user), icon_url=bot.user.display_avatar.url), view=view
         )
@@ -351,12 +351,12 @@ class MusicSettings(commands.Cog):
 
     setup_args = CommandArgparse()
     setup_args.add_argument('-reset', '--reset', '-purge', '--purge', action="store_true",
-                             help="Limpar mensagens do canal selecionado (até 100 mensagens, não efetivo em forum).")
+                             help="選択したチャンネルのメッセージを削除（最大100件、フォーラムでは無効）。")
 
     @commands.has_guild_permissions(manage_guild=True)
     @commands.command(
         name="setup", aliases=["songrequestchannel", "sgrc"], usage="{prefix}{cmd} [id|#canal]\nEx: {prefix}{cmd} #canal",
-        description="Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
+        description="音楽リクエスト専用チャンネルを作成/選択し、プレイヤーを固定します。",
         cooldown=setup_cd, max_concurrency=setup_mc, extras={"flags": setup_args}
     )
     async def setup_legacy(
@@ -371,7 +371,7 @@ class MusicSettings(commands.Cog):
                                   purge_messages=args.reset)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Criar/escolher um canal dedicado para pedir músicas e deixar player fixado.",
+        description=f"{desc_prefix}音楽リクエスト専用チャンネルを作成/選択し、プレイヤーを固定します。",
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc
     )
     @commands.contexts(guild=True)
@@ -379,17 +379,17 @@ class MusicSettings(commands.Cog):
             self,
             interaction: disnake.ApplicationCommandInteraction,
             target: Union[disnake.TextChannel, disnake.VoiceChannel, disnake.ForumChannel, disnake.StageChannel] = commands.Param(
-                name="canal", default=None, description="Selecionar um canal existente"
+                name="channel", default=None, description="既存のチャンネルを選択"
             ),
             purge_messages: str = commands.Param(
-                name="limpar_mensagens", default="no",
-                description="Limpar mensagens do canal selecionado (até 100 mensagens, não efetivo em forum).",
+                name="clear_messages", default="no",
+                description="選択したチャンネルのメッセージを削除（最大100件、フォーラムでは無効）。",
                 choices=[
                     disnake.OptionChoice(
-                        disnake.Localized("Yes", data={disnake.Locale.pt_BR: "Sim"}), "yes"
+                        disnake.Localized("Yes", data={disnake.Locale.ja: "はい"}), "yes"
                     ),
                     disnake.OptionChoice(
-                        disnake.Localized("No", data={disnake.Locale.pt_BR: "Não"}), "no"
+                        disnake.Localized("No", data={disnake.Locale.ja: "いいえ"}), "no"
                     )
                 ],
             )
@@ -412,12 +412,12 @@ class MusicSettings(commands.Cog):
         if isinstance(target, disnake.ForumChannel) and not isinstance(inter, CustomContext):
 
             await inter.response.send_modal(
-                title="Escolha um nome para o post (em até 30seg.)",
+                title="投稿の名前を選択してください（30秒以内）",
                 custom_id=str(inter.id),
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome",
+                        label="名前",
                         custom_id="forum_title",
                         min_length=4,
                         max_length=30,
@@ -493,7 +493,7 @@ class MusicSettings(commands.Cog):
                 pass
 
         embed_archived = disnake.Embed(
-            description=f"**Este canal de pedir música foi reconfigurado pelo membro {inter.author.mention}.**",
+            description=f"**この音楽リクエストチャンネルはメンバー {inter.author.mention} によって再設定されました。**",
             color=bot.get_color(guild.me)
         )
 
@@ -503,7 +503,7 @@ class MusicSettings(commands.Cog):
 
                 try:
                     if isinstance(original_message.channel.parent, disnake.ForumChannel):
-                        await original_message.thread.delete(reason=f"Player reconfigurado por {inter.author}.")
+                        await original_message.thread.delete(reason=f"プレイヤーが {inter.author} によって再設定されました。")
                         return
                 except AttributeError:
                     pass
@@ -520,7 +520,7 @@ class MusicSettings(commands.Cog):
                     await original_message.thread.edit(
                         archived=True,
                         locked=True,
-                        reason=f"Player reconfigurado por {inter.author}."
+                        reason=f"プレイヤーが {inter.author} によって再設定されました。"
                     )
                 except:
                     pass
@@ -548,37 +548,36 @@ class MusicSettings(commands.Cog):
                         kwargs_msg = {"ephemeral": True}
 
             buttons = [
-                disnake.ui.Button(label="Criar canal de texto", custom_id=f"text_channel_{id_}", emoji="💬", disabled=not guild.me.guild_permissions.manage_channels),
-                disnake.ui.Button(label="Criar canal de voz", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=not guild.me.guild_permissions.manage_channels),
-                disnake.ui.Button(label="Cancelar", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
+                disnake.ui.Button(label="テキストチャンネルを作成", custom_id=f"text_channel_{id_}", emoji="💬", disabled=not guild.me.guild_permissions.manage_channels),
+                disnake.ui.Button(label="ボイスチャンネルを作成", custom_id=f"voice_channel_{id_}", emoji="🔊", disabled=not guild.me.guild_permissions.manage_channels),
+                disnake.ui.Button(label="キャンセル", custom_id=f"voice_channel_cancel_{id_}", emoji="❌")
             ]
 
             if "COMMUNITY" in guild.features:
-                buttons.insert(2, disnake.ui.Button(label="Criar canal de palco", custom_id=f"stage_channel_{id_}",
+                buttons.insert(2, disnake.ui.Button(label="ステージチャンネルを作成", custom_id=f"stage_channel_{id_}",
                                   emoji="<:stagechannel:1077351815533826209>", disabled=not guild.me.guild_permissions.manage_channels))
 
             color = self.bot.get_color(guild.me)
 
             embeds = [
                 disnake.Embed(
-                    description="**Selecione um canal " + ("ou clique em um dos botões abaixo para criar um novo canal para pedir músicas." if guild.me.guild_permissions.manage_channels else "abaixo:") +'**' ,
+                    description="**チャンネルを選択 " + ("または下のボタンをクリックして音楽リクエスト用の新しいチャンネルを作成してください。" if guild.me.guild_permissions.manage_channels else "以下:") +'**' ,
                     color=color
-                ).set_footer(text="Você tem apenas 45 segundos para selecionar/clicar em uma opção.")
+                ).set_footer(text="45秒以内にオプションを選択/クリックしてください。")
             ]
 
             if not guild.me.guild_permissions.manage_channels:
                 embeds.append(
                     disnake.Embed(
-                        description=f"Os botões de criar canal foram desativados devido o bot **{bot.user.mention}** "
-                                    "não possuir a permissão de **gerenciar canais** no servidor.",
+                        description=f"チャンネル作成ボタンは無効になっています。ボット **{bot.user.mention}** "
+                                    "がサーバーで**チャンネルの管理**権限を持っていないためです。",
                         color=color
                     )
                 )
 
             disnake.Embed(color=color).set_footer(
-                text="Nota: Caso queira usar canal de forum você terá que selecionar um na lista de canais "
-                     "abaixo (Caso não tenha você terá que criar um canal de fórum manualmente e usar esse "
-                     "comando novamente."
+                text="注意: フォーラムチャンネルを使用する場合は、下のチャンネルリストから選択する必要があります"
+                     "（ない場合は、手動でフォーラムチャンネルを作成してからこのコマンドを再度使用してください）。"
             )
 
             msg_select = await func(
@@ -635,7 +634,7 @@ class MusicSettings(commands.Cog):
                 try:
                     await func(
                         embed=disnake.Embed(
-                            description="**Tempo esgotado!**",
+                            description="**タイムアウト！**",
                             color=disnake.Color.red()
                         ),
                         components=None
@@ -655,7 +654,7 @@ class MusicSettings(commands.Cog):
 
                 await inter_message.response.edit_message(
                     embed=disnake.Embed(
-                        description="**Operação cancelada...**",
+                        description="**操作がキャンセルされました...**",
                         color=self.bot.get_color(guild.me),
                     ), components=None
                 )
@@ -673,7 +672,7 @@ class MusicSettings(commands.Cog):
             else:
 
                 if not guild.me.guild_permissions.manage_channels:
-                    raise GenericError(f"**O bot {bot.user.mention} não possui permissão de gerenciar canais pra criar um novo canal.**")
+                    raise GenericError(f"**ボット {bot.user.mention} は新しいチャンネルを作成するためのチャンネル管理権限を持っていません。**")
 
                 await inter_message.response.defer()
                 if inter_message.data.custom_id.startswith("voice_channel_"):
@@ -688,10 +687,10 @@ class MusicSettings(commands.Cog):
             inter = inter_message
 
         if target == guild.public_updates_channel:
-            raise GenericError("**Você não pode usar um canal de atualizações do discord.**")
+            raise GenericError("**Discordのアップデートチャンネルは使用できません。**")
 
         if target == guild.rules_channel:
-            raise GenericError("**Você não pode usar um canal de regras.**")
+            raise GenericError("**ルールチャンネルは使用できません。**")
 
         check_channel_perm(target)
 
@@ -700,7 +699,7 @@ class MusicSettings(commands.Cog):
             channel_kwargs.clear()
 
             if not target.permissions_for(guild.me).create_forum_threads:
-                raise GenericError(f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")
+                raise GenericError(f"**{bot.user.mention} はチャンネルに投稿する権限を持っていません {target.mention}.**")
 
             try:
                 id_ = f"modal_{inter.id}"
@@ -710,12 +709,12 @@ class MusicSettings(commands.Cog):
             if not inter.response.is_done():
 
                 await inter.response.send_modal(
-                    title="Definir um nome para o post do fórum",
+                    title="フォーラム投稿の名前を設定",
                     custom_id=id_,
                     components=[
                         disnake.ui.TextInput(
                             style=disnake.TextInputStyle.short,
-                            label="Nome",
+                            label="名前",
                             custom_id="forum_title",
                             min_length=4,
                             max_length=30,
@@ -732,7 +731,7 @@ class MusicSettings(commands.Cog):
                         func = inter.edit_original_message
                     except AttributeError:
                         func = msg_select.edit
-                    await func(embed=disnake.Embed(description="### Tempo esgotado!", color=bot.get_color(guild.me)), view=None)
+                    await func(embed=disnake.Embed(description="### タイムアウト！", color=bot.get_color(guild.me)), view=None)
                     return
 
                 try:
@@ -787,17 +786,16 @@ class MusicSettings(commands.Cog):
 
                 if not target.permissions_for(guild.me).manage_threads:
                     raise GenericError(
-                        f"**{bot.user.mention} não possui permissão de gerenciar tópicos no canal {target.mention}.**\n"
-                        f"`Nota: Você pode me conceder temporariamente essa permissão e após usar o comando novamente "
-                        f"você pode remover essa permissão.`")
+                        f"**{bot.user.mention} はチャンネルでスレッドを管理する権限を持っていません {target.mention}.**\n"
+                        f"`注意: 一時的にこの権限を付与し、コマンドを再度使用した後に権限を削除できます。`")
 
                 """if not target.permissions_for(guild.me).create_forum_threads:
                     raise GenericError(
-                        f"**{bot.user.mention} não possui permissão para postar no canal {target.mention}.**")"""
+                        f"**{bot.user.mention} はチャンネルに投稿する権限を持っていません {target.mention}.**")"""
 
                 thread_wmessage = await target.create_thread(
                     name=channel_name,
-                    content="Post para pedido de músicas.",
+                    content="音楽リクエスト用の投稿です。",
                     auto_archive_duration=10080,
                     slowmode_delay=5,
                 )
@@ -813,15 +811,15 @@ class MusicSettings(commands.Cog):
         else:
 
             if existing_channel and not guild.me.guild_permissions.administrator and not target.permissions_for(guild.me).manage_permissions:
-                raise GenericError(f"**{guild.me.mention} não possui permissão de administrador ou permissão de "
-                                   f"gerenciar permissões do canal {target.mention}** para editar as permissões "
-                                   f"necessárias para o sistema de pedir música funcionar devidamente.\n\n"
-                                   f"Caso não queira fornecer a permissão de administrador ou editar as permissões do"
-                                   f" canal {target.mention} para me permitir gerenciar permissões do canal. Você pode usar o comando "
-                                   f"sem selecionar um canal de destino.")
+                raise GenericError(f"**{guild.me.mention} は管理者権限またはチャンネルの権限を管理する権限を持っていません "
+                                   f"{target.mention}** 音楽リクエストシステムが正常に機能するために "
+                                   f"必要な権限を編集することができません。\n\n"
+                                   f"管理者権限を付与したくない場合、またはチャンネル"
+                                   f" {target.mention} の権限を編集したくない場合は、対象チャンネルを選択せずに"
+                                   f"コマンドを使用できます。")
 
             if not target.permissions_for(guild.me).read_messages:
-                raise GenericError(f"{bot.user.mention} permissão para ler mensagens no canal {target.mention}")
+                raise GenericError(f"{bot.user.mention} チャンネルでメッセージを読む権限 {target.mention}")
 
             if purge_messages == "yes":
                 await target.purge(limit=100, check=lambda m: m.author != guild.me or not m.thread)
@@ -844,7 +842,7 @@ class MusicSettings(commands.Cog):
 
         channel = target
 
-        msg = f"{inter.author.mention}, o sistema pra pedidos de música foi configurado no canal <#{channel.id}> através do bot: {bot.user.mention}"
+        msg = f"{inter.author.mention}, 音楽リクエストシステムがチャンネルに設定されました <#{channel.id}> ボット: {bot.user.mention}"
 
         if player and player.text_channel != target:
             if player.static:
@@ -852,7 +850,7 @@ class MusicSettings(commands.Cog):
                     await player.message.thread.edit(
                         archived=True,
                         locked=True,
-                        reason=f"Player reconfigurado por {inter.author}."
+                        reason=f"プレイヤーが {inter.author} によって再設定されました。"
                     )
                 except:
                     pass
@@ -884,7 +882,7 @@ class MusicSettings(commands.Cog):
                 elif message.thread.archived and message.thread.owner_id == bot.user.id:
                     thread_kw["archived"] = False
                 if thread_kw:
-                    await message.thread.edit(reason=f"Song request reativado por: {inter.author}.", **thread_kw)
+                    await message.thread.edit(reason=f"音楽リクエストが {inter.author} によって再有効化されました。", **thread_kw)
         elif player and isinstance(channel, (disnake.VoiceChannel, disnake.StageChannel)) and player.guild.me.voice.channel != channel:
             await player.connect(channel.id)
 
@@ -895,8 +893,8 @@ class MusicSettings(commands.Cog):
         reset_txt = f"{inter.prefix}reset" if isinstance(inter, CustomContext) else "/reset"
 
         embed = disnake.Embed(
-            description=f"**{msg}**\n\nObs: Caso queira reverter essa configuração, apenas use o comando {reset_txt} ou "
-                        f"delete o canal/post {channel.mention}",
+            description=f"**{msg}**\n\n注意: この設定を元に戻す場合は、コマンド {reset_txt} を使用するか、"
+                        f"チャンネル/投稿を削除してください {channel.mention}",
             color=bot.get_color(guild.me)
         )
 
@@ -917,7 +915,7 @@ class MusicSettings(commands.Cog):
     @commands.bot_has_guild_permissions(manage_threads=True)
     @commands.command(
         name="reset",
-        description="Resetar as configurações relacionadas ao canal de pedir música (song request).",
+        description="音楽リクエストチャンネルに関連する設定をリセットします。",
         cooldown=setup_cd, max_concurrency=setup_mc
     )
     async def reset_legacy(self, ctx: CustomContext, *, delete_channel: str = None):
@@ -928,7 +926,7 @@ class MusicSettings(commands.Cog):
         await self.reset.callback(self=self, interaction=ctx, delete_channel=delete_channel)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Resetar as configurações relacionadas ao canal de pedir música (song request).",
+        description=f"{desc_prefix}音楽リクエストチャンネルに関連する設定をリセットします。",
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=setup_cd, max_concurrency=setup_mc
     )
     @commands.contexts(guild=True)
@@ -936,8 +934,8 @@ class MusicSettings(commands.Cog):
             self,
             interaction: disnake.ApplicationCommandInteraction,
             delete_channel: str = commands.Param(
-                name="deletar_canal",
-                description="deletar o canal do player controller", default=None, choices=["sim", "não"]
+                name="delete_channel",
+                description="プレイヤーコントローラーのチャンネルを削除", default=None, choices=["はい", "いいえ"]
             )
     ):
 
@@ -951,7 +949,7 @@ class MusicSettings(commands.Cog):
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
         if not guild.me.guild_permissions.manage_threads:
-            raise GenericError(f"Não tenho permissão de **{perms_translations['manage_threads']}** no servidor.")
+            raise GenericError(f"権限がありません: **{perms_translations['manage_threads']}** サーバーで。")
 
         channel_inter = bot.get_channel(inter.channel.id)
 
@@ -964,13 +962,13 @@ class MusicSettings(commands.Cog):
             channel = None
 
         if not channel or channel.guild.id != inter.guild_id:
-            raise GenericError(f"**Não há canais de pedido de música configurado no bot {bot.user.mention} (ou o canal foi deletado).**")
+            raise GenericError(f"**ボットに音楽リクエストチャンネルが設定されていません {bot.user.mention} （またはチャンネルが削除されました）。**")
 
         try:
             if isinstance(channel.parent, disnake.ForumChannel):
-                await channel.delete(reason=f"{inter.author.id} resetou player")
+                await channel.delete(reason=f"{inter.author.id} がプレイヤーをリセットしました")
                 if channel_inter != channel:
-                    await inter.edit_original_message("O post foi deletado com sucesso!", embed=None, components=None)
+                    await inter.edit_original_message("投稿が正常に削除されました！", embed=None, components=None)
 
                 try:
                     player: LavalinkPlayer = bot.music.players[guild.id]
@@ -1014,7 +1012,7 @@ class MusicSettings(commands.Cog):
         await func(
             embed=disnake.Embed(
                 color=self.bot.get_color(guild.me),
-                description="**O Canal de pedir música foi resetado com sucesso.**"
+                description="**音楽リクエストチャンネルが正常にリセットされました。**"
             ), components=[]
         )
 
@@ -1030,22 +1028,22 @@ class MusicSettings(commands.Cog):
             await player.invoke_np(force=True)
 
         try:
-            if delete_channel == "sim":
-                await channel.delete(reason=f"Player resetado por: {inter.author}")
+            if delete_channel == "はい":
+                await channel.delete(reason=f"プレイヤーが {inter.author} によってリセットされました")
 
             elif original_message:
                 await original_message.edit(
-                    content=f"Canal de pedir música foi resetado pelo membro {inter.author.mention}.",
+                    content=f"音楽リクエストチャンネルがメンバーによってリセットされました {inter.author.mention}.",
                     embed=None, components=[
-                        disnake.ui.Button(label="Reconfigurar este canal", emoji="💠",
+                        disnake.ui.Button(label="このチャンネルを再設定", emoji="💠",
                                           custom_id="musicplayer_request_channel")
                     ]
                 )
-                await original_message.thread.edit(archived=True, reason=f"Player resetado por {inter.author}.")
+                await original_message.thread.edit(archived=True, reason=f"プレイヤーが {inter.author} によってリセットされました。")
         except Exception as e:
             traceback.print_exc()
             raise GenericError(
-                "**O canal de pedir música foi resetado da base de dados mas ocorreu um erro no processo:** "
+                "**音楽リクエストチャンネルはデータベースからリセットされましたが、処理中にエラーが発生しました:** "
                 f"```py\n{repr(e)}```"
             )
 
@@ -1053,20 +1051,20 @@ class MusicSettings(commands.Cog):
     djrole_mc =commands.MaxConcurrency(1, per=commands.BucketType.guild, wait=False)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(name="adddjrole",description="Adicionar um cargo para a lista de DJ's do servidor.",
+    @commands.command(name="adddjrole",description="サーバーのDJリストにロールを追加します。",
                       usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo", cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def add_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.add_dj_role.callback(self=self, interaction=ctx, role=role)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Adicionar um cargo para a lista de DJ's do servidor.",
+        description=f"{desc_prefix}サーバーのDJリストにロールを追加します。",
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=djrole_cd, max_concurrency=djrole_mc
     )
     @commands.contexts(guild=True)
     async def add_dj_role(
             self,
             interaction: disnake.ApplicationCommandInteraction,
-            role: disnake.Role = commands.Param(name="cargo", description="Cargo")
+            role: disnake.Role = commands.Param(name="role", description="ロール")
     ):
 
         inter, bot = await select_bot_pool(interaction)
@@ -1074,37 +1072,37 @@ class MusicSettings(commands.Cog):
         role = guild.get_role(role.id)
 
         if role == guild.default_role:
-            await inter.send("Você não pode adicionar esse cargo.", ephemeral=True)
+            await inter.send("このロールは追加できません。", ephemeral=True)
             return
 
         guild_data = await bot.get_data(inter.guild_id, db_name=DBModel.guilds)
 
         if str(role.id) in guild_data['djroles']:
-            await inter.send(f"O cargo {role.mention} já está na lista de DJ's", ephemeral=True)
+            await inter.send(f"ロール {role.mention} は既にDJリストに含まれています", ephemeral=True)
             return
 
         guild_data['djroles'].append(str(role.id))
 
         await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
-        await inter.send(f"O cargo {role.mention} foi adicionado à lista de DJ's.", ephemeral=True)
+        await inter.send(f"ロール {role.mention} がDJリストに追加されました。", ephemeral=True)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(name="removedjrole", description="Remover um cargo da lista de DJ's do servidor.",
+    @commands.command(name="removedjrole", description="サーバーのDJリストからロールを削除します。",
                       usage="{prefix}{cmd} [id|nome|@cargo]\nEx: {prefix}{cmd} @cargo",
                       cooldown=djrole_cd, max_concurrency=djrole_mc)
     async def remove_dj_role_legacy(self, ctx: CustomContext, *, role: disnake.Role):
         await self.remove_dj_role.callback(self=self, interaction=ctx, role=role)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Remover um cargo da lista de DJ's do servidor.",
+        description=f"{desc_prefix}サーバーのDJリストからロールを削除します。",
         default_member_permissions=disnake.Permissions(manage_guild=True), cooldown=djrole_cd, max_concurrency=djrole_mc
     )
     @commands.contexts(guild=True)
     async def remove_dj_role(
             self,
             interaction: disnake.ApplicationCommandInteraction,
-            role: disnake.Role = commands.Param(name="cargo", description="Cargo")
+            role: disnake.Role = commands.Param(name="role", description="ロール")
     ):
 
         inter, bot = await select_bot_pool(interaction)
@@ -1116,14 +1114,14 @@ class MusicSettings(commands.Cog):
 
         if not guild_data['djroles']:
 
-            await inter.send("Não há cargos na lista de DJ's.", ephemeral=True)
+            await inter.send("DJリストにロールがありません。", ephemeral=True)
             return
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
         role = guild.get_role(role.id)
 
         if str(role.id) not in guild_data['djroles']:
-            await inter.send(f"O cargo {role.mention} não está na lista de DJ's\n\n" + "Cargos:\n" +
+            await inter.send(f"ロール {role.mention} はDJリストに含まれていません\n\n" + "ロール:\n" +
                                               " ".join(f"<#{r}>" for r in guild_data['djroles']), ephemeral=True)
             return
 
@@ -1131,20 +1129,20 @@ class MusicSettings(commands.Cog):
 
         await bot.update_data(guild.id, guild_data, db_name=DBModel.guilds)
 
-        await inter.send(f"O cargo {role.mention} foi removido da lista de DJ's.", ephemeral=True)
+        await inter.send(f"ロール {role.mention} がDJリストから削除されました。", ephemeral=True)
 
     skin_cd = commands.CooldownMapping.from_cooldown(1, 20, commands.BucketType.guild)
     skin_mc =commands.MaxConcurrency(1, per=commands.BucketType.member, wait=False)
 
     @commands.has_guild_permissions(manage_guild=True)
-    @commands.command(description="Alterar aparência/skin do player.", name="changeskin", aliases=["skin", "skins"],
+    @commands.command(description="プレイヤーの外観/スキンを変更します。", name="changeskin", aliases=["skin", "skins"],
                       cooldown=skin_cd, max_concurrency=skin_mc)
     async def change_skin_legacy(self, ctx: CustomContext):
 
         await self.change_skin.callback(self=self, interaction=ctx)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Alterar aparência/skin do player.", cooldown=skin_cd, max_concurrency=skin_mc,
+        description=f"{desc_prefix}プレイヤーの外観/スキンを変更します。", cooldown=skin_cd, max_concurrency=skin_mc,
         default_member_permissions=disnake.Permissions(manage_guild=True)
     )
     @commands.contexts(guild=True)
@@ -1176,22 +1174,22 @@ class MusicSettings(commands.Cog):
         global_selected = global_data["player_skin"] or bot.pool.default_skin
         global_static_selected = global_data["player_skin_static"] or bot.pool.default_static_skin
 
-        skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Modo normal: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
-        static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
+        skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"通常モード: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "現在のスキン"} if selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
+        static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"曲リクエスト: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "現在のスキン"} if static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
-        global_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Modo Normal: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if global_selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
-        global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"Song-Request: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "skin atual"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
+        global_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"通常モード: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "現在のスキン"} if global_selected == s else {}) for s in skin_list + add_skin_prefix(global_data["custom_skins"])]
+        global_static_skins_opts = [disnake.SelectOption(emoji="💠" if s.startswith("> custom_skin: ") else "🎨", label=f"曲リクエスト: {s.replace('> custom_skin: ', '')}", value=s, **{"default": True, "description": "現在のスキン"} if global_static_selected == s else {}) for s in static_skin_list + add_skin_prefix(global_data["custom_skins_static"])]
 
         embed = disnake.Embed(
-            description="```ansi\n[31;1mModo Normal:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
-                        "```ansi\n[33;1mModo Fixo (Song-Request):[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
-                        "\n\n`Nota: No modo global a skin será aplicada globalmente em todos os bots.`",
+            description="```ansi\n[31;1m通常モード:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_skins[s].preview})" for s in skin_list) + "\n\n" 
+                        "```ansi\n[33;1m固定モード（曲リクエスト）:[0m``` " + ", ".join(f"[`[{s}]`]({bot.player_static_skins[s].preview})" for s in static_skin_list) +
+                        "\n\n`注意: グローバルモードでは、スキンはすべてのボットにグローバルに適用されます。`",
             colour=bot.get_color(guild.me)
         ).set_image("https://cdn.discordapp.com/attachments/554468640942981147/1082887587770937455/rainbow_bar2.gif")
 
         try:
             if bot.user.id != self.bot.user.id:
-                embed.set_footer(text=f"Bot selecionado: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
+                embed.set_footer(text=f"選択したボット: {bot.user.display_name}", icon_url=bot.user.display_avatar.url)
         except AttributeError:
             pass
 
@@ -1215,7 +1213,7 @@ class MusicSettings(commands.Cog):
         if select_view.skin_selected is None:
             await select_view.interaction.response.edit_message(
                 view=None,
-                embed=disnake.Embed(description="**Solicitação cancelada.**", colour=bot.get_color(guild.me))
+                embed=disnake.Embed(description="**リクエストがキャンセルされました。**", colour=bot.get_color(guild.me))
             )
             return
 
@@ -1257,15 +1255,15 @@ class MusicSettings(commands.Cog):
 
             if global_selected != select_view.skin_selected:
                 try:
-                    changed_skins_txt += f"Global - Modo Normal: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
+                    changed_skins_txt += f"Global - 通常モード: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Global - Modo Normal: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"Global - 通常モード: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
             if global_static_selected != select_view.static_skin_selected:
                 try:
-                    changed_skins_txt += f"Global - Song Request: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
+                    changed_skins_txt += f"グローバル - 曲リクエスト: [`{select_view.static_skin_selected}`]({self.bot.player_static_skins[select_view.static_skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Global - Song Request: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"グローバル - 曲リクエスト: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
         else:
             guild_data["player_controller"]["skin"] = select_view.skin_selected
@@ -1274,9 +1272,9 @@ class MusicSettings(commands.Cog):
 
             if selected != select_view.skin_selected:
                 try:
-                    changed_skins_txt += f"Modo Normal: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
+                    changed_skins_txt += f"通常モード: [`{select_view.skin_selected}`]({self.bot.player_skins[select_view.skin_selected].preview})\n"
                 except:
-                    changed_skins_txt += f"Modo Normal: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
+                    changed_skins_txt += f"通常モード: `{select_view.skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
             if static_selected != select_view.static_skin_selected:
                 try:
@@ -1285,12 +1283,12 @@ class MusicSettings(commands.Cog):
                     changed_skins_txt += f"Song Request: `{select_view.static_skin_selected.replace('> custom_skin: ', '[custom skin]: ')}`\n"
 
         if global_mode != select_view.global_mode:
-            changed_skins_txt += "Skin Global: `" + ("Ativado" if select_view.global_mode else "Desativado") + "`\n"
+            changed_skins_txt += "グローバルスキン: `" + ("有効" if select_view.global_mode else "無効") + "`\n"
 
         if not changed_skins_txt:
-            txt = "**Não houve alterações nas configurações de skin...**"
+            txt = "**スキン設定に変更はありませんでした...**"
         else:
-            txt = f"**A skin do player do servidor foi alterada com sucesso.**\n{changed_skins_txt}"
+            txt = f"**サーバーのプレイヤースキンが正常に変更されました。**\n{changed_skins_txt}"
 
         kwargs = {
             "embed": disnake.Embed(
@@ -1346,7 +1344,7 @@ class MusicSettings(commands.Cog):
 
             player.setup_hints()
             player.process_hint()
-            player.set_command_log(text=f"{inter.author.mention} alterou a skin do player.", emoji="🎨")
+            player.set_command_log(text=f"{inter.author.mention} プレイヤーのスキンを変更しました。", emoji="🎨")
 
             try:
                 if player.controller_mode and not [m for m in player.guild.me.voice.channel.members if not m.bot]:
@@ -1359,8 +1357,8 @@ class MusicSettings(commands.Cog):
 
     @commands.cooldown(2, 10, commands.BucketType.member)
     @commands.has_guild_permissions(manage_channels=True)
-    @pool_command(aliases=["la"], description="Ativar o envio de invite para ouvir junto via RPC "
-                                                                "(Sistema ainda em testes)")
+    @pool_command(aliases=["la"], description="RPC経由で一緒に聴く招待を有効にする"
+                                                                "（システムはテスト中）")
     async def listenalong(self, ctx: CustomContext):
 
         try:
@@ -1378,16 +1376,13 @@ class MusicSettings(commands.Cog):
 
         await ctx.reply(
             embed=disnake.Embed(
-                description=f"**Crie um convite no canal {ctx.author.voice.channel.mention} marcando a opção "
-                            f"\"Inscrição como convidado\" e em seguida clique no botão abaixo para enviar o link do "
-                            f"convite.**\n\n"
-                            f"Cuidado! Caso não tenha essa opção significa que o recurso não está disponível no seu "
-                            f"servidor e não recomendo prosseguir pra evitar dar acesso permanente ao membro que usar "
-                            f"o botão ou evitar problemas de permissões etc."
+                description=f"**チャンネル {ctx.author.voice.channel.mention} で招待を作成し、"
+                            f"「ゲストとして参加」オプションをチェックしてから、下のボタンをクリックして招待リンクを送信してください。**\n\n"
+                            f"注意！このオプションがない場合、この機能はサーバーで利用できないことを意味します。"
+                            f"ボタンを使用するメンバーに永続的なアクセスを与えたり、権限の問題を回避するために続行することはお勧めしません。"
             ).set_image(url="https://cdn.discordapp.com/attachments/554468640942981147/1108943648508366868/image.png").
-            set_footer(text="Nota: crie um convite sem limitações como: datas para expirar, quantidade de usos ou "
-                            "apenas para um usuário usar."),
-            components=[disnake.ui.Button(label="Enviar convite", custom_id=f"listen_along_{ctx.author.id}")],
+            set_footer(text="注意: 有効期限、使用回数制限、または1人のユーザーのみ使用可能などの制限のない招待を作成してください。"),
+            components=[disnake.ui.Button(label="招待を送信", custom_id=f"listen_along_{ctx.author.id}")],
             fail_if_not_exists=False
         )
 
@@ -1398,18 +1393,18 @@ class MusicSettings(commands.Cog):
             return
 
         if not inter.data.custom_id.endswith(str(inter.author.id)):
-            return await inter.send("**Você não pode usar este botão.**", ephemeral=True)
+            return await inter.send("**このボタンは使用できません。**", ephemeral=True)
 
         if not inter.author.voice.channel:
-            return await inter.send("**Você precisa estar em um canal de voz para enviar o convite.**", ephemeral=True)
+            return await inter.send("**招待を送信するにはボイスチャンネルに参加している必要があります。**", ephemeral=True)
 
         await inter.response.send_modal(
-            title="Invite para ouvir junto",
+            title="一緒に聴く招待",
             custom_id="listen_along_modal",
             components=[
                 disnake.ui.TextInput(
                     style=disnake.TextInputStyle.short,
-                    label="Cole o invite no campo abaixo:",
+                    label="下のフィールドに招待を貼り付けてください:",
                     custom_id="invite_url",
                     min_length=25,
                     max_length=36,
@@ -1425,26 +1420,26 @@ class MusicSettings(commands.Cog):
             return
 
         if not inter.author.voice.channel:
-            return await inter.send("**Você precisa estar em um canal de voz para enviar o convite.**", ephemeral=True)
+            return await inter.send("**招待を送信するにはボイスチャンネルに参加している必要があります。**", ephemeral=True)
 
         bucket = self.invite_cooldown.get_bucket(inter)
         retry_after = bucket.update_rate_limit()
 
         if retry_after:
-            return await inter.send("**Você deve aguardar {} para enviar o convite**".format(time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
+            return await inter.send("**招待を送信するには {} 待つ必要があります**".format(time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
 
         await inter.response.defer(ephemeral=True)
 
         try:
             invite = await self.bot.fetch_invite(inter.text_values['invite_url'].strip(), with_expiration=True)
         except disnake.NotFound:
-            return await inter.edit_original_message("Link inválido ou o convite não existe/expirou")
+            return await inter.edit_original_message("無効なリンクまたは招待が存在しない/期限切れです")
 
         if invite.max_uses:
-            return await inter.edit_original_message("O convite pode ter quantidade máxima de usos")
+            return await inter.edit_original_message("招待には最大使用回数が設定されています")
 
         if invite.target_user:
-            return await inter.edit_original_message("O convite não pode ser configurado para apenas 1 usuário usar.")
+            return await inter.edit_original_message("招待は1人のユーザーのみ使用可能に設定することはできません。")
 
         channel = None
 
@@ -1456,22 +1451,20 @@ class MusicSettings(commands.Cog):
                 continue
 
             if not isinstance(channel, disnake.VoiceChannel):
-                return await inter.edit_original_message("**Esse recurso funciona apenas em canais de voz.**")
+                return await inter.edit_original_message("**この機能はボイスチャンネルでのみ動作します。**")
 
             break
 
         if not channel:
-            return await inter.edit_original_message("**Não há bots compatíveis adicionado no servidor do invite informado.**")
+            return await inter.edit_original_message("**指定された招待のサーバーに互換性のあるボットが追加されていません。**")
 
         global_data = await self.bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
         if len(global_data["listen_along_invites"]) > 4:
             return await inter.edit_original_message(
                 embed=disnake.Embed(
-                    description="**Limite de convites excedido no servidor atual, delete pelo menos um dos convites "
-                                "abaixo do servidor:** ```ansi\n" +
-                                ", ".join(f"[31;1m{c}[0m" for c in global_data["listen_along_invites"]) + "```",
-                    color=self.bot.get_color()
+                    description="**現在のサーバーで招待制限を超えました。サーバーから以下の招待の少なくとも1つを削除してください:** ```ansi\n" +
+                                ", ".join(f"[31;1m{c}[0m" for c in global_data["listen_along_invites"]) + "```",
                 )
             )
 
@@ -1480,10 +1473,9 @@ class MusicSettings(commands.Cog):
         await self.bot.update_global_data(inter.guild_id, global_data, db_name=DBModel.guilds)
 
         await inter.edit_original_message(
-            f"**O link {invite} foi ativado/atualizado com sucesso para ser enviado via RPC quando houver "
-            f"player ativo no canal {inter.author.voice.channel.mention}.**\n"
-            f"`Nota: Caso queira exibir no seu status e não tenha o app de RPC, use o comando /rich_presence para "
-            f"obter mais informações.`"
+            f"**リンク {invite} がRPC経由で送信されるように正常に有効化/更新されました "
+            f"（チャンネル {inter.author.voice.channel.mention} でアクティブなプレイヤーがある場合）。**\n"
+            f"`注意: ステータスに表示したいがRPCアプリを持っていない場合は、/rich_presenceコマンドを使用して詳細を確認してください。`"
         )
 
         for bot in self.bot.pool.get_guild_bots(inter.guild_id):
@@ -1509,7 +1501,7 @@ class MusicSettings(commands.Cog):
         data = await self.bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
         if inter.text_values["token_input"] == data["token"]:
-            await inter.send("Seu token é igual ao token atual!", ephemeral=True)
+            await inter.send("トークンは現在のトークンと同じです！", ephemeral=True)
             return
 
         await self.bot.get_cog("RPCCog").close_presence(inter)
@@ -1518,21 +1510,21 @@ class MusicSettings(commands.Cog):
 
         await self.bot.update_global_data(id_=inter.author.id, data=data, db_name=DBModel.users)
 
-        await inter.edit_original_message(f"O seu token foi importado/editado com sucesso!\n"
-                                          f"Nota: Adicione/Atualize o token no app de RPC.")
+        await inter.edit_original_message(f"トークンが正常にインポート/編集されました！\n"
+                                          f"注意: RPCアプリでトークンを追加/更新してください。")
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(
         name="nodeinfo",
         aliases=["llservers", "ll"],
-        description="Ver informações dos servidores de música."
+        description="音楽サーバーの情報を表示します。"
     )
     async def nodeinfo_legacy(self, ctx: CustomContext):
         await self.nodeinfo.callback(self=self, interaction=ctx)
 
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.slash_command(
-        description=f"{desc_prefix}Ver informações dos servidores de música (lavalink servers)."
+        description=f"{desc_prefix}音楽サーバー（Lavalinkサーバー）の情報を表示します。"
     )
     @commands.contexts(guild=True)
     async def nodeinfo(self, interaction: disnake.ApplicationCommandInteraction):
@@ -1549,7 +1541,7 @@ class MusicSettings(commands.Cog):
         embeds = []
 
         if not bot.music.nodes:
-            raise GenericError("**Não há servidores de música.**")
+            raise GenericError("**音楽サーバーがありません。**")
 
         failed_nodes = set()
 
@@ -1565,7 +1557,7 @@ class MusicSettings(commands.Cog):
 
         for page in disnake.utils.as_chunks(available_nodes, 6):
 
-            em = disnake.Embed(color=color, title="Servidores de música:")
+            em = disnake.Embed(color=color, title="音楽サーバー:")
 
             for identifier, node in page:
 
@@ -1574,7 +1566,7 @@ class MusicSettings(commands.Cog):
                 except KeyError:
                     current_player = None
 
-                txt = f"Região: `{node.region.title()}`\n"
+                txt = f"リージョン: `{node.region.title()}`\n"
 
                 used = humanize.naturalsize(node.stats.memory_used)
                 total = humanize.naturalsize(node.stats.memory_allocated)
@@ -1584,10 +1576,10 @@ class MusicSettings(commands.Cog):
                 started = node.stats.players
 
                 txt += f'RAM: `{used}/{free}`\n' \
-                       f'RAM Total: `{total}`\n' \
-                       f'CPU Cores: `{cpu_cores}`\n' \
-                       f'Uso de CPU: `{cpu_usage}%`\n' \
-                       f'Versão do Lavalink: `v{node.version}`\n' \
+                       f'RAM合計: `{total}`\n' \
+                       f'CPUコア数: `{cpu_cores}`\n' \
+                       f'CPU使用率: `{cpu_usage}%`\n' \
+                       f'Lavalinkバージョン: `v{node.version}`\n' \
                        f'Uptime: <t:{int((disnake.utils.utcnow() - datetime.timedelta(milliseconds=node.stats.uptime)).timestamp())}:R>\n'
 
                 if started:
@@ -1602,7 +1594,7 @@ class MusicSettings(commands.Cog):
                     txt += "\n"
 
                 if node.website:
-                    txt += f'[`Website do server`]({node.website})\n'
+                    txt += f'[`サーバーのWebサイト`]({node.website})\n'
 
                 status = "🌟" if current_player else "✅"
 
@@ -1611,7 +1603,7 @@ class MusicSettings(commands.Cog):
             em.set_footer(text=f"{bot.user} - [{bot.user.id}]", icon_url=bot.user.display_avatar.with_format("png").url)
 
             if failed_nodes:
-                em.add_field(name="**Servidores que falharam** `❌`",
+                em.add_field(name="**失敗したサーバー** `❌`",
                              value=f"```ansi\n[31;1m" + "\n".join(failed_nodes) + "[0m\n```", inline=False)
 
             embeds.append(em)
@@ -1646,13 +1638,13 @@ class MusicSettings(commands.Cog):
 
     @commands.has_guild_permissions(administrator=True)
     @commands.command(name="customskin", aliases=["setskin", "cskin", "cs", "ss"],
-                      description="Criar suas próprias skins/templates para usar no player de música.",
+                      description="音楽プレイヤーで使用する独自のスキン/テンプレートを作成します。",
                       cooldown=customskin_cd, max_concurrency=customskin__mc)
     async def customskin_legacy(self, ctx: CustomContext):
         await self.custom_skin.callback(self=self, inter=ctx)
 
     @commands.slash_command(cooldown=customskin_cd, max_concurrency=customskin__mc,
-                            description=f"{desc_prefix}Criar suas próprias skins/templates para o player de música.",
+                            description=f"{desc_prefix}音楽プレイヤー用の独自のスキン/テンプレートを作成します。",
                             default_member_permissions=disnake.Permissions(administrator=True))
     @commands.contexts(guild=True)
     async def custom_skin(self, inter: disnake.ApplicationCommandInteraction):
@@ -1685,44 +1677,44 @@ class MusicSettings(commands.Cog):
             ephemeral=True,
             embed=disnake.Embed(
                 color=self.bot.get_color(inter.guild.me),
-                description="### Placeholders para custom skins:\n```ansi\n"
-                            "[34;1m{track.title}[0m -> Nome da música\n"
-                            "[34;1m{track.title_25}[0m -> Nome da música (até 25 caracteres)\n"
-                            "[34;1m{track.title_42}[0m -> Nome da música (até 42 caracteres)\n"
-                            "[34;1m{track.title_58}[0m -> Nome da música (até 58 caracteres)\n"
-                            "[34;1m{track.url}[0m -> Link da música\n"
-                            "[34;1m{track.author}[0m -> Nome do Uploader/Artista da música\n"
-                            "[34;1m{track.duration}[0m -> Tempo/Duração da música\n"
-                            "[34;1m{track.thumb}[0m -> Link da miniatura/artowkr da música\n"
-                            "[34;1m{playlist.name}[0m -> Nome da playlist de origem da música\n"
-                            "[34;1m{playlist.url}[0m -> Link/Url da playlist de origem da música\n"
-                            "[34;1m{player.loop.mode}[0m -> Modo de repetição do player\n"
-                            "[34;1m{player.queue.size}[0m -> Quantidade de músicas na fila\n"
-                            "[34;1m{player.volume}[0m -> Volume do player\n"
-                            "[34;1m{player.autoplay}[0m -> Reprodução automática (Ativado/Desativado)\n"
-                            "[34;1m{player.nightcore}[0m -> Efeito nightcore (Ativado/Desativado)\n"
-                            "[34;1m{player.hint}[0m -> Dicas de uso do player\n"
-                            "[34;1m{player.log.text}[0m -> Log do player\n"
-                            "[34;1m{player.log.emoji}[0m -> Emoji do log do player\n"
-                            "[34;1m{requester.global_name}[0m -> Nome global do membro que pediu a música.\n"
-                            "[34;1m{requester.display_name}[0m -> Nome de exibição do membro que pediu a música.\n"
-                            "[34;1m{requester.mention}[0m -> Menção do membro que pediu a música\n"
-                            "[34;1m{requester.avatar}[0m -> Link do avatar do membro que pediu a música\n"
-                            "[34;1m{guild.color}[0m -> Cor do maior cargo do bot no servidor\n"
-                            "[34;1m{guild.icon}[0m -> Link do icone do servidor\n"
-                            "[34;1m{guild.name}[0m -> Nome do servidor\n"
-                            "[34;1m{guild.id}[0m -> ID do servidor\n"
-                            "[34;1m{queue_format}[0m -> Músicas da fila pré-formatada (use o botão de configurar "
-                            "placeholder caso queira alterar o estilo)\n"
-                            "[34;1m{track.number}[0m -> Número da posição da música na fila (funcional junto com "
-                            "o placeholder: [31;1m{queue_format}[0m)```"
+                description="### カスタムスキン用のプレースホルダー:\n```ansi\n"
+                            "[34;1m{track.title}[0m -> 曲名\n"
+                            "[34;1m{track.title_25}[0m -> 曲名 (最大25文字)\n"
+                            "[34;1m{track.title_42}[0m -> 曲名 (最大42文字)\n"
+                            "[34;1m{track.title_58}[0m -> 曲名 (最大58文字)\n"
+                            "[34;1m{track.url}[0m -> 曲のリンク\n"
+                            "[34;1m{track.author}[0m -> アップローダー/アーティスト名\n"
+                            "[34;1m{track.duration}[0m -> 曲の長さ/再生時間\n"
+                            "[34;1m{track.thumb}[0m -> 曲のサムネイル/アートワークリンク\n"
+                            "[34;1m{playlist.name}[0m -> 曲の元プレイリスト名\n"
+                            "[34;1m{playlist.url}[0m -> 曲の元プレイリストのリンク/URL\n"
+                            "[34;1m{player.loop.mode}[0m -> プレイヤーのリピートモード\n"
+                            "[34;1m{player.queue.size}[0m -> キュー内の曲数\n"
+                            "[34;1m{player.volume}[0m -> プレイヤーの音量\n"
+                            "[34;1m{player.autoplay}[0m -> 自動再生（有効/無効）\n"
+                            "[34;1m{player.nightcore}[0m -> Nightcoreエフェクト（有効/無効）\n"
+                            "[34;1m{player.hint}[0m -> プレイヤーの使用ヒント\n"
+                            "[34;1m{player.log.text}[0m -> プレイヤーログ\n"
+                            "[34;1m{player.log.emoji}[0m -> プレイヤーログの絵文字\n"
+                            "[34;1m{requester.global_name}[0m -> 曲をリクエストしたメンバーのグローバル名\n"
+                            "[34;1m{requester.display_name}[0m -> 曲をリクエストしたメンバーの表示名\n"
+                            "[34;1m{requester.mention}[0m -> 曲をリクエストしたメンバーのメンション\n"
+                            "[34;1m{requester.avatar}[0m -> 曲をリクエストしたメンバーのアバターリンク\n"
+                            "[34;1m{guild.color}[0m -> サーバーでのボットの最高ロールの色\n"
+                            "[34;1m{guild.icon}[0m -> サーバーアイコンのリンク\n"
+                            "[34;1m{guild.name}[0m -> サーバー名\n"
+                            "[34;1m{guild.id}[0m -> サーバーID\n"
+                            "\x1b[34;1m{queue_format}\x1b[0m -> フォーマット済みのキュー曲（スタイルを変更したい場合は"
+                            "プレースホルダー設定ボタンを使用）\n"
+                            "\x1b[34;1m{track.number}\x1b[0m -> キュー内の曲の位置番号（プレースホルダー "
+                            "\x1b[31;1m{queue_format}\x1b[0m と一緒に機能）```"
             )
         )
 
 class RPCCog(commands.Cog):
 
     emoji = "🔧"
-    name = "Configurações"
+    name = "設定"
     desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
@@ -1747,13 +1739,13 @@ class RPCCog(commands.Cog):
     @commands.cooldown(1,  120, commands.BucketType.guild)
     @commands.has_permissions(manage_channels=True)
     @commands.command(
-        description="Alterar a região de um canal de palco"
+        description="ステージチャンネルのリージョンを変更"
     )
     async def stageregion(self, ctx: CustomContext):
 
         if not isinstance(ctx.author.voice.channel, disnake.StageChannel):
             ctx.command.reset_cooldown(ctx)
-            raise GenericError("**Você deve estar conectado em um canal de palco para usar esse comando.**")
+            raise GenericError("**このコマンドを使用するにはステージチャンネルに接続している必要があります。**")
 
         bot: Optional[BotCore] = None
 
@@ -1766,7 +1758,7 @@ class RPCCog(commands.Cog):
 
         if not bot:
             ctx.command.reset_cooldown(ctx)
-            raise GenericError("**Não há bots com permissão de gerenciar canais no servidor**")
+            raise GenericError("**サーバーにチャンネル管理権限を持つボットがいません**")
 
         vc = ctx.author.voice.channel
 
@@ -1778,7 +1770,7 @@ class RPCCog(commands.Cog):
         color = self.bot.get_color(ctx.guild.me)
 
         msg = await ctx.send(
-            embed=disnake.Embed(description="### Selecione uma região abaixo:", color=color),
+            embed=disnake.Embed(description="### 以下からリージョンを選択してください:", color=color),
             view=view,
         )
 
@@ -1797,76 +1789,74 @@ class RPCCog(commands.Cog):
             await func(
                 embed=disnake.Embed(
                     color=color,
-                    description="### Operação cancelada!"
+                    description="### 操作がキャンセルされました！"
                 ), view=None
             )
             return
 
-        await vc.edit(rtc_region=view.selected, reason=f"Região alterada por: {ctx.author.name} [{ctx.author.id}]")
+        await vc.edit(rtc_region=view.selected, reason=f"リージョン変更者: {ctx.author.name} [{ctx.author.id}]")
 
         await func(
             embed=disnake.Embed(
                 color=color,
-                description=f"**A região do canal {vc.mention} foi alterado com sucesso para:\n"
+                description=f"**チャンネルのリージョン {vc.mention} が正常に変更されました:\n"
                             f"{view.selected}**"
             ), view=None
         )
 
     rpc_cd = commands.CooldownMapping.from_cooldown(1, 30, commands.BucketType.user)
 
-    @commands.command(description="Ativar/Desativar o sistema de rich-presence no seu status.",
+    @commands.command(description="ステータスのRich Presenceシステムを有効/無効にします。",
                       name="richpresence", aliases=["rich_presence", "rpc"], cooldown=rpc_cd)
     async def rich_presence_legacy(self, ctx: CustomContext):
 
         await self.rich_presence.callback(self=self, inter=ctx)
 
     @commands.slash_command(
-        description=f"{desc_prefix}Ativar/Desativar o sistema de rich-presence no seu status.", cooldown=rpc_cd
+        description=f"{desc_prefix}ステータスのRich Presenceシステムを有効/無効にします。", cooldown=rpc_cd
     )
     @commands.contexts(guild=True)
     async def rich_presence(self, inter: disnake.ApplicationCommandInteraction):
 
         if not self.bot.config["ENABLE_RPC_COMMAND"] and not any([await b.is_owner(inter.author) for b in self.bot.pool.get_guild_bots(inter.guild_id)]):
-            raise GenericError("**Este comando está desativado nas minhas configurações...**\n"
-                               "Apenas o meu desenvolvedor pode ativar este comando publicamente.")
+            raise GenericError("**このコマンドは私の設定で無効になっています...**\n"
+                               "私の開発者のみがこのコマンドを公開で有効にできます。")
 
         if not self.bot.config["RPC_PUBLIC_URL"] and not self.bot.config["RPC_SERVER"]:
-            raise GenericError("**O RPC_SERVER não foi configurado na ENV/ENVIRONMENTS (ou arquivo .env)**")
+            raise GenericError("**RPC_SERVERがENV/ENVIRONMENTS（または.envファイル）に設定されていません**")
 
         components = []
 
         embed = disnake.Embed(
             color=self.bot.get_color(),
-            description="**Mini-guia para usar o app para exibir a música que você está ouvindo via RPC:\n\n"
-                        "Faça o download do app (musicbot_rpc.zip) "
-                        "[aqui](https://github.com/zRitsu/Discord-MusicBot-RPC/releases).\n\n"
-                        "Extraia o musicbot_rpc.zip e na pasta abra o musicbot_rpc." \
-                        "Adicione o link do websocket abaixo no app (aba: Socket Settings):** ```ansi\n" \
+            description="**RPC経由で聴いている曲を表示するためのアプリの使用ミニガイド:\n\n"
+                        "アプリ（musicbot_rpc.zip）をダウンロード "
+                        "[こちら](https://github.com/zRitsu/Discord-MusicBot-RPC/releases).\n\n"
+                        "musicbot_rpc.zipを解凍し、フォルダ内のmusicbot_rpcを開いてください。" \
+                        "以下のWebSocketリンクをアプリに追加してください（タブ: Socket Settings）:** ```ansi\n" \
                         f"{(self.bot.config['RPC_PUBLIC_URL'] or self.bot.config['RPC_SERVER']).replace('$PORT', os.environ.get('PORT', '80'))}```"
         )
 
-        embed.set_footer(text="Nota: No momento funciona apenas no windows com discord desktop, não funciona no mobile "
-                              "ou discord web.")
+        embed.set_footer(text="注意: 現在Windows上のDiscordデスクトップでのみ動作し、モバイルやDiscord Webでは動作しません。")
 
         if self.bot.config["ENABLE_RPC_AUTH"]:
 
-            embed.description += "\n**Será necessário criar/gerar/importar um token para liberar o acesso do RPC " \
-                                 "(Verifique os botões abaixo), copie o token e no app (Aba: Socket Settings) " \
-                                 "clique no botão \"Colar Token\"**"
+            embed.description += "\n**RPCアクセスを有効にするにはトークンを作成/生成/インポートする必要があります " \
+                                 "（以下のボタンを確認してください）。トークンをコピーしてアプリ（タブ: Socket Settings）で" \
+                                 "「トークンを貼り付け」ボタンをクリックしてください。**"
 
             components.extend(
                 [
-                    disnake.ui.Button(label="Criar/Resetar token", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑",
+                    disnake.ui.Button(label="トークンを作成/リセット", custom_id=f"rpc_gen.{inter.author.id}", emoji="🔑",
                                       row=0),
-                    disnake.ui.Button(label="Importar/Editar/Ver token", custom_id=f"rpc_create.{inter.author.id}",
+                    disnake.ui.Button(label="トークンをインポート/編集/表示", custom_id=f"rpc_create.{inter.author.id}",
                                       emoji="✍️", row=0),
-                    disnake.ui.Button(label="Remover token (Desativar)", custom_id=f"rpc_remove.{inter.author.id}",
+                    disnake.ui.Button(label="トークンを削除（無効化）", custom_id=f"rpc_remove.{inter.author.id}",
                                       emoji="♻️", row=1),
                 ]
             )
 
-        embed.description += "\n\n**Agora basta apenas clicar no botão \"Iniciar Presence\" e escutar música através de " \
-                             "algum bot compatível.**"
+        embed.description += "\n\n**あとは「Presenceを開始」ボタンをクリックして、互換性のあるボットで音楽を聴くだけです。**"
 
         embed.set_author(
             name=f"{inter.author.display_name}#{inter.author.discriminator} - [ {inter.author.id} ]",
@@ -1875,7 +1865,7 @@ class RPCCog(commands.Cog):
 
         if isinstance(inter, CustomContext):
             components.append(
-                disnake.ui.Button(label="Fechar", custom_id=f"rpc_close.{inter.author.id}", emoji="❌", row=1),
+                disnake.ui.Button(label="閉じる", custom_id=f"rpc_close.{inter.author.id}", emoji="❌", row=1),
             )
 
         await inter.send(
@@ -1893,7 +1883,7 @@ class RPCCog(commands.Cog):
         button_id, user_id = inter.data.custom_id.split(".")
 
         if user_id != str(inter.author.id):
-            await inter.send(f"Apenas <@{user_id}> pode usar os botões da mensagem!", ephemeral=True)
+            await inter.send(f"<@{user_id}> のみがメッセージのボタンを使用できます！", ephemeral=True)
             return
 
         if button_id == "rpc_gen":
@@ -1906,8 +1896,8 @@ class RPCCog(commands.Cog):
 
             data["token"] = "".join(random.choice(string.ascii_letters + string.digits) for i in range(50))
             await self.bot.update_global_data(id_=user_id, data=data, db_name=DBModel.users)
-            msg = f"O token para usar no app de RPC (Rich Presence) foi gerado com sucesso!\n\n" \
-                  f"`Token gerado:` ||{data['token']}||"
+            msg = f"RPCアプリ（Rich Presence）で使用するトークンが正常に生成されました！\n\n" \
+                  f"`生成されたトークン:` ||{data['token']}||"
 
         elif button_id == "rpc_create":
 
@@ -1923,13 +1913,13 @@ class RPCCog(commands.Cog):
                 pass
 
             await inter.response.send_modal(
-                title="Importar token",
+                title="トークンをインポート",
                 custom_id="rpc_token_create",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Cole o token no campo abaixo:",
-                        placeholder="Nota: Por medida de segurança, jamais inclua uma senha pessoal aqui!",
+                        label="以下のフィールドにトークンを貼り付けてください:",
+                        placeholder="注意: セキュリティ上の理由から、個人のパスワードをここに入力しないでください！",
                         custom_id="token_input",
                         min_length=50,
                         max_length=50,
@@ -1954,8 +1944,8 @@ class RPCCog(commands.Cog):
 
             data["token"] = ""
             await self.bot.update_global_data(id_=user_id, data=data, db_name=DBModel.users)
-            msg = "O token foi removido com sucesso!\n" \
-                  "Agora o sistema de rpc estará desativado no seu usuário."
+            msg = "トークンが正常に削除されました！\n" \
+                  "RPCシステムがあなたのユーザーで無効になりました。"
 
         else: # button_id == "rpc_close"
             await inter.message.delete()

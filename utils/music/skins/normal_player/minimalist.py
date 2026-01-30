@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from os.path import basename
 
 from utils.music.converters import fix_characters, time_format
@@ -27,11 +27,11 @@ class Minimalist:
 
         data = {
             "embeds": [],
-            "content": f"-# ▶️`⠂Tocando:` [`{fix_characters(player.current.title, 42)}`](<{player.current.uri or player.current.search_uri}>) `[{fix_characters(player.current.author, 20)}] {duration}`"
+            "content": f"-# ▶️`⠂再生中:` [`{fix_characters(player.current.title, 42)}`](<{player.current.uri or player.current.search_uri}>) `[{fix_characters(player.current.author, 20)}] {duration}`"
         }
 
         if player.current_hint:
-            data["content"] += f"\n-# 💡`⠂Dica: {player.current_hint}`"
+            data["content"] += f"\n-# 💡`⠂ヒント: {player.current_hint}`"
 
         return data
 

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from __future__ import annotations
 
 import asyncio
@@ -45,17 +45,17 @@ class VolumeInteraction(disnake.ui.View):
         for l in [5, 20, 40, 60, 80, 100, 120, 150]:
 
             if l > 100:
-                description = "Acima de 100% o audio pode ficar bem ruim."
+                description = "100%以上にすると音質が悪くなる可能性があります。"
             else:
                 description = None
             opts.append(disnake.SelectOption(label=f"{l}%", value=f"vol_{l}", description=description))
 
-        select = disnake.ui.Select(placeholder='Nível:', options=opts)
+        select = disnake.ui.Select(placeholder='レベル:', options=opts)
         select.callback = self.callback
         self.add_item(select)
 
     async def callback(self, interaction: disnake.MessageInteraction):
-        await interaction.response.edit_message(content=f"Volume alterado!",embed=None, view=None)
+        await interaction.response.edit_message(content=f"音量を変更しました！",embed=None, view=None)
         self.volume = int(interaction.data.values[0][4:])
         self.stop()
 
@@ -96,7 +96,7 @@ class QueueInteraction(disnake.ui.View):
         if not self.message:
             return
 
-        self.embed.set_footer(text="Tempo para interagir esgotado!")
+        self.embed.set_footer(text="操作の有効期限が切れました！")
 
         for c in self.children:
             c.disabled = True
@@ -112,7 +112,7 @@ class QueueInteraction(disnake.ui.View):
         self.clear_items()
 
         track_select = disnake.ui.Select(
-            placeholder="Tocar uma música específica da página:",
+            placeholder="このページの曲を選択して再生:",
             options=self.select_options,
             custom_id="queue_track_selection",
             max_values=1
@@ -142,19 +142,19 @@ class QueueInteraction(disnake.ui.View):
         stop_interaction.callback = self.stop_interaction
         self.add_item(stop_interaction)
 
-        play = disnake.ui.Button(emoji='▶️', label="Tocar", style=disnake.ButtonStyle.grey, custom_id="queue_skip")
+        play = disnake.ui.Button(emoji='▶️', label="再生", style=disnake.ButtonStyle.grey, custom_id="queue_skip")
         play.callback = self.invoke_command
         self.add_item(play)
 
-        move = disnake.ui.Button(emoji="↪️", label="Mover", style=disnake.ButtonStyle.grey, custom_id="queue_move")
+        move = disnake.ui.Button(emoji="↪️", label="移動", style=disnake.ButtonStyle.grey, custom_id="queue_move")
         move.callback = self.move_callback
         self.add_item(move)
 
-        rotate_q = disnake.ui.Button(emoji='🔃', label="Rotacionar Fila", style=disnake.ButtonStyle.grey, custom_id="queue_rotate")
+        rotate_q = disnake.ui.Button(emoji='🔃', label="キューを回転", style=disnake.ButtonStyle.grey, custom_id="queue_rotate")
         rotate_q.callback = self.invoke_command
         self.add_item(rotate_q)
 
-        update_q = disnake.ui.Button(emoji='🔄', label="Recarregar", style=disnake.ButtonStyle.grey)
+        update_q = disnake.ui.Button(emoji='🔄', label="更新", style=disnake.ButtonStyle.grey)
         update_q.callback = self.update_q
         self.add_item(update_q)
 
@@ -168,11 +168,11 @@ class QueueInteraction(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Mover música selecionada", custom_id="queue_move_modal",
+                view=self, title="選択した曲を移動", custom_id="queue_move_modal",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Posição da fila:",
+                        label="キュー内の位置:",
                         custom_id="queue_move_position",
                         max_length=4,
                         required=True
@@ -187,7 +187,7 @@ class QueueInteraction(disnake.ui.View):
             if inter.data.custom_id == "queue_move_modal":
 
                 if not inter.text_values["queue_move_position"].isdigit():
-                    await inter.send("Você deve usar um número válido...", ephemeral=True)
+                    await inter.send("有効な数字を入力してください...", ephemeral=True)
                     return
 
                 try:
@@ -226,7 +226,7 @@ class QueueInteraction(disnake.ui.View):
                     await inter.edit_original_message(embed=self.embed, view=self)
 
             else:
-                await inter.send(f"Método ainda não implementado: {inter.data.custom_id}", ephemeral=True)
+                await inter.send(f"まだ実装されていないメソッドです: {inter.data.custom_id}", ephemeral=True)
 
         except Exception as e:
             self.bot.dispatch('interaction_player_error', inter, e)
@@ -234,7 +234,7 @@ class QueueInteraction(disnake.ui.View):
 
     def update_embed(self):
 
-        self.embed.title = f"**Músicas da fila [Página: {self.current_page+1} / {self.max_page+1}]**"
+        self.embed.title = f"**キューの曲 [ページ: {self.current_page+1} / {self.max_page+1}]**"
 
         opts = []
 
@@ -248,12 +248,12 @@ class QueueInteraction(disnake.ui.View):
 
             if self.current_track == t:
                 txt += f"`╔{'='*50}`\n`║` **{index}º) [{fix_characters(t.title, limit=37)}]({t.uri})**\n" \
-                       f"`║ ⏲️`  **{duration}**" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                       " **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") + f"\n`╚{'='*50}`\n"
+                       f"`║ ⏲️`  **{duration}**" + (f" - `リピート: {t.track_loops}`" if t.track_loops else "") + \
+                       " **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂おすすめ`") + f"\n`╚{'='*50}`\n"
             else:
                 txt += f"`┌ {index})` [`{fix_characters(t.title, limit=45)}`]({t.uri})\n" \
-                       f"`└ ⏲️ {duration}`" + (f" - `Repetições: {t.track_loops}`" if t.track_loops else "") + \
-                       f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂Recomendada`") + "\n"
+                       f"`└ ⏲️ {duration}`" + (f" - `リピート: {t.track_loops}`" if t.track_loops else "") + \
+                       f" **|** " + (f"`✋` <@{t.requester}>" if not t.autoplay else f"`👍⠂おすすめ`") + "\n"
 
             opts.append(
                 disnake.SelectOption(
@@ -285,7 +285,7 @@ class QueueInteraction(disnake.ui.View):
                 break
 
         if not track:
-            await interaction.send(f"Música com id \"{track_id}\" não encontrada na fila do player...", ephemeral=True)
+            await interaction.send(f"ID \"{track_id}\" の曲がプレイヤーのキューに見つかりませんでした...", ephemeral=True)
             return
 
         self.current_track = track
@@ -301,7 +301,7 @@ class QueueInteraction(disnake.ui.View):
         try:
             player = self.bot.music.players[self.user.guild.id]
         except KeyError:
-            await interaction.send("O player já foi finalizado...", ephemeral=True)
+            await interaction.send("プレイヤーは既に終了しています...", ephemeral=True)
             self.stop()
             return
 
@@ -309,14 +309,14 @@ class QueueInteraction(disnake.ui.View):
 
         try:
             if self.current_track is None:
-                await interaction.send("Nenhuma música selecionada...", ephemeral=True)
+                await interaction.send("曲が選択されていません...", ephemeral=True)
                 return
 
             if interaction.data.custom_id == "queue_skip":
                 if player.current and player.current.unique_id == self.current_track.unique_id:
                     await check_cmd(self.bot.get_slash_command("seek"), interaction)
                     await player.seek(0)
-                    player.set_command_log(emoji="⏪", text=f"{interaction.author.mention} retrocedeu da música para: `0:00`")
+                    player.set_command_log(emoji="⏪", text=f"{interaction.author.mention} が曲を巻き戻しました: `0:00`")
                     player.update = True
                     await interaction.response.defer()
                     return
@@ -330,7 +330,7 @@ class QueueInteraction(disnake.ui.View):
                 update_inter = True
 
             else:
-                await interaction.send(f"Comando não implementado: {interaction.data.custom_id}", ephemeral=True)
+                await interaction.send(f"コマンドは実装されていません: {interaction.data.custom_id}", ephemeral=True)
                 return
 
             interaction.music_bot = self.bot
@@ -387,7 +387,7 @@ class QueueInteraction(disnake.ui.View):
 
     async def stop_interaction(self, interaction: disnake.MessageInteraction):
 
-        await interaction.response.edit_message(content="Queue fechada", embed=None, view=None)
+        await interaction.response.edit_message(content="キューを閉じました", embed=None, view=None)
         self.stop()
 
     async def update_q(self, interaction: disnake.MessageInteraction):
@@ -401,13 +401,13 @@ class QueueInteraction(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction):
 
         if interaction.author != self.user:
-            await interaction.send(f"Apenas o membro {self.user.mention} pode interagir aqui.", ephemeral=True)
+            await interaction.send(f"ここで操作できるのは {self.user.mention} さんのみです。", ephemeral=True)
             return
 
         try:
             self.bot.music.players[self.user.guild.id]
         except KeyError:
-            await interaction.response.edit_message(content="O player foi finalizado...", embed=None, view=None)
+            await interaction.response.edit_message(content="プレイヤーが終了しました...", embed=None, view=None)
             self.stop()
             return
 
@@ -428,7 +428,7 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         if interaction.user.id == self.user.id:
             return True
 
-        await interaction.send(f"Apenas {self.user.mention} pode interagir aqui.", ephemeral = True)
+        await interaction.send(f"ここで操作できるのは {self.user.mention} さんのみです。", ephemeral = True)
 
     def load_components(self):
 
@@ -451,7 +451,7 @@ class EmbedPaginatorInteraction(disnake.ui.View):
         next_button.callback = self.next_callback
         self.add_item(next_button)
 
-        button = disnake.ui.Button(label="Fechar", emoji="❌")
+        button = disnake.ui.Button(label="閉じる", emoji="❌")
         button.callback = self.cancel_callback
         self.add_item(button)
 
@@ -509,7 +509,7 @@ class ButtonInteraction(disnake.ui.View):
             b.callback = self.callback
             self.add_item(b)
 
-        button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        button = disnake.ui.Button(label="キャンセル", emoji="❌")
         button.callback = self.cancel_callback
         self.add_item(button)
 
@@ -542,7 +542,7 @@ class SelectInteraction(disnake.ui.View):
 
         self.clear_items()
 
-        select_menu = disnake.ui.Select(placeholder='Selecione uma opção:', options=self.item_pages[self.current_page])
+        select_menu = disnake.ui.Select(placeholder='オプションを選択してください:', options=self.item_pages[self.current_page])
         select_menu.callback = self.callback
         self.add_item(select_menu)
         self.selected = self.item_pages[self.current_page][0].value
@@ -566,7 +566,7 @@ class SelectInteraction(disnake.ui.View):
             next_button.callback = self.next_callback
             self.add_item(next_button)
 
-        button = disnake.ui.Button(label="Cancelar", emoji="❌")
+        button = disnake.ui.Button(label="キャンセル", emoji="❌")
         button.callback = self.cancel_callback
         self.add_item(button)
 
@@ -575,7 +575,7 @@ class SelectInteraction(disnake.ui.View):
         if interaction.user.id == self.user.id:
             return True
 
-        await interaction.send(f"Apenas {self.user.mention} pode interagir aqui.", ephemeral = True)
+        await interaction.send(f"ここで操作できるのは {self.user.mention} さんのみです。", ephemeral = True)
 
     async def back_callback(self, interaction: disnake.MessageInteraction):
         if self.current_page == 0:
@@ -621,18 +621,18 @@ class AskView(disnake.ui.View):
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
 
         if interaction.user != self.ctx.author:
-            await interaction.send("Você não pode usar este botão!", ephemeral=True)
+            await interaction.send("このボタンは使用できません！", ephemeral=True)
             return False
 
         return True
 
-    @disnake.ui.button(label="Sim", emoji="✅")
+    @disnake.ui.button(label="はい", emoji="✅")
     async def allow(self, button, interaction: disnake.MessageInteraction):
         self.selected = True
         self.interaction_resp = interaction
         self.stop()
 
-    @disnake.ui.button(label="Não", emoji="❌")
+    @disnake.ui.button(label="いいえ", emoji="❌")
     async def deny(self, button, interaction: disnake.MessageInteraction):
         self.selected = False
         self.interaction_resp = interaction
@@ -674,11 +674,11 @@ class FavModalImport(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.fav_manager:
             super().__init__(
-                title="Importar Favoritos",
+                title="お気に入りをインポート",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Inserir dados (em formato json)",
+                        label="データを入力（JSON形式）",
                         custom_id="json_data",
                         min_length=20,
                         required=True
@@ -689,11 +689,11 @@ class FavModalImport(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.guild_fav_manager:
             super().__init__(
-                title="Importar Playlists para o Servidor",
+                title="サーバーにプレイリストをインポート",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Inserir dados (em formato json)",
+                        label="データを入力（JSON形式）",
                         custom_id="json_data",
                         min_length=20,
                         required=True
@@ -704,11 +704,11 @@ class FavModalImport(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.integrations_manager:
             super().__init__(
-                title="Importar integração",
+                title="連携をインポート",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Inserir dados (em formato json)",
+                        label="データを入力（JSON形式）",
                         custom_id="json_data",
                         min_length=20,
                         required=True
@@ -717,15 +717,15 @@ class FavModalImport(disnake.ui.Modal):
             )
             return
 
-        raise GenericError(f"Modo atual ainda não implementado: {self.view.mode} | {type(self.view.mode)}")
+        raise GenericError(f"このモードはまだ実装されていません: {self.view.mode} | {type(self.view.mode)}")
 
     async def callback(self, inter: disnake.ModalInteraction, /) -> None:
 
         try:
             json_data = json.loads(inter.text_values["json_data"])
         except Exception as e:
-            await inter.send("**Ocorreu um erro ao analisar os dados ou foi enviado dados inválidos/não-formatado "
-                               f"em formato json.**\n\n`{repr(e)}`", ephemeral=True)
+            await inter.send("**データの解析中にエラーが発生したか、無効な/JSON形式でない"
+                               f"データが送信されました。**\n\n`{repr(e)}`", ephemeral=True)
             return
 
         if self.view.mode == ViewMode.fav_manager:
@@ -733,7 +733,7 @@ class FavModalImport(disnake.ui.Modal):
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
-                await inter.send("**Você deve aguardar {} para importar.**".format(
+                await inter.send("**インポートするには {} お待ちください。**".format(
                     time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
                 return
 
@@ -744,12 +744,12 @@ class FavModalImport(disnake.ui.Modal):
 
                 if len(url) > (max_url_chars := self.view.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                     await inter.send(
-                        f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**",
+                        f"**ファイル内のアイテム {url} が許可された文字数を超えています:{max_url_chars}**",
                         ephemeral=True)
                     return
 
                 if not isinstance(url, str) or not URL_REG.match(url):
-                    await inter.send(f"O seu arquivo contém link inválido: ```ldif\n{url}```", ephemeral=True)
+                    await inter.send(f"ファイルに無効なリンクが含まれています: ```ldif\n{url}```", ephemeral=True)
                     return
 
             await inter.response.defer(ephemeral=True)
@@ -759,7 +759,7 @@ class FavModalImport(disnake.ui.Modal):
             for name in json_data.keys():
                 if len(name) > (max_name_chars := self.view.bot.config["USER_FAV_MAX_NAME_LENGTH"]):
                     await inter.edit_original_message(
-                        f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
+                        f"**ファイル内のアイテム ({name}) が許可された文字数を超えています:{max_name_chars}**")
                     return
                 try:
                     del self.view.data["fav_links"][name.lower()]
@@ -769,30 +769,30 @@ class FavModalImport(disnake.ui.Modal):
             if self.view.bot.config["MAX_USER_FAVS"] > 0 and not (await self.view.bot.is_owner(inter.author)):
 
                 if (json_size := len(json_data)) > self.view.bot.config["MAX_USER_FAVS"]:
-                    await inter.edit_original_message(f"A quantidade de itens no seu arquivo de favorito excede "
-                                                      f"a quantidade máxima permitida ({self.view.bot.config['MAX_USER_FAVS']}).")
+                    await inter.edit_original_message(f"お気に入りファイルのアイテム数が "
+                                                      f"許可された最大数を超えています ({self.view.bot.config['MAX_USER_FAVS']})。")
                     return
 
                 if (json_size + (user_favs := len(self.view.data["fav_links"]))) > self.view.bot.config[
                     "MAX_USER_FAVS"]:
                     await inter.edit_original_message(
-                        "Você não possui espaço suficiente para adicionar todos os favoritos de seu arquivo...\n"
-                        f"Limite atual: {self.view.bot.config['MAX_USER_FAVS']}\n"
-                        f"Quantidade de favoritos salvos: {user_favs}\n"
-                        f"Você precisa de: {(json_size + user_favs) - self.view.bot.config['MAX_USER_FAVS']}")
+                        "ファイルのすべてのお気に入りを追加する十分な空きがありません...\n"
+                        f"現在の上限: {self.view.bot.config['MAX_USER_FAVS']}\n"
+                        f"保存済みのお気に入り数: {user_favs}\n"
+                        f"必要な空き: {(json_size + user_favs) - self.view.bot.config['MAX_USER_FAVS']}")
                     return
 
             self.view.data["fav_links"].update(json_data)
 
             await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
-            await inter.edit_original_message(content="**Favoritos importados com sucesso!**")
+            await inter.edit_original_message(content="**お気に入りが正常にインポートされました！**")
 
             if (s := len(json_data)) > 1:
-                self.view.log = f"{s} favoritos foram importados com sucesso."
+                self.view.log = f"{s} 件のお気に入りが正常にインポートされました。"
             else:
                 name = next(iter(json_data))
-                self.view.log = f"O favorito [`{name}`]({json_data[name]}) foi importado com sucesso."
+                self.view.log = f"お気に入り [`{name}`]({json_data[name]}) が正常にインポートされました。"
 
 
         elif self.view.mode == ViewMode.guild_fav_manager:
@@ -800,7 +800,7 @@ class FavModalImport(disnake.ui.Modal):
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
-                await inter.send("**Você deve aguardar {} para importar.**".format(
+                await inter.send("**インポートするには {} お待ちください。**".format(
                     time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
                 return
 
@@ -811,18 +811,18 @@ class FavModalImport(disnake.ui.Modal):
 
                 if len(data['url']) > (max_url_chars := self.view.bot.config["USER_FAV_MAX_URL_LENGTH"]):
                     await inter.send(
-                        f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nURL:** {data['url']}",
+                        f"**ファイル内のアイテムが許可された文字数を超えています:{max_url_chars}\nURL:** {data['url']}",
                         ephemeral=True)
                     return
 
                 if len(data['description']) > 50:
                     await inter.send(
-                        f"**Um item de seu arquivo ultrapassa a quantidade de caracteres permitido:{max_url_chars}\nDescrição:** {data['description']}",
+                        f"**ファイル内のアイテムが許可された文字数を超えています:{max_url_chars}\n説明:** {data['description']}",
                         ephemeral=True)
                     return
 
                 if not isinstance(data['url'], str) or not URL_REG.match(data['url']):
-                    await inter.send(f"O seu arquivo contém link inválido: ```ldif\n{data['url']}```", ephemeral=True)
+                    await inter.send(f"ファイルに無効なリンクが含まれています: ```ldif\n{data['url']}```", ephemeral=True)
                     return
 
             await inter.response.defer(ephemeral=True)
@@ -831,13 +831,13 @@ class FavModalImport(disnake.ui.Modal):
 
             if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
-                await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
+                await inter.edit_original_message("**サーバーにプレイヤーが設定されていません！/setup コマンドを使用してください**")
                 return
 
             for name in json_data.keys():
                 if len(name) > (max_name_chars := 25):
                     await inter.edit_original_message(
-                        f"**Um item de seu arquivo ({name}) ultrapassa a quantidade de caracteres permitido:{max_name_chars}**")
+                        f"**ファイル内のアイテム ({name}) が許可された文字数を超えています:{max_name_chars}**")
                     return
                 try:
                     del self.view.guild_data["player_controller"]["fav_links"][name]
@@ -846,15 +846,15 @@ class FavModalImport(disnake.ui.Modal):
 
             if (json_size := len(json_data)) > 25:
                 await inter.edit_original_message(
-                    f"A quantidade de itens no arquivo excede a quantidade máxima permitida (25).")
+                    f"ファイルのアイテム数が許可された最大数 (25) を超えています。")
                 return
 
             if (json_size + (user_favs := len(self.view.guild_data["player_controller"]["fav_links"]))) > 25:
                 await inter.edit_original_message(
-                    "A lista de músicas/playlist do servidor não possui espaço suficiente para adicionar todos os itens de seu arquivo...\n"
-                    f"Limite atual: 25\n"
-                    f"Quantidade de links salvos: {user_favs}\n"
-                    f"Você precisa de: {(json_size + user_favs) - 25}")
+                    "サーバーの曲/プレイリストリストには、ファイルのすべてのアイテムを追加する十分な空きがありません...\n"
+                    f"現在の上限: 25\n"
+                    f"保存済みのリンク数: {user_favs}\n"
+                    f"必要な空き: {(json_size + user_favs) - 25}")
                 return
 
             self.view.guild_data["player_controller"]["fav_links"].update(json_data)
@@ -863,13 +863,13 @@ class FavModalImport(disnake.ui.Modal):
 
             guild = self.view.bot.get_guild(inter.guild_id)
 
-            await inter.edit_original_message(content="**Links fixos do servidor foram importados com sucesso!**")
+            await inter.edit_original_message(content="**サーバーの固定リンクが正常にインポートされました！**")
 
             if (s := len(json_data)) > 1:
-                self.view.log = f"{s} links foram importados com sucesso para a lista de favoritos do servidor."
+                self.view.log = f"{s} 件のリンクがサーバーのお気に入りリストに正常にインポートされました。"
             else:
                 name = next(iter(json_data))
-                self.view.log = f"O link [`{name}`]({json_data[name]}) foi importado com sucesso para a lista de links do servidor.."
+                self.view.log = f"リンク [`{name}`]({json_data[name]}) がサーバーのリンクリストに正常にインポートされました。"
 
             await process_idle_embed(self.view.bot, guild, guild_data=self.view.guild_data)
 
@@ -878,7 +878,7 @@ class FavModalImport(disnake.ui.Modal):
             if retry_after := self.view.bot.get_cog("Music").fav_import_export_cd.get_bucket(inter).update_rate_limit():
                 if retry_after < 1:
                     retry_after = 1
-                await inter.send("**Você deve aguardar {} para importar.**".format(
+                await inter.send("**インポートするには {} お待ちください。**".format(
                     time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
                 return
 
@@ -889,11 +889,11 @@ class FavModalImport(disnake.ui.Modal):
 
                 if len(url) > (max_url_chars := 150):
                     await inter.edit_original_message(
-                        f"**Um item de seu arquivo {url} ultrapassa a quantidade de caracteres permitido:{max_url_chars}**")
+                        f"**ファイル内のアイテム {url} が許可された文字数を超えています:{max_url_chars}**")
                     return
 
                 if not isinstance(url, str) or not URL_REG.match(url):
-                    await inter.edit_original_message(f"O seu arquivo contém link inválido: ```ldif\n{url}```")
+                    await inter.edit_original_message(f"ファイルに無効なリンクが含まれています: ```ldif\n{url}```")
                     return
 
             await inter.response.defer(ephemeral=True)
@@ -909,17 +909,17 @@ class FavModalImport(disnake.ui.Modal):
             if self.view.bot.config["MAX_USER_INTEGRATIONS"] > 0 and not (await self.view.bot.is_owner(inter.author)):
 
                 if (json_size := len(json_data)) > self.view.bot.config["MAX_USER_INTEGRATIONS"]:
-                    await inter.edit_original_message(f"A quantidade de itens no seu arquivo de integrações excede "
-                                       f"a quantidade máxima permitida ({self.view.bot.config['MAX_USER_INTEGRATIONS']}).")
+                    await inter.edit_original_message(f"連携ファイルのアイテム数が "
+                                       f"許可された最大数を超えています ({self.view.bot.config['MAX_USER_INTEGRATIONS']})。")
                     return
 
                 if (json_size + (user_integrations := len(self.view.data["integration_links"]))) > self.view.bot.config[
                     "MAX_USER_INTEGRATIONS"]:
                     await inter.edit_original_message(
-                        "Você não possui espaço suficiente para adicionar todos as integrações de seu arquivo...\n"
-                        f"Limite atual: {self.view.bot.config['MAX_USER_INTEGRATIONS']}\n"
-                        f"Quantidade de integrações salvas: {user_integrations}\n"
-                        f"Você precisa de: {(json_size + user_integrations) - self.view.bot.config['MAX_USER_INTEGRATIONS']}")
+                        "ファイルのすべての連携を追加する十分な空きがありません...\n"
+                        f"現在の上限: {self.view.bot.config['MAX_USER_INTEGRATIONS']}\n"
+                        f"保存済みの連携数: {user_integrations}\n"
+                        f"必要な空き: {(json_size + user_integrations) - self.view.bot.config['MAX_USER_INTEGRATIONS']}")
                     return
 
             self.view.data["integration_links"].update(json_data)
@@ -927,17 +927,17 @@ class FavModalImport(disnake.ui.Modal):
             await self.view.bot.update_global_data(inter.author.id, self.view.data, db_name=DBModel.users)
 
             await inter.edit_original_message(
-                content="**Integrações importadas com sucesso!**"
+                content="**連携が正常にインポートされました！**"
             )
 
             if (s := len(json_data)) > 1:
-                self.view.log = f"{s} integrações foram importadas com sucesso."
+                self.view.log = f"{s} 件の連携が正常にインポートされました。"
             else:
                 name = next(iter(json_data))
-                self.view.log = f"A integração [`{name}`]({json_data[name]}) foi importada com sucesso."
+                self.view.log = f"連携 [`{name}`]({json_data[name]}) が正常にインポートされました。"
 
         else:
-            raise GenericError(f"**Modo ainda não implementado: {self.view.mode} | {type(self.view.mode)}**")
+            raise GenericError(f"**まだ実装されていないモードです: {self.view.mode} | {type(self.view.mode)}**")
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(embed=self.view.build_embed(), view=self.view)
@@ -953,19 +953,19 @@ class FavModalAdd(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.fav_manager:
             super().__init__(
-                title="Adicionar/Editar playlist/favorito",
+                title="プレイリスト/お気に入りを追加/編集",
                 custom_id="user_fav_edit",
                 timeout=180,
                 components=[
                     disnake.ui.TextInput(
-                        label="Nome da playlist/favorito:",
+                        label="プレイリスト/お気に入りの名前:",
                         custom_id="user_fav_name",
                         min_length=2,
                         max_length=25,
                         value=name or None
                     ),
                     disnake.ui.TextInput(
-                        label="Link/Url:",
+                        label="リンク/URL:",
                         custom_id="user_fav_url",
                         min_length=10,
                         max_length=200,
@@ -977,19 +977,19 @@ class FavModalAdd(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.guild_fav_manager:
             super().__init__(
-                title="Adicionar/Editar playlist/favorito",
+                title="プレイリスト/お気に入りを追加/編集",
                 custom_id="guild_fav_edit",
                 timeout=180,
                 components=[
                     disnake.ui.TextInput(
-                        label="Nome do favorito/playlist:",
+                        label="お気に入り/プレイリストの名前:",
                         custom_id="guild_fav_name",
                         min_length=2,
                         max_length=25,
                         value=name or None
                     ),
                     disnake.ui.TextInput(
-                        label="Descrição:",
+                        label="説明:",
                         custom_id="guild_fav_description",
                         min_length=3,
                         max_length=50,
@@ -997,7 +997,7 @@ class FavModalAdd(disnake.ui.Modal):
                         required=False
                     ),
                     disnake.ui.TextInput(
-                        label="Link/Url:",
+                        label="リンク/URL:",
                         custom_id="guild_fav_url",
                         min_length=10,
                         max_length=250,
@@ -1009,12 +1009,12 @@ class FavModalAdd(disnake.ui.Modal):
 
         if self.view.mode == ViewMode.integrations_manager:
             super().__init__(
-                title="Adicionar integração",
+                title="連携を追加",
                 custom_id="user_integration_add",
                 timeout=180,
                 components=[
                     disnake.ui.TextInput(
-                        label="Link/Url:",
+                        label="リンク/URL:",
                         custom_id="user_integration_url",
                         min_length=10,
                         max_length=200,
@@ -1024,7 +1024,7 @@ class FavModalAdd(disnake.ui.Modal):
             )
             return
 
-        raise GenericError(f"**Modo ainda não implementado: {self.view.mode} | {type(self.view.mode)}**")
+        raise GenericError(f"**まだ実装されていないモードです: {self.view.mode} | {type(self.view.mode)}**")
 
 
     async def callback(self, inter: disnake.ModalInteraction):
@@ -1038,7 +1038,7 @@ class FavModalAdd(disnake.ui.Modal):
             except IndexError:
                 await inter.send(
                     embed=disnake.Embed(
-                        description=f"**Nenhum link válido encontrado:** {url}",
+                        description=f"**有効なリンクが見つかりません:** {url}",
                         color=disnake.Color.red()
                     ), ephemeral=True
                 )
@@ -1056,7 +1056,7 @@ class FavModalAdd(disnake.ui.Modal):
             except KeyError:
                 if len(self.view.data["fav_links"]) >= self.view.bot.config["MAX_USER_FAVS"]:
                     await inter.edit_original_message(
-                        "**Não há espaço disponível para adicionar novos favorito (remova algum e tente novamente).**")
+                        "**新しいお気に入りを追加する空きがありません（いくつか削除してから再度お試しください）。**")
                     return
 
             self.view.data["fav_links"][name] = valid_url
@@ -1070,11 +1070,11 @@ class FavModalAdd(disnake.ui.Modal):
 
             await inter.edit_original_message(
                 embed=disnake.Embed(
-                    description="**Link salvo/atualizado com sucesso nos seus favoritos!\n"
-                                "Ele vai aparecer nas seguintes ocasições:** ```\n"
-                                "- Ao usar o comando /play (selecionando no preenchimento automático da busca)\n"
-                                "- Ao clicar no botão de tocar favorito do player.\n"
-                                "- Ao usar o comando play (prefixed) sem nome ou link.```",
+                    description="**リンクがお気に入りに正常に保存/更新されました！\n"
+                                "以下の場面で表示されます:** ```\n"
+                                "- /play コマンドを使用時（検索の自動補完で選択）\n"
+                                "- プレイヤーのお気に入り再生ボタンをクリック時。\n"
+                                "- play（プレフィックス）コマンドを名前やリンクなしで使用時。```",
                     color=self.view.bot.get_color(me)
                 )
             )
@@ -1087,7 +1087,7 @@ class FavModalAdd(disnake.ui.Modal):
             except IndexError:
                 await inter.send(
                     embed=disnake.Embed(
-                        description=f"**Nenhum link válido encontrado:** {url}",
+                        description=f"**有効なリンクが見つかりません:** {url}",
                         color=disnake.Color.red()
                     ), ephemeral=True
                 )
@@ -1099,7 +1099,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
-                await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
+                await inter.edit_original_message("**サーバーにプレイヤーが設定されていません！/setup コマンドを使用してください**")
                 return
 
             name = inter.text_values["guild_fav_name"].strip()
@@ -1107,7 +1107,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             if not self.view.guild_data["player_controller"]["channel"] or not self.view.bot.get_channel(
                     int(self.view.guild_data["player_controller"]["channel"])):
-                await inter.edit_original_message("**Não há player configurado no servidor! Use o comando /setup**")
+                await inter.edit_original_message("**サーバーにプレイヤーが設定されていません！/setup コマンドを使用してください**")
                 return
 
             try:
@@ -1115,7 +1115,7 @@ class FavModalAdd(disnake.ui.Modal):
                     del self.view.guild_data["player_controller"]["fav_links"][self.name]
             except KeyError:
                 if len(self.view.guild_data["player_controller"]["fav_links"]) > 24:
-                    await inter.edit_original_message("**Não há espaço disponível para adicionar novos favorito (remova algum e tente novamente).**")
+                    await inter.edit_original_message("**新しいお気に入りを追加する空きがありません（いくつか削除してから再度お試しください）。**")
                     return
 
             self.view.guild_data["player_controller"]["fav_links"][name] = {'url': valid_url, "description": description}
@@ -1125,8 +1125,8 @@ class FavModalAdd(disnake.ui.Modal):
             guild = inter.guild or self.view.bot.get_guild(inter.guild_id)
 
             await inter.edit_original_message(
-                embed=disnake.Embed(description="**Link adicionado/atualizado com sucesso nos fixos do player!\n"
-                                                "Membros podem usá-lo diretamente no player-controller quando não estiver em uso.**",
+                embed=disnake.Embed(description="**リンクがプレイヤーの固定リンクに正常に追加/更新されました！\n"
+                                                "メンバーは未使用時にプレイヤーコントローラーから直接使用できます。**",
                                     color=self.view.bot.get_color(guild.me)), view=None)
 
             await process_idle_embed(self.view.bot, guild, guild_data=self.view.guild_data)
@@ -1142,7 +1142,7 @@ class FavModalAdd(disnake.ui.Modal):
 
             if len(self.view.data["integration_links"]) >= self.view.bot.config["MAX_USER_FAVS"]:
                 await inter.edit_original_message(
-                    "**Não há espaço disponível para adicionar novas integrações (remova alguma e tente novamente).**")
+                    "**新しい連携を追加する空きがありません（いくつか削除してから再度お試しください）。**")
                 return
 
             url = inter.text_values["user_integration_url"].strip()
@@ -1152,7 +1152,7 @@ class FavModalAdd(disnake.ui.Modal):
             except IndexError:
                 await inter.edit_original_message(
                     embed=disnake.Embed(
-                        description=f"**Nenhum link válido encontrado:** {url}",
+                        description=f"**有効なリンクが見つかりません:** {url}",
                         color=disnake.Color.red()
                     )
                 )
@@ -1163,7 +1163,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not self.view.bot.spotify:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**O suporte ao spotify não está disponível no momento...**",
+                            description="**現在Spotifyのサポートは利用できません...**",
                             color=disnake.Color.red()
                         )
                     )
@@ -1174,7 +1174,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if url_type != "user":
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"**Você deve usar link de um perfil de usuário do spotify.** {url}",
+                            description=f"**Spotifyユーザープロフィールのリンクを使用してください。** {url}",
                             color=disnake.Color.red()
                         )
                     )
@@ -1185,7 +1185,7 @@ class FavModalAdd(disnake.ui.Modal):
                 except Exception as e:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
+                            description="**Spotify情報の取得中にエラーが発生しました:** ```py\n"
                                         f"{repr(e)}```",
                             color=self.view.bot.get_color()
                         )
@@ -1196,7 +1196,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not result:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**O usuário do link informado não possui playlists públicas...**",
+                            description="**指定されたリンクのユーザーには公開プレイリストがありません...**",
                             color=self.view.bot.get_color()
                         )
                     )
@@ -1212,7 +1212,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if url_type != "profile":
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"**Você deve usar link de um perfil de usuário do deezer.** {url}",
+                            description=f"**Deezerユーザープロフィールのリンクを使用してください。** {url}",
                             color=disnake.Color.red()
                         )
                     )
@@ -1223,7 +1223,7 @@ class FavModalAdd(disnake.ui.Modal):
                 except Exception as e:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description="**Ocorreu um erro ao obter informações do spotify:** ```py\n"
+                            description="**Deezer情報の取得中にエラーが発生しました:** ```py\n"
                                         f"{repr(e)}```",
                             color=self.view.bot.get_color()
                         )
@@ -1248,7 +1248,7 @@ class FavModalAdd(disnake.ui.Modal):
                     else:
                         await inter.edit_original_message(
                             embed=disnake.Embed(
-                                description=f"**Link informado não é suportado:** {url}",
+                                description=f"**指定されたリンクはサポートされていません:** {url}",
                                 color=disnake.Color.red()
                             )
                         )
@@ -1262,15 +1262,15 @@ class FavModalAdd(disnake.ui.Modal):
                     info = await loop.run_in_executor(None, lambda: self.view.bot.pool.ytdl.extract_info(base_url, download=False))
                 except Exception as e:
                     traceback.print_exc()
-                    await inter.edit_original_message(f"**Ocorreu um erro ao obter informação da url:** ```py\n{repr(e)}```")
+                    await inter.edit_original_message(f"**URL情報の取得中にエラーが発生しました:** ```py\n{repr(e)}```")
                     return
 
                 if not info:
 
-                    msg = f"**O usuário/canal do link informado não existe:**\n{url}"
+                    msg = f"**指定されたリンクのユーザー/チャンネルは存在しません:**\n{url}"
 
                     if source == "[YT]:":
-                        msg += f"\n\n`Nota: Confira se no link contém usuário com @, ex: @ytchannel`"
+                        msg += f"\n\n`注意: リンクに @ 付きのユーザーが含まれているか確認してください。例: @ytchannel`"
 
                     await inter.edit_original_message(
                         embed=disnake.Embed(
@@ -1283,7 +1283,7 @@ class FavModalAdd(disnake.ui.Modal):
                 if not info['entries']:
                     await inter.edit_original_message(
                         embed=disnake.Embed(
-                            description=f"**O usuário/canal do link informado não possui playlists públicas...**",
+                            description=f"**指定されたリンクのユーザー/チャンネルには公開プレイリストがありません...**",
                             color=disnake.Color.red()
                         )
                     )
@@ -1309,16 +1309,16 @@ class FavModalAdd(disnake.ui.Modal):
 
             await inter.edit_original_message(
                 embed=disnake.Embed(
-                    description=f"**Integração adicionada/editada com sucesso:** [`{title}`]({data['url']})\n"
-                                "**Ela vai aparecer nas seguintes ocasições:** ```\n"
-                                "- Ao usar o comando /play (selecionando a integração no preenchimento automático da busca)\n"
-                                "- Ao clicar no botão de tocar favorito do player.\n"
-                                "- Ao usar o comando play (prefixed) sem nome ou link.```",
+                    description=f"**連携が正常に追加/編集されました:** [`{title}`]({data['url']})\n"
+                                "**以下の場面で表示されます:** ```\n"
+                                "- /play コマンドを使用時（検索の自動補完で連携を選択）\n"
+                                "- プレイヤーのお気に入り再生ボタンをクリック時。\n"
+                                "- play（プレフィックス）コマンドを名前やリンクなしで使用時。```",
                     color=self.view.bot.get_color(me)
                 ), view=None
             )
 
-            self.view.log = f"[`{data['title']}`](<{data['url']}>) foi adicionado nas suas integrações."
+            self.view.log = f"[`{data['title']}`](<{data['url']}>) があなたの連携に追加されました。"
 
         if not isinstance(self.view.ctx, CustomContext):
             await self.view.ctx.edit_original_message(content=self.view.build_txt(), view=self.view)
@@ -1362,18 +1362,18 @@ class FavMenuView(disnake.ui.View):
 
             mode_select = disnake.ui.Select(
                 options=[
-                    disnake.SelectOption(label="Gerenciador de Favoritos", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
+                    disnake.SelectOption(label="お気に入りマネージャー", value=f"fav_view_mode_{ViewMode.fav_manager}", emoji="⭐",
                                          default=self.mode == ViewMode.fav_manager)
                 ], min_values=1, max_values=1
             )
 
             mode_select.append_option(
-                disnake.SelectOption(label="Gerenciador de Integrações", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
+                disnake.SelectOption(label="連携マネージャー", value=f"fav_view_mode_{ViewMode.integrations_manager}", emoji="💠",
                                      default=self.mode == ViewMode.integrations_manager)
             )
 
             if self.guild and (self.ctx.author.guild_permissions.manage_guild or self.is_owner):
-                mode_select.options.insert(1, disnake.SelectOption(label="Gerenciador de Playlists do Servidor",
+                mode_select.options.insert(1, disnake.SelectOption(label="サーバープレイリストマネージャー",
                                                                    value=f"fav_view_mode_{ViewMode.guild_fav_manager}", emoji="📌",
                                                                    default=self.mode == ViewMode.guild_fav_manager))
 
@@ -1438,74 +1438,74 @@ class FavMenuView(disnake.ui.View):
                 integration_select.callback = self.select_callback
                 self.add_item(integration_select)
 
-        add_button = disnake.ui.Button(label="Adicionar", emoji="<:add_music:588172015760965654>")
+        add_button = disnake.ui.Button(label="追加", emoji="<:add_music:588172015760965654>")
         add_button.callback = self.add_callback
         self.add_item(add_button)
 
         if self.mode == ViewMode.fav_manager:
-            edit_button = disnake.ui.Button(label="Editar", emoji="✍️", disabled=not self.data["fav_links"])
+            edit_button = disnake.ui.Button(label="編集", emoji="✍️", disabled=not self.data["fav_links"])
             edit_button.callback = self.edit_callback
             self.add_item(edit_button)
 
-            remove_button = disnake.ui.Button(label="Remover", emoji="♻️", disabled=not self.data["fav_links"])
+            remove_button = disnake.ui.Button(label="削除", emoji="♻️", disabled=not self.data["fav_links"])
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Limpar favoritos", emoji="🚮", disabled=not self.data["fav_links"])
+            clear_button = disnake.ui.Button(label="お気に入りをクリア", emoji="🚮", disabled=not self.data["fav_links"])
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
-            export_button = disnake.ui.Button(label="Exportar", emoji="📤", disabled=not self.data["fav_links"])
+            export_button = disnake.ui.Button(label="エクスポート", emoji="📤", disabled=not self.data["fav_links"])
             export_button.callback = self.export_callback
             self.add_item(export_button)
 
         elif self.mode == ViewMode.guild_fav_manager:
-            edit_button = disnake.ui.Button(label="Editar", emoji="✍️", disabled=not self.guild_data["player_controller"]["fav_links"])
+            edit_button = disnake.ui.Button(label="編集", emoji="✍️", disabled=not self.guild_data["player_controller"]["fav_links"])
             edit_button.callback = self.edit_callback
             self.add_item(edit_button)
 
-            remove_button = disnake.ui.Button(label="Remover", emoji="♻️", disabled=not self.guild_data["player_controller"]["fav_links"])
+            remove_button = disnake.ui.Button(label="削除", emoji="♻️", disabled=not self.guild_data["player_controller"]["fav_links"])
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Limpar favoritos", emoji="🚮", disabled=not self.guild_data["player_controller"]["fav_links"])
+            clear_button = disnake.ui.Button(label="お気に入りをクリア", emoji="🚮", disabled=not self.guild_data["player_controller"]["fav_links"])
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
-            export_button = disnake.ui.Button(label="Exportar", emoji="📤", disabled=not self.guild_data["player_controller"]["fav_links"])
+            export_button = disnake.ui.Button(label="エクスポート", emoji="📤", disabled=not self.guild_data["player_controller"]["fav_links"])
             export_button.callback = self.export_callback
             self.add_item(export_button)
 
         elif self.mode == ViewMode.integrations_manager:
-            remove_button = disnake.ui.Button(label="Remover", emoji="♻️", disabled=not self.data["integration_links"])
+            remove_button = disnake.ui.Button(label="削除", emoji="♻️", disabled=not self.data["integration_links"])
             remove_button.callback = self.remove_callback
             self.add_item(remove_button)
 
-            clear_button = disnake.ui.Button(label="Limpar Integrações", emoji="🚮", disabled=not self.data["integration_links"])
+            clear_button = disnake.ui.Button(label="連携をクリア", emoji="🚮", disabled=not self.data["integration_links"])
             clear_button.callback = self.clear_callback
             self.add_item(clear_button)
 
-            export_button = disnake.ui.Button(label="Exportar", emoji="📤", disabled=not self.data["integration_links"])
+            export_button = disnake.ui.Button(label="エクスポート", emoji="📤", disabled=not self.data["integration_links"])
             export_button.callback = self.export_callback
             self.add_item(export_button)
 
-        import_button = disnake.ui.Button(label="Importar", emoji="📥")
+        import_button = disnake.ui.Button(label="インポート", emoji="📥")
         import_button.callback = self.import_callback
         self.add_item(import_button)
 
         if self.mode == ViewMode.fav_manager:
             if self.data["fav_links"] and not self.light_mode:
-                play_button = disnake.ui.Button(label="Tocar o favorito selecionado", emoji="▶", custom_id="favmanager_play_button")
+                play_button = disnake.ui.Button(label="選択したお気に入りを再生", emoji="▶", custom_id="favmanager_play_button")
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
 
         elif self.mode == ViewMode.integrations_manager:
             if self.data["integration_links"]:
-                play_button = disnake.ui.Button(label="Tocar uma playlist da integração selecionada", emoji="▶", custom_id="favmanager_play_button")
+                play_button = disnake.ui.Button(label="選択した連携のプレイリストを再生", emoji="▶", custom_id="favmanager_play_button")
                 play_button.callback = self.play_callback
                 self.add_item(play_button)
 
-        cancel_button = disnake.ui.Button(label="Fechar", emoji="❌")
+        cancel_button = disnake.ui.Button(label="閉じる", emoji="❌")
         cancel_button.callback = self.cancel_callback
         self.add_item(cancel_button)
 
@@ -1518,7 +1518,7 @@ class FavMenuView(disnake.ui.View):
 
             user, data, url = await self.bot.wait_for("fav_add", check=lambda user, data, url: user.id == self.ctx.author.id)
 
-            self.log = f"<{url}> foi adicionado nos seus favoritos."
+            self.log = f"<{url}> がお気に入りに追加されました。"
 
             if not isinstance(self.ctx, CustomContext):
                 await self.ctx.edit_original_message(content=self.build_txt(), view=self)
@@ -1577,10 +1577,10 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.fav_manager:
 
-            txt = "### Gerenciador de favoritos.\n"
+            txt = "### お気に入りマネージャー。\n"
 
             if not self.data["fav_links"]:
-                txt += "Você não possui favoritos (clique no botão de adicionar abaixo).\n"
+                txt += "お気に入りがありません（下の追加ボタンをクリックしてください）。\n"
 
             else:
                 def format_fav(index, data):
@@ -1595,18 +1595,18 @@ class FavMenuView(disnake.ui.View):
                 ), max_size=1400)[0]
 
             if not self.light_mode:
-                txt += "\n\n**Como usá-los?**\n" \
-                       f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n" \
-                        "* Clicando no botão/select de tocar favorito/integração do player.\n" \
-                        f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n" \
-                        "* Usando o botão de tocar favorito abaixo.\n"
+                txt += "\n\n**使い方は？**\n" \
+                       f"* {cmd} コマンドを使用（検索の自動補完でお気に入りを選択）\n" \
+                        "* プレイヤーのお気に入り/連携再生ボタン/セレクトをクリック。\n" \
+                        f"* {self.prefix}{self.bot.get_cog('Music').play_legacy.name} コマンドを曲名やリンクなしで使用。\n" \
+                        "* 下のお気に入り再生ボタンを使用。\n"
 
         elif self.mode == ViewMode.guild_fav_manager:
 
-            txt = "### Gerenciador de favoritos do servidor.\n"
+            txt = "### サーバーお気に入りマネージャー。\n"
 
             if not self.guild_data["player_controller"]["fav_links"]:
-                txt += f"Não há links adicionados no bot {self.bot.user.mention} (clique no botão de adicionar abaixo).\n"
+                txt += f"ボット {self.bot.user.mention} にリンクが追加されていません（下の追加ボタンをクリックしてください）。\n"
 
             else:
                 def format_gfav(index, data):
@@ -1616,20 +1616,20 @@ class FavMenuView(disnake.ui.View):
                         return f"` {index:02} ` {e} [`{fix_characters(name, 40)}`](<{data['url']}>)"
                     return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{data['url']}>)"
 
-                txt += f"**Links atuais no bot {self.bot.user.mention}:**\n" + paginator("\n".join(
+                txt += f"**ボット {self.bot.user.mention} の現在のリンク:**\n" + paginator("\n".join(
                     f"> {format_gfav(n+1, d)}" for n, d in enumerate(islice(self.guild_data["player_controller"]["fav_links"].items(), 22))
                 ), max_size=1400)[0]
 
-                txt += "\n\n**Como usá-los?**\n" \
-                        f"* Usando o menu de seleção do player durante o modo de espera.\n" \
-                       f"\n`Bot selecionado:` {self.bot.user.mention}"
+                txt += "\n\n**使い方は？**\n" \
+                        f"* 待機モード中のプレイヤーの選択メニューを使用。\n" \
+                       f"\n`選択中のボット:` {self.bot.user.mention}"
 
         elif self.mode == ViewMode.integrations_manager:
 
-            txt = "### Gerenciador de integrações de canais/perfis com playlists públicas.\n"
+            txt = "### 公開プレイリストを持つチャンネル/プロフィールの連携マネージャー。\n"
 
             if not self.data["integration_links"]:
-                txt += "**Você não possui integrações no momento (clique no botão de adicionar abaixo).**\n"
+                txt += "**現在連携がありません（下の追加ボタンをクリックしてください）。**\n"
 
             else:
                 def format_itg(bot, index, data):
@@ -1641,24 +1641,24 @@ class FavMenuView(disnake.ui.View):
                         return f"` {index:02} ` {e} [`{fix_characters(name[5:], 40)}`](<{url}>)"
                     return f"` {index:02} ` [`{fix_characters(name, 40)}`](<{url}>)"
 
-                txt += f"### Suas integrações atuais:\n" + paginator("\n".join(
+                txt += f"### 現在の連携:\n" + paginator("\n".join(
                     f"> {format_itg(self.bot, n+1, d)}" for n, d in enumerate(islice(self.data["integration_links"].items(), 22))), max_size=1400)[0]
 
                 if not self.light_mode:
-                    txt += "\n\n**Como usá-los?**\n" \
-                           f"* Usando o comando {cmd} (selecionando o favorito no preenchimento automático da busca)\n" \
-                           "* Clicando no botão/select de tocar favorito/integração do player.\n" \
-                           f"* Usando o comando {self.prefix}{self.bot.get_cog('Music').play_legacy.name} sem incluir um nome ou link de uma música/vídeo.\n" \
-                           "* Usando o botão de tocar favorito abaixo.\n"
+                    txt += "\n\n**使い方は？**\n" \
+                           f"* {cmd} コマンドを使用（検索の自動補完でお気に入りを選択）\n" \
+                           "* プレイヤーのお気に入り/連携再生ボタン/セレクトをクリック。\n" \
+                           f"* {self.prefix}{self.bot.get_cog('Music').play_legacy.name} コマンドを曲名やリンクなしで使用。\n" \
+                           "* 下のお気に入り再生ボタンを使用。\n"
 
         else:
-            raise GenericError(f"**Modo não implementado:** {self.mode} | {type(self.mode)}")
+            raise GenericError(f"**実装されていないモードです:** {self.mode} | {type(self.mode)}")
 
         if self.log:
-            txt += f"\n**Última interação:**\n{self.log}\n"
+            txt += f"\n**最後の操作:**\n{self.log}\n"
 
         if self.mode == ViewMode.integrations_manager:
-            txt += f"\n**Links de perfis/canais suportados:**\n{', '.join(supported_platforms)}"
+            txt += f"\n**対応しているプロフィール/チャンネルのリンク:**\n{', '.join(supported_platforms)}"
 
         return txt
 
@@ -1668,7 +1668,7 @@ class FavMenuView(disnake.ui.View):
     async def edit_callback(self, inter: disnake.MessageInteraction):
 
         if not self.current:
-            await inter.send("Você deve selecionar um item!", ephemeral=True)
+            await inter.send("アイテムを選択してください！", ephemeral=True)
             return
 
         if self.mode == ViewMode.fav_manager:
@@ -1677,13 +1677,13 @@ class FavMenuView(disnake.ui.View):
                     FavModalAdd(name=self.current, url=self.data["fav_links"][self.current], view=self)
                 )
             except KeyError:
-                await inter.send(f"**Não há favorito com o nome:** {self.current}", ephemeral=True)
+                await inter.send(f"**名前が次のお気に入りはありません:** {self.current}", ephemeral=True)
 
         elif self.mode == ViewMode.guild_fav_manager:
             guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
             if not guild:
-                await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+                await inter.send("サーバー外ではこの操作を実行できません。", ephemeral=True)
                 return
             try:
                 await inter.response.send_modal(
@@ -1695,12 +1695,12 @@ class FavMenuView(disnake.ui.View):
                     )
                 )
             except KeyError:
-                await inter.send(f"**Não há favorito com nome:** {self.current}", ephemeral=True)
+                await inter.send(f"**名前が次のお気に入りはありません:** {self.current}", ephemeral=True)
 
     async def remove_callback(self, inter: disnake.MessageInteraction):
 
         if not self.current:
-            await inter.send("Você deve selecionar um item!", ephemeral=True)
+            await inter.send("アイテムを選択してください！", ephemeral=True)
             return
 
         await inter.response.defer(ephemeral=True)
@@ -1712,7 +1712,7 @@ class FavMenuView(disnake.ui.View):
             guild = self.bot.get_guild(inter.guild_id)
 
             if not guild:
-                await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+                await inter.send("サーバー外ではこの操作を実行できません。", ephemeral=True)
                 return
 
             if not self.guild_data:
@@ -1726,12 +1726,12 @@ class FavMenuView(disnake.ui.View):
                 url = f'[`{self.current}`]({self.data["fav_links"][self.current]})'
                 del self.data["fav_links"][self.current]
             except:
-                await inter.edit_original_message(f"**Não há favorito na lista com o nome:** {self.current}")
+                await inter.edit_original_message(f"**リストに次の名前のお気に入りはありません:** {self.current}")
                 return
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = f"Favorito {url} foi removido com sucesso!"
+            self.log = f"お気に入り {url} が正常に削除されました！"
 
         elif self.mode == ViewMode.guild_fav_manager:
             try:
@@ -1745,7 +1745,7 @@ class FavMenuView(disnake.ui.View):
 
                 await inter.edit_original_message(
                     embed=disnake.Embed(
-                        description=f"**Não há links da lista com o nome:** {self.current}",
+                        description=f"**リストに次の名前のリンクはありません:** {self.current}",
                         color=self.bot.get_color(guild.me)),
                     view=None
                 )
@@ -1753,7 +1753,7 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_data(inter.guild_id, self.guild_data, db_name=DBModel.guilds)
 
-            self.log = f"Link {url} foi removido com sucesso da lista de favoritos do servidor!"
+            self.log = f"リンク {url} がサーバーのお気に入りリストから正常に削除されました！"
 
         elif self.mode == ViewMode.integrations_manager:
 
@@ -1766,12 +1766,12 @@ class FavMenuView(disnake.ui.View):
                 url = f'[`{self.current}`]({item})'
                 del self.data["integration_links"][self.current]
             except:
-                await inter.send(f"**Não há integração na lista com o nome:** {self.current}", ephemeral=True)
+                await inter.send(f"**リストに次の名前の連携はありません:** {self.current}", ephemeral=True)
                 return
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = f"Integração {url} foi removida com sucesso!"
+            self.log = f"連携 {url} が正常に削除されました！"
 
         await inter.edit_original_message(content=self.build_txt(), view=self)
 
@@ -1799,7 +1799,7 @@ class FavMenuView(disnake.ui.View):
             guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
             if not guild:
-                await inter.send("Você não pode executar essa ação fora de um servidor.", ephemeral=True)
+                await inter.send("サーバー外ではこの操作を実行できません。", ephemeral=True)
                 return
 
             await inter.response.defer(ephemeral=True)
@@ -1815,7 +1815,7 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.fav_manager:
             if not self.data["fav_links"]:
-                await inter.send("**Você não possui links favoritos!**", ephemeral=True)
+                await inter.send("**お気に入りリンクがありません！**", ephemeral=True)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["fav_links"], indent=4), 'utf-8'))
@@ -1824,17 +1824,17 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = "Sua lista de favoritos foi limpa com sucesso!"
+            self.log = "お気に入りリストが正常にクリアされました！"
 
-            await inter.send("### Seus favoritos foram excluídos com sucesso!\n"
-                             "`Um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
-                             "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+            await inter.send("### お気に入りが正常に削除されました！\n"
+                             "`バックアップファイルが生成されました。この削除を元に戻したい場合は、"
+                             "ファイルの内容をコピーして「インポート」ボタンをクリックし、指定されたフィールドに内容を貼り付けてください。`",
                              ephemeral=True, file=disnake.File(fp, filename="favs.json"))
 
         elif self.mode == ViewMode.guild_fav_manager:
 
             if not self.guild_data["player_controller"]["fav_links"]:
-                await inter.send("**Não há links favoritos no servidor.**", ephemeral=True)
+                await inter.send("**サーバーにお気に入りリンクがありません。**", ephemeral=True)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
@@ -1848,17 +1848,17 @@ class FavMenuView(disnake.ui.View):
             except:
                 traceback.print_exc()
 
-            self.log = "Lista de favoritos do server foi limpa com sucesso!"
+            self.log = "サーバーのお気に入りリストが正常にクリアされました！"
 
-            await inter.send("### Os links de favoritos do server foram excluídos com sucesso!\n"
-                             "`um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
-                             "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+            await inter.send("### サーバーのお気に入りリンクが正常に削除されました！\n"
+                             "`バックアップファイルが生成されました。この削除を元に戻したい場合は、"
+                             "ファイルの内容をコピーして「インポート」ボタンをクリックし、指定されたフィールドに内容を貼り付けてください。`",
                              ephemeral=True, file=disnake.File(fp, filename="guild_favs.json"))
 
         elif self.mode == ViewMode.integrations_manager:
 
             if not self.data["integration_links"]:
-                await inter.response.edit_message(content="**Você não possui integrações salvas!**", view=None)
+                await inter.response.edit_message(content="**保存された連携がありません！**", view=None)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["integration_links"], indent=4), 'utf-8'))
@@ -1867,11 +1867,11 @@ class FavMenuView(disnake.ui.View):
 
             await self.bot.update_global_data(inter.author.id, self.data, db_name=DBModel.users)
 
-            self.log = "Sua lista de integrações foi limpa com sucesso!"
+            self.log = "連携リストが正常にクリアされました！"
 
-            await inter.send("### Suas integrações foram excluídas com sucesso!\n"
-                             "`um arquivo de backup foi gerado e caso queira reverter essa exclusão, copie o "
-                             "conteúdo do arquivo e clique no botão \"importar\" e cole o conteudo no campo indicado.`",
+            await inter.send("### 連携が正常に削除されました！\n"
+                             "`バックアップファイルが生成されました。この削除を元に戻したい場合は、"
+                             "ファイルの内容をコピーして「インポート」ボタンをクリックし、指定されたフィールドに内容を貼り付けてください。`",
                              ephemeral=True, file=disnake.File(fp, filename="integrations.json"))
 
         self.current = None
@@ -1894,7 +1894,7 @@ class FavMenuView(disnake.ui.View):
         if retry_after := cog.fav_import_export_cd.get_bucket(inter).update_rate_limit():
             if retry_after < 1:
                 retry_after = 1
-            await inter.send("**Você deve aguardar {} para exportar.**".format(
+            await inter.send("**エクスポートするには {} お待ちください。**".format(
                 time_format(int(retry_after) * 1000, use_names=True)), ephemeral=True)
             return
 
@@ -1909,28 +1909,28 @@ class FavMenuView(disnake.ui.View):
 
         if self.mode == ViewMode.fav_manager:
             if not self.data["fav_links"]:
-                await inter.send(f"**Você não possui links favoritos..\n"
-                                 f"Você pode adicionar usando o comando: {cmd}**", ephemeral=True)
+                await inter.send(f"**お気に入りリンクがありません。\n"
+                                 f"次のコマンドで追加できます: {cmd}**", ephemeral=True)
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["fav_links"], indent=4), 'utf-8'))
 
             await inter.send(embed=disnake.Embed(
-                description=f"Seus favoritos estão aqui.\nVocê pode importar usando o comando: {cmd}",
+                description=f"お気に入りはこちらです。\n次のコマンドでインポートできます: {cmd}",
                 color=self.bot.get_color()), file=disnake.File(fp=fp, filename="favoritos.json"), ephemeral=True)
 
         elif self.mode == ViewMode.guild_fav_manager:
             if not self.guild_data["player_controller"]["fav_links"]:
-                await inter.edit_original_message(content=f"**Não há músicas/playlists fixadas no servidor..\n"
-                                                          f"Você pode adicionar usando o comando: {cmd}**")
+                await inter.edit_original_message(content=f"**サーバーに固定された曲/プレイリストがありません。\n"
+                                                          f"次のコマンドで追加できます: {cmd}**")
 
             fp = BytesIO(bytes(json.dumps(self.guild_data["player_controller"]["fav_links"], indent=4), 'utf-8'))
 
             guild = self.bot.get_guild(inter.guild_id) or inter.guild
 
             embed = disnake.Embed(
-                description=f"**Os dados dos links de músicas/playlists fixas do servidor estão aqui.\n"
-                            f"Você pode importar usando o comando:** {cmd}",
+                description=f"**サーバーの固定曲/プレイリストリンクのデータはこちらです。\n"
+                            f"次のコマンドでインポートできます:** {cmd}",
                 color=self.bot.get_color(guild.me))
 
             await inter.send(embed=embed, file=disnake.File(fp=fp, filename="guild_favs.json"), ephemeral=True)
@@ -1938,14 +1938,14 @@ class FavMenuView(disnake.ui.View):
         elif self.mode == ViewMode.integrations_manager:
 
             if not self.data["integration_links"]:
-                await inter.edit_original_message(f"**Você não possui integrações adicionadas...\n"
-                                                  f"Você pode adicionar usando o comando: {cmd}**")
+                await inter.edit_original_message(f"**追加された連携がありません...\n"
+                                                  f"次のコマンドで追加できます: {cmd}**")
                 return
 
             fp = BytesIO(bytes(json.dumps(self.data["integration_links"], indent=4), 'utf-8'))
 
             await inter.send(embed=disnake.Embed(
-                description=f"Suas integrações estão aqui.\nVocê pode importar usando o comando: {cmd}",
+                description=f"連携はこちらです。\n次のコマンドでインポートできます: {cmd}",
                 color=self.bot.get_color()), file=disnake.File(fp=fp, filename="integrations.json"), ephemeral=True)
 
     async def cancel_callback(self, inter: disnake.MessageInteraction):
@@ -1955,7 +1955,7 @@ class FavMenuView(disnake.ui.View):
         except:
             pass
 
-        await inter.response.edit_message(content="**Gerenciador fechado.**", view=None)
+        await inter.response.edit_message(content="**マネージャーを閉じました。**", view=None)
         self.stop()
 
     async def mode_callback(self, inter: disnake.MessageInteraction):
@@ -1988,7 +1988,7 @@ class FavMenuView(disnake.ui.View):
         if inter.author.id == self.ctx.author.id:
             return True
 
-        await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.", ephemeral=True)
+        await inter.send(f"このメッセージで操作できるのは {self.ctx.author.mention} さんのみです。", ephemeral=True)
 
 
 
@@ -1997,18 +1997,18 @@ base_skin = {
     "queue_format": "`{track.number}) [{track.duration}]` [`{track.title_42}`]({track.url})",
     "embeds": [
         {
-            "title": "Próximas músicas:",
+            "title": "次の曲:",
             "description": "{queue_format}",
             "color": "{guild.color}"
         },
         {
-            "description": "**Tocando agora:\n[{track.title}]({track.url})**\n\n**Duração:** `{track.duration}`\n**Pedido por:** {requester.mention}\n**Uploader**: `{track.author}`\n**Playlist de origem:** [`{playlist.name}`]({playlist.url})\n\n{player.log.emoji} **Última ação:** {player.log.text}",
+            "description": "**再生中:\n[{track.title}]({track.url})**\n\n**再生時間:** `{track.duration}`\n**リクエスト者:** {requester.mention}\n**アップローダー**: `{track.author}`\n**元のプレイリスト:** [`{playlist.name}`]({playlist.url})\n\n{player.log.emoji} **最後の操作:** {player.log.text}",
             "image": {
               "url": "{track.thumb}"
             },
             "color": "{guild.color}",
             "footer": {
-               "text": "Músicas na lista: {player.queue.size}"
+               "text": "キュー内の曲数: {player.queue.size}"
             }
         }
     ]
@@ -2031,9 +2031,9 @@ class SkinSettingsButton(disnake.ui.View):
 
         select_mode = disnake.ui.Select(
             min_values=1, max_values=1, options=[
-                disnake.SelectOption(label="Modo Normal", description="Aplicar skin ao modo normal do player",
+                disnake.SelectOption(label="通常モード", description="通常モードのプレイヤーにスキンを適用",
                                      value="custom_skins", default=self.mode == "custom_skins"),
-                disnake.SelectOption(label="Song-Request", description="Aplicar skin no modo song-request do player",
+                disnake.SelectOption(label="Song-Request", description="Song-Requestモードのプレイヤーにスキンを適用",
                                      value="custom_skins_static", default=self.mode == "custom_skins_static"),
             ]
         )
@@ -2042,12 +2042,12 @@ class SkinSettingsButton(disnake.ui.View):
 
         if self.mode == "custom_skins":
             controller_btn = disnake.ui.Button(emoji="💠",
-                label="Ativar Player-Controller" if not self.controller_enabled else "Desativar Player-Controller"
+                label="プレイヤーコントローラーを有効化" if not self.controller_enabled else "プレイヤーコントローラーを無効化"
             )
             controller_btn.callback = self.controller_buttons
             self.add_item(controller_btn)
 
-        save_btn = disnake.ui.Button(label="Salvar", emoji="💾")
+        save_btn = disnake.ui.Button(label="保存", emoji="💾")
         save_btn.callback = self.save
         self.add_item(save_btn)
 
@@ -2068,7 +2068,7 @@ class SkinSettingsButton(disnake.ui.View):
     async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
 
         if inter.user.id != self.user.id:
-            await inter.send(f"Apenas o membro {self.user.mention} pode usar es botões da mensagem.", ephemeral=True)
+            await inter.send(f"このメッセージのボタンを使用できるのは {self.user.mention} さんのみです。", ephemeral=True)
             return False
 
         return True
@@ -2099,8 +2099,8 @@ class SetStageTitle(disnake.ui.View):
                "[34;1m{track.playlist}[0m -> Nome da playlist de origem da música (caso tenha)\n" \
                "[34;1m{requester.name}[0m -> Nome/Nick do membro que pediu a música\n" \
                "[34;1m{requester.id}[0m -> ID do membro que pediu a música```\n" \
-               "Exemplo: Tocando {track.title} | Por: {track.author}\n\n" \
-               "`Nota: No canal de voz você pode usar custom emojis na mensagem do status (incluindo emoji de servers que eu não estou e de servers que você não está).`"
+               "例: 再生中 {track.title} | 投稿者: {track.author}\n\n" \
+               "`注意: ボイスチャンネルでは、ステータスメッセージにカスタム絵文字を使用できます（私がいないサーバーや、あなたがいないサーバーの絵文字も含む）。`"
 
     def __init__(self, ctx: Union[CustomContext, disnake.Interaction], bot: BotCore, guild: disnake.Guild, data: dict):
         super().__init__(timeout=180)
@@ -2111,18 +2111,18 @@ class SetStageTitle(disnake.ui.View):
         self.message = None
 
         if self.data['voice_channel_status']:
-            setstatus_btn = disnake.ui.Button(label="Usar modelo atual", emoji="🎶",
+            setstatus_btn = disnake.ui.Button(label="現在のテンプレートを使用", emoji="🎶",
                                               style=disnake.ButtonStyle.grey,
                                               custom_id="status_voice_channel_temp_current")
             setstatus_btn.callback = self.setstatus_callback
             self.add_item(setstatus_btn)
 
-        setstatus_modal_btn = disnake.ui.Button(label="Ativar/Desativar status",
+        setstatus_modal_btn = disnake.ui.Button(label="ステータスを有効/無効化",
                                                 emoji='🔊', style=disnake.ButtonStyle.grey)
         setstatus_modal_btn.callback = self.set_status_modal
         self.add_item(setstatus_modal_btn)
 
-        setstatus_perm_btn = disnake.ui.Button(label="Ativar/Desativar status (permanente)",
+        setstatus_perm_btn = disnake.ui.Button(label="ステータスを有効/無効化（永続）",
                                                emoji='💾', style=disnake.ButtonStyle.grey)
         setstatus_perm_btn.callback = self.set_status_perm
         self.add_item(setstatus_perm_btn)
@@ -2139,15 +2139,15 @@ class SetStageTitle(disnake.ui.View):
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="status",
+                        label="ステータス",
                         custom_id="status_voice_value",
-                        placeholder="Pra desativar deixe vazio",
+                        placeholder="無効にするには空のままにしてください",
                         max_length=496,
                         required=False
                     ),
                 ],
                 view=self,
-                title="Definir status do canal",
+                title="チャンネルステータスを設定",
                 custom_id="status_voice_channel_temp",
             )
         )
@@ -2160,15 +2160,15 @@ class SetStageTitle(disnake.ui.View):
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="status permanente",
+                        label="永続ステータス",
                         custom_id="status_voice_value",
-                        placeholder="Pra desativar deixe vazio",
+                        placeholder="無効にするには空のままにしてください",
                         max_length=496,
                         required=False
                     ),
                 ],
                 view=self,
-                title="Definir status do canal",
+                title="チャンネルステータスを設定",
                 custom_id="status_voice_channel_perm",
             )
         )
@@ -2181,15 +2181,15 @@ class SetStageTitle(disnake.ui.View):
 
         embeds.append(
             disnake.Embed(
-                description="### Definir status automático no canal de voz ou palco\n"
-                            "**Placeholders:** `(Pelo menos um placeholder deve ser incluso na mensagem de status)`\n"
+                description="### ボイスチャンネルまたはステージの自動ステータスを設定\n"
+                            "**プレースホルダー:** `（ステータスメッセージには少なくとも1つのプレースホルダーを含める必要があります）`\n"
                             f"{self.placeholder_text}",
                 color=color)
         )
 
         if self.data['voice_channel_status']:
             embeds.append(
-                disnake.Embed(title="**Modelo permanente atual:**", description=self.data['voice_channel_status'], color=self.bot.get_color(self.guild.me))
+                disnake.Embed(title="**現在の永続テンプレート:**", description=self.data['voice_channel_status'], color=self.bot.get_color(self.guild.me))
             )
 
         return embeds
@@ -2205,13 +2205,13 @@ class SetStageTitle(disnake.ui.View):
 
         if values["status_voice_value"] and not any(
                 p in values["status_voice_value"] for p in self.placeholders):
-            await inter.send("**Você deve usar pelo menos um placeholder válido...**", ephemeral=True)
+            await inter.send("**少なくとも1つの有効なプレースホルダーを使用する必要があります...**", ephemeral=True)
             return
 
         if inter.data.custom_id == "status_voice_channel_perm":
 
             if self.data["voice_channel_status"] == values["status_voice_value"]:
-                await inter.send("**O status permanente atual é o mesmo do informado...**", ephemeral=True)
+                await inter.send("**現在の永続ステータスは入力されたものと同じです...**", ephemeral=True)
                 return
 
             guild: Optional[disnake.Guild] = None
@@ -2221,14 +2221,14 @@ class SetStageTitle(disnake.ui.View):
                     break
 
             if not guild:
-                await inter.send("**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
-                                components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")], ephemeral=True)
+                await inter.send("**サーバーに利用可能なボットがありません。下のボタンをクリックして少なくとも1つ追加してください。**",
+                                components=[disnake.ui.Button(custom_id="bot_invite", label="ボットを追加")], ephemeral=True)
                 return
 
             inter.author = guild.get_member(inter.author.id)
 
             if not inter.author.guild_permissions.manage_guild:
-                await inter.send("**Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz**", ephemeral=True)
+                await inter.send("**ボイスチャンネルのステータスを変更するにはサーバー管理権限が必要です**", ephemeral=True)
                 return
 
             self.data["voice_channel_status"] = values["status_voice_value"]
@@ -2246,7 +2246,7 @@ class SetStageTitle(disnake.ui.View):
                 p.stage_title_template = values["status_voice_value"]
                 p.start_time = disnake.utils.utcnow()
                 p.set_command_log(
-                    text=f"{inter.author.mention} " + ("ativou" if values["status_voice_value"] else "desativou") + " o status automático",
+                    text=f"{inter.author.mention} が自動ステータスを" + ("有効化" if values["status_voice_value"] else "無効化") + "しました",
                     emoji="📢",
                 )
                 p.update = True
@@ -2259,7 +2259,7 @@ class SetStageTitle(disnake.ui.View):
                 await p.process_save_queue()
                 await asyncio.sleep(3)
 
-            await inter.edit_original_message("**Status permanente foi " + ("salvo" if values["status_voice_value"] else "desativado") + " com sucesso!**" )
+            await inter.edit_original_message("**永続ステータスが正常に" + ("保存" if values["status_voice_value"] else "無効化") + "されました！**" )
 
         elif inter.data.custom_id.startswith("status_voice_channel_temp"):
 
@@ -2277,13 +2277,13 @@ class SetStageTitle(disnake.ui.View):
                 break
 
             if not player:
-                await inter.send("**Não estou tocando música em um canal de voz/palco...**", ephemeral=True)
+                await inter.send("**ボイスチャンネル/ステージで音楽を再生していません...**", ephemeral=True)
                 return
 
             inter.author = player.guild.get_member(inter.author.id)
 
             if not inter.author.guild_permissions.manage_guild:
-                await inter.send("Você não possui a permissão de gerenciar servidor para alterar o status do canal de voz", ephemeral=True)
+                await inter.send("ボイスチャンネルのステータスを変更するにはサーバー管理権限が必要です", ephemeral=True)
                 return
 
             player.stage_title_event = bool(values["status_voice_value"])
@@ -2300,16 +2300,16 @@ class SetStageTitle(disnake.ui.View):
             await player.process_save_queue()
 
             player.set_command_log(
-                text=f"{inter.author.mention} " + ("ativou" if values["status_voice_value"] else "desativou") + " o status automático",
+                text=f"{inter.author.mention} が自動ステータスを" + ("有効化" if values["status_voice_value"] else "無効化") + "しました",
                 emoji="📢",
             )
 
             player.update = True
 
-            await inter.edit_original_message("**Status definido com sucesso!**" if values["status_voice_value"] else "**Status desativado com sucesso!**")
+            await inter.edit_original_message("**ステータスが正常に設定されました！**" if values["status_voice_value"] else "**ステータスが正常に無効化されました！**")
 
         else:
-            await inter.send(f"Não implementado: {inter.data.custom_id}", ephemeral=True)
+            await inter.send(f"実装されていません: {inter.data.custom_id}", ephemeral=True)
             return
 
         await self.close()
@@ -2336,7 +2336,7 @@ class SetStageTitle(disnake.ui.View):
 
     async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
         if inter.author.id != self.ctx.author.id:
-            await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.",
+            await inter.send(f"このメッセージで操作できるのは {self.ctx.author.mention} さんのみです。",
                              ephemeral=True)
             return False
         return True
@@ -2399,7 +2399,7 @@ class SkinEditorMenu(disnake.ui.View):
 
         if self.mode == "select":
             add_skin_prefix = (lambda d: [f"> cs: {i}" for i in d.keys()])
-            skins_opts = [disnake.SelectOption(emoji="💠", label=f"Modo normal: {s.replace('> cs: ', '', 1)}", value=s) for s in add_skin_prefix(self.global_data["custom_skins"])]
+            skins_opts = [disnake.SelectOption(emoji="💠", label=f"通常モード: {s.replace('> cs: ', '', 1)}", value=s) for s in add_skin_prefix(self.global_data["custom_skins"])]
             add_skin_prefix = (lambda d: [f"> css: {i}" for i in d.keys()])
             static_skins_opts = [disnake.SelectOption(emoji="💠", label=f"Song-Request: {s.replace('> css: ', '', 1)}", value=s) for s in add_skin_prefix(self.global_data["custom_skins_static"])]
 
@@ -2407,26 +2407,26 @@ class SkinEditorMenu(disnake.ui.View):
 
             if skins_opts:
                 skin_select = disnake.ui.Select(min_values=1, max_values=1, options=skins_opts,
-                                                placeholder="Skins do modo normal do player")
+                                                placeholder="通常モードのプレイヤースキン")
                 skin_select.callback = self.load_skin
                 self.add_item(skin_select)
                 has_skins = True
 
             if static_skins_opts:
                 static_skin_select = disnake.ui.Select(min_values=1, max_values=1, options=static_skins_opts,
-                                                       placeholder="Skins do modo song-request do player")
+                                                       placeholder="Song-Requestモードのプレイヤースキン")
                 static_skin_select.callback = self.load_skin
                 self.add_item(static_skin_select)
                 has_skins = True
 
             if not has_skins:
-                self.message_data = {"embeds": [{"description": "**Não há skins salvas...\nClique no botão abaixo para criar uma nova skin/template.**", "color": self.guild.me.color.value}]}
-                new_skin_btn = disnake.ui.Button(label="Adicionar nova skin", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
+                self.message_data = {"embeds": [{"description": "**保存されたスキンがありません...\n下のボタンをクリックして新しいスキン/テンプレートを作成してください。**", "color": self.guild.me.color.value}]}
+                new_skin_btn = disnake.ui.Button(label="新しいスキンを追加", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
                 new_skin_btn.callback = self.new_skin
                 self.add_item(new_skin_btn)
             else:
-                self.message_data = {"embeds": [{"description": "**Selecione uma skin abaixo para editá-la ou crie uma nova usando um modelo base clicando no botão de adicionar abaixo.**", "color": self.guild.me.color.value}]}
-                new_skin_btn = disnake.ui.Button(label="Adicionar nova skin", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
+                self.message_data = {"embeds": [{"description": "**下からスキンを選択して編集するか、下の追加ボタンをクリックしてベーステンプレートから新規作成してください。**", "color": self.guild.me.color.value}]}
+                new_skin_btn = disnake.ui.Button(label="新しいスキンを追加", custom_id="skin_editor_new_skin", disabled=len(static_skins_opts) > 2 and len(skins_opts) > 2)
                 new_skin_btn.callback = self.new_skin
                 self.add_item(new_skin_btn)
 
@@ -2453,24 +2453,24 @@ class SkinEditorMenu(disnake.ui.View):
                     self.add_item(select_embed_field)
 
                 if len(fields) < 25:
-                    add_field_btn = disnake.ui.Button(label="Adicionar Field", emoji="🔖")
+                    add_field_btn = disnake.ui.Button(label="Fieldを追加", emoji="🔖")
                     add_field_btn.callback = self.add_field
                     self.add_item(add_field_btn)
 
                 if fields:
-                    edit_field_btn = disnake.ui.Button(label="Editar Field", emoji="🔖")
+                    edit_field_btn = disnake.ui.Button(label="Fieldを編集", emoji="🔖")
                     edit_field_btn.callback = self.edit_embed_field_button
                     self.add_item(edit_field_btn)
 
-                    delete_field_btn = disnake.ui.Button(label="Remover Field", emoji="🔖")
+                    delete_field_btn = disnake.ui.Button(label="Fieldを削除", emoji="🔖")
                     delete_field_btn.callback = self.delete_embed_field_button
                     self.add_item(delete_field_btn)
 
-                edit_embed_btn = disnake.ui.Button(label="Editar Embed", emoji="📋")
+                edit_embed_btn = disnake.ui.Button(label="Embedを編集", emoji="📋")
                 edit_embed_btn.callback = self.edit_embed_button
                 self.add_item(edit_embed_btn)
 
-                remove_embed_btn = disnake.ui.Button(label="Remover Embed", emoji="📋")
+                remove_embed_btn = disnake.ui.Button(label="Embedを削除", emoji="📋")
                 remove_embed_btn.callback = self.remove_embed
                 self.add_item(remove_embed_btn)
 
@@ -2478,46 +2478,46 @@ class SkinEditorMenu(disnake.ui.View):
                 set_author_footer_btn.callback = self.set_author_footer
                 self.add_item(set_author_footer_btn)
 
-            edit_content_btn = disnake.ui.Button(label=("Adicionar" if not self.message_data.get("content") else "Editar") + " Mensagem", emoji="💬")
+            edit_content_btn = disnake.ui.Button(label=("メッセージを追加" if not self.message_data.get("content") else "メッセージを編集"), emoji="💬")
             edit_content_btn.callback = self.edit_content
             self.add_item(edit_content_btn)
 
-            add_embed_btn = disnake.ui.Button(label="Adicionar Embed", disabled=len(embeds)>=8, emoji="📋")
+            add_embed_btn = disnake.ui.Button(label="Embedを追加", disabled=len(embeds)>=8, emoji="📋")
             add_embed_btn.callback = self.add_embed
             self.add_item(add_embed_btn)
 
-            setup_queue_btn = disnake.ui.Button(label="Configurar placeholder da fila", emoji="<:music_queue:703761160679194734>")
+            setup_queue_btn = disnake.ui.Button(label="キュープレースホルダーを設定", emoji="<:music_queue:703761160679194734>")
             setup_queue_btn.callback = self.setup_queue
             self.add_item(setup_queue_btn)
 
             save_disabled = not embeds and len(self.message_data.get("content", "")) < 15
 
-            export_btn = disnake.ui.Button(label="Exportar Skin", emoji="📤", disabled=save_disabled)
+            export_btn = disnake.ui.Button(label="スキンをエクスポート", emoji="📤", disabled=save_disabled)
             export_btn.callback = self.export
             self.add_item(export_btn)
 
-            import_btn = disnake.ui.Button(label="Importar Skin", emoji="📥")
+            import_btn = disnake.ui.Button(label="スキンをインポート", emoji="📥")
             import_btn.callback = self.import_
             self.add_item(import_btn)
 
             if self.skin_selected:
-                delete_skin_btn = disnake.ui.Button(label="Excluir Skin", emoji="🚮")
+                delete_skin_btn = disnake.ui.Button(label="スキンを削除", emoji="🚮")
                 delete_skin_btn.callback = self.delete_skin
                 self.add_item(delete_skin_btn)
 
-            back_btn = disnake.ui.Button(label="Voltar ao menu anterior", emoji="⬅️")
+            back_btn = disnake.ui.Button(label="前のメニューに戻る", emoji="⬅️")
             back_btn.callback = self.back
             self.add_item(back_btn)
 
-            self.add_item(disnake.ui.Button(label="Lista de placeholders", emoji="<:help:947781412017279016>", custom_id="skin_editor_placeholders"))
+            self.add_item(disnake.ui.Button(label="プレースホルダー一覧", emoji="<:help:947781412017279016>", custom_id="skin_editor_placeholders"))
 
-            save_btn = disnake.ui.Button(label="Salvar Skin", emoji="💾", disabled=save_disabled)
+            save_btn = disnake.ui.Button(label="スキンを保存", emoji="💾", disabled=save_disabled)
             save_btn.callback = self.save
             self.add_item(save_btn)
 
     async def interaction_check(self, inter: disnake.MessageInteraction) -> bool:
         if inter.author.id != self.ctx.author.id:
-            await inter.send(f"Apenas o membro {self.ctx.author.mention} pode interagir nessa mensagem.",
+            await inter.send(f"このメッセージで操作できるのは {self.ctx.author.mention} さんのみです。",
                              ephemeral=True)
             return False
         return True
@@ -2564,11 +2564,11 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Editar/Adicionar conteúdo da mensagem", custom_id="skin_editor_message_content",
+                view=self, title="メッセージ内容を編集/追加", custom_id="skin_editor_message_content",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Mensagem:",
+                        label="メッセージ:",
                         custom_id="message_content",
                         value=self.message_data.get("content", ""),
                         max_length=1700,
@@ -2583,40 +2583,40 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Adicionar Embed", custom_id="skin_editor_add_embed",
+                view=self, title="Embedを追加", custom_id="skin_editor_add_embed",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Título da embed:",
+                        label="Embedのタイトル:",
                         custom_id="skin_embed_title",
                         max_length=170,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Descrição da embed:",
+                        label="Embedの説明:",
                         custom_id="skin_embed_description",
                         max_length=1700,
                         required=True
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Cor da embed:",
-                        placeholder="Exemplo: #000fff ou {guild.color}",
+                        label="Embedの色:",
+                        placeholder="例: #000fff または {guild.color}",
                         custom_id="skin_embed_color",
                         max_length=15,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da imagem:",
+                        label="画像のリンク/プレースホルダー:",
                         custom_id="image_url",
                         max_length=400,
                         required=False
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da miniatura:",
+                        label="サムネイルのリンク/プレースホルダー:",
                         custom_id="thumbnail_url",
                         max_length=400,
                         required=False
@@ -2643,11 +2643,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Edite os campos principais da embed", custom_id="skin_editor_edit_embed",
+                view=self, title="Embedの主要フィールドを編集", custom_id="skin_editor_edit_embed",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Título da embed:",
+                        label="Embedのタイトル:",
                         custom_id="skin_embed_title",
                         value=embed.get("title", ""),
                         max_length=170,
@@ -2655,7 +2655,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Descrição da embed:",
+                        label="Embedの説明:",
                         custom_id="skin_embed_description",
                         value=embed.get("description", ""),
                         max_length=1700,
@@ -2663,8 +2663,8 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Cor da embed:",
-                        placeholder="Exemplo: #000fff ou {guild.color}",
+                        label="Embedの色:",
+                        placeholder="例: #000fff または {guild.color}",
                         custom_id="skin_embed_color",
                         value=str(embed.get("color", "")),
                         max_length=14,
@@ -2672,7 +2672,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da imagem:",
+                        label="画像のリンク/プレースホルダー:",
                         custom_id="image_url",
                         value=image_url,
                         max_length=400,
@@ -2680,7 +2680,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Placeholder da miniatura:",
+                        label="サムネイルのリンク/プレースホルダー:",
                         custom_id="thumbnail_url",
                         value=thumb_url,
                         max_length=400,
@@ -2701,18 +2701,18 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Adicionar field na embed", custom_id="skin_editor_add_field",
+                view=self, title="EmbedにFieldを追加", custom_id="skin_editor_add_field",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome:",
+                        label="名前:",
                         custom_id="add_field_name",
                         max_length=170,
                         required=True
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Valor/Texto:",
+                        label="値/テキスト:",
                         custom_id="add_field_value",
                         max_length=1700,
                         required=True
@@ -2729,11 +2729,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Edição dos campos principais da embed", custom_id="skin_editor_edit_field",
+                view=self, title="Embedの主要フィールドを編集", custom_id="skin_editor_edit_field",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome do campo:",
+                        label="フィールド名:",
                         custom_id="edit_field_name",
                         value=field["name"],
                         max_length=170,
@@ -2741,7 +2741,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Valor/Texto do campo:",
+                        label="フィールドの値/テキスト:",
                         custom_id="edit_field_value",
                         value=field["value"],
                         max_length=1700,
@@ -2789,11 +2789,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, custom_id="skin_editor_set_authorfooter", title="Adicionar/editar autor/footer",
+                view=self, custom_id="skin_editor_set_authorfooter", title="Author/Footerを追加/編集",
                 components = [
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome do author:",
+                        label="Authorの名前:",
                         custom_id="set_author_name",
                         value=author_name,
                         max_length=170,
@@ -2801,7 +2801,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Url do author:",
+                        label="AuthorのリンクURL:",
                         custom_id="set_author_url",
                         value=author_url,
                         max_length=400,
@@ -2809,7 +2809,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Link/Url da imagem do author:",
+                        label="Author画像のリンクURL:",
                         custom_id="set_author_icon",
                         value=author_icon_url,
                         max_length=400,
@@ -2817,7 +2817,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Texto do footer:",
+                        label="Footerのテキスト:",
                         custom_id="footer_text",
                         value=footer_text,
                         max_length=1700,
@@ -2825,7 +2825,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="URL/Link da imagem do footer:",
+                        label="Footer画像のURL/リンク:",
                         custom_id="footer_icon_url",
                         value=footer_icon_url,
                         max_length=400,
@@ -2841,11 +2841,11 @@ class SkinEditorMenu(disnake.ui.View):
 
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Placeholder da lista de músicas da fila", custom_id="skin_editor_setup_queue",
+                view=self, title="キュー曲リストのプレースホルダー", custom_id="skin_editor_setup_queue",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Formatação de texto no nome das músicas:",
+                        label="曲名のテキストフォーマット:",
                         custom_id="queue_format",
                         value=self.message_data["queue_format"],
                         max_length=120,
@@ -2853,7 +2853,7 @@ class SkinEditorMenu(disnake.ui.View):
                     ),
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Quantidade de músicas exibidas na lista:",
+                        label="リストに表示する曲数:",
                         custom_id="queue_max_entries",
                         value=str(self.message_data["queue_max_entries"]),
                         max_length=2,
@@ -2872,11 +2872,11 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Importar skin", custom_id="skin_editor_import_skin",
+                view=self, title="スキンをインポート", custom_id="skin_editor_import_skin",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.long,
-                        label="Código da skin (json):",
+                        label="スキンコード（JSON）:",
                         custom_id="skin",
                         max_length=2000,
                         required=True
@@ -2889,11 +2889,11 @@ class SkinEditorMenu(disnake.ui.View):
         self.ctx = inter
         await inter.response.send_modal(
             ViewModal(
-                view=self, title="Informe o nome da skin", custom_id="skin_editor_save",
+                view=self, title="スキン名を入力", custom_id="skin_editor_save",
                 components=[
                     disnake.ui.TextInput(
                         style=disnake.TextInputStyle.short,
-                        label="Nome:",
+                        label="名前:",
                         custom_id="skin_name",
                         value=self.skin_selected.replace("> css: ", "", 1).replace("> cs: ", "", 1),
                         max_length=15,
@@ -2915,14 +2915,14 @@ class SkinEditorMenu(disnake.ui.View):
             try:
                 del self.global_data["custom_skins"][self.skin_selected[6:]]
             except KeyError:
-                await inter.send(f'**A skin {self.skin_selected[6:]} não existe mais na database...**', ephemeral=True)
+                await inter.send(f'**スキン {self.skin_selected[6:]} はデータベースに存在しません...**', ephemeral=True)
                 return
 
         elif self.skin_selected.startswith("> css:"):
             try:
                 del self.global_data["custom_skins_static"][self.skin_selected[7:]]
             except KeyError:
-                await inter.send(f'**A skin {self.skin_selected[7:]} não existe mais na database...**', ephemeral=True)
+                await inter.send(f'**スキン {self.skin_selected[7:]} はデータベースに存在しません...**', ephemeral=True)
                 return
 
         await self.bot.update_global_data(id_=inter.guild_id, data=self.global_data, db_name=DBModel.guilds)
@@ -2952,7 +2952,7 @@ class SkinEditorMenu(disnake.ui.View):
                 await inter.edit_original_message(view=self, **self.build_embeds())
         except Exception as e:
             traceback.print_exc()
-            await inter.send(f"**Ocorreu um erro ao processar a mensagem:** ```py\n{repr(e)}```", ephemeral=True)
+            await inter.send(f"**メッセージの処理中にエラーが発生しました:** ```py\n{repr(e)}```", ephemeral=True)
 
     async def modal_handler(self, inter: disnake.ModalInteraction):
 
@@ -3056,7 +3056,7 @@ class SkinEditorMenu(disnake.ui.View):
             try:
                 info = json.loads(inter.text_values["skin"])
             except Exception as e:
-                await inter.send(f"**Ocorreu um erro ao processar sua skin:** ```py\n{repr(e)}```", ephemeral=True)
+                await inter.send(f"**スキンの処理中にエラーが発生しました:** ```py\n{repr(e)}```", ephemeral=True)
                 return
 
             try:
@@ -3095,11 +3095,11 @@ class SkinEditorMenu(disnake.ui.View):
 
             view = SkinSettingsButton(self.ctx.author, timeout=30)
             view.controller_enabled = self.message_data.get("controller_enabled", True)
-            await inter.send("**Selecione o modo de player que será aplicado na skin.**", view=view, ephemeral=True)
+            await inter.send("**スキンを適用するプレイヤーモードを選択してください。**", view=view, ephemeral=True)
             await view.wait()
 
             if view.mode is None:
-                await inter.edit_original_message("Tempo esgotado!", components=[])
+                await inter.edit_original_message("タイムアウト！", components=[])
                 return
 
             self.message_data["controller_enabled"] = view.controller_enabled
@@ -3163,8 +3163,8 @@ class SkinEditorMenu(disnake.ui.View):
             if not view.inter:
                 view.inter = inter
 
-            await view.inter.edit_original_message("**A skin foi salva/editada com sucesso!**\n"
-                                                   f"Você pode aplicá-la usando o comando {cmd} ou {guild_prefix}skin",
+            await view.inter.edit_original_message("**スキンが正常に保存/編集されました！**\n"
+                                                   f"次のコマンドで適用できます {cmd} ou {guild_prefix}skin",
                                                    view=None)
 
             self.skin_selected = ("> cs: " if view.mode == "custom_skins" else "> css: ") + modal_skin_name
@@ -3232,11 +3232,11 @@ class SelectBotVoice(disnake.ui.View):
         bot_select.callback = self.bot_select_callback
         self.add_item(bot_select)
 
-        refresh_btn = disnake.ui.Button(label="Atualizar lista", emoji="🔄", style=disnake.ButtonStyle.blurple)
+        refresh_btn = disnake.ui.Button(label="リストを更新", emoji="🔄", style=disnake.ButtonStyle.blurple)
         refresh_btn.callback = self.reload_callback
         self.add_item(refresh_btn)
 
-        cancel_btn = disnake.ui.Button(label="Cancelar", emoji="❌")
+        cancel_btn = disnake.ui.Button(label="キャンセル", emoji="❌")
         cancel_btn.callback = self.cancel_callback
         self.add_item(cancel_btn)
 
@@ -3263,14 +3263,14 @@ class SelectBotVoice(disnake.ui.View):
         try:
             bot = [b for b in self.inter.bot.pool.get_guild_bots(inter.guild_id) if b.bot_ready and b.user.id == bot_id][0]
         except IndexError:
-            await inter.send(f"<@{bot_id}> não está mais presente no servidor...", ephemeral=True)
+            await inter.send(f"<@{bot_id}> はサーバーに存在しません...", ephemeral=True)
             await self.update_message()
             return
 
         guild = bot.get_guild(inter.guild_id)
 
         if not guild:
-            await inter.send(f"{bot.user.mention} não está mais no servidor...", ephemeral=True)
+            await inter.send(f"{bot.user.mention} はもうサーバーにいません...", ephemeral=True)
             await self.update_message()
             return
 
@@ -3285,13 +3285,13 @@ class SelectBotVoice(disnake.ui.View):
 
             if not vc:
                 await inter.send(
-                    f"{bot.user.mention} está com player ativo mas não está conectado em um canal de voz...",
+                    f"{bot.user.mention} はプレイヤーがアクティブですが、ボイスチャンネルに接続されていません...",
                     ephemeral=True)
                 await self.update_message()
                 return
 
             if inter.author.id not in vc.voice_states:
-                await inter.send(f"{bot.user.mention} já está em uso no canal {vc.mention}", ephemeral=True)
+                await inter.send(f"{bot.user.mention} は既にチャンネル {vc.mention} で使用中です", ephemeral=True)
                 await self.update_message()
                 return
 

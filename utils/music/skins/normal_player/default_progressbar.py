@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import datetime
 import itertools
 from os.path import basename
@@ -37,17 +37,17 @@ class DefaultProgressbarSkin:
 
         if not player.paused:
             embed.set_author(
-                name="Tocando Agora:",
+                name="再生中:",
                 icon_url=music_source_image(player.current.info["sourceName"])
             )
         else:
             embed.set_author(
-                name="Em Pausa:",
+                name="一時停止中:",
                 icon_url="https://cdn.discordapp.com/attachments/480195401543188483/896013933197013002/pause.png"
             )
 
         if player.current_hint:
-            embed.set_footer(text=f"💡 Dica: {player.current_hint}")
+            embed.set_footer(text=f"💡 ヒント: {player.current_hint}")
         else:
             embed.set_footer(
                 text=str(player),
@@ -76,22 +76,22 @@ class DefaultProgressbarSkin:
             txt += f"\n> -# ✋ **⠂** <@{player.current.requester}>"
         else:
             try:
-                mode = f" [`Recomendada`]({player.current.info['extra']['related']['uri']})"
+                mode = f" [`おすすめ`]({player.current.info['extra']['related']['uri']})"
             except:
-                mode = "`Recomendada`"
+                mode = "`おすすめ`"
             txt += f"\n> -# 👍 **⠂** {mode}"
 
         if player.current.track_loops:
-            txt += f"\n> -# 🔂 **⠂** `Repetições restantes: {player.current.track_loops}`"
+            txt += f"\n> -# 🔂 **⠂** `残りリピート回数: {player.current.track_loops}`"
 
         if player.loop:
             if player.loop == 'current':
                 e = '🔂'
-                m = 'Música atual'
+                m = '現在の曲'
             else:
                 e = '🔁'
-                m = 'Fila'
-            txt += f"\n> -# {e} **⠂** `Repetição: {m}`"
+                m = 'キュー'
+            txt += f"\n> -# {e} **⠂** `リピート: {m}`"
 
         if player.current.album_name:
             txt += f"\n> -# 💽 **⠂** [`{fix_characters(player.current.album_name, limit=36)}`]({player.current.album_url})"
@@ -100,15 +100,15 @@ class DefaultProgressbarSkin:
             txt += f"\n> -# 📑 **⠂** [`{fix_characters(player.current.playlist_name, limit=36)}`]({player.current.playlist_url})"
 
         if (qlenght:=len(player.queue)) and not player.mini_queue_enabled:
-            txt += f"\n> -# 🎶 **⠂** `{qlenght} música{'s'[:qlenght^1]} na fila`"
+            txt += f"\n> -# 🎶 **⠂** `{qlenght}曲がキューにあります`"
 
         if player.keep_connected:
-            txt += "\n> -# ♾️ **⠂** `Modo 24/7 ativado`"
+            txt += "\n> -# ♾️ **⠂** `24/7モード有効`"
 
         txt += f"{vc_txt}\n"
 
         if player.command_log:
-            txt += f"> -# {player.command_log_emoji} **⠂Última Interação:** {player.command_log}\n"
+            txt += f"> -# {player.command_log_emoji} **⠂最後の操作:** {player.command_log}\n"
 
         txt += duration
 
@@ -123,7 +123,7 @@ class DefaultProgressbarSkin:
                     for n, t in (enumerate(itertools.islice(player.queue, 3)))
                 )
 
-                embed_queue = disnake.Embed(title=f"Músicas na fila: {qlenght}", color=player.bot.get_color(player.guild.me),
+                embed_queue = disnake.Embed(title=f"キュー内の曲: {qlenght}", color=player.bot.get_color(player.guild.me),
                                             description=f"\n{queue_txt}")
 
                 if not player.loop and not player.keep_connected and not player.paused and not player.current.is_stream:
@@ -135,7 +135,7 @@ class DefaultProgressbarSkin:
                             queue_duration += t.duration
 
                     if queue_duration:
-                        embed_queue.description += f"\n`[⌛ As músicas acabam` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
+                        embed_queue.description += f"\n`[⌛ 曲が終わるまで` <t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=(queue_duration + (player.current.duration if not player.current.is_stream else 0)) - player.position)).timestamp())}:R> `⌛]`"
 
                 embed_queue.set_image(url=rainbow_bar)
 
@@ -144,7 +144,7 @@ class DefaultProgressbarSkin:
                     f"`👍⠂{(n + 1):02}) [{time_format(t.duration) if not t.is_stream else '🔴 Livestream'}]` [`{fix_characters(t.title, 21)}`]({t.uri})"
                     for n, t in (enumerate(itertools.islice(player.queue_autoplay, 3)))
                 )
-                embed_queue = disnake.Embed(title="Próximas músicas recomendadas:", color=player.bot.get_color(player.guild.me),
+                embed_queue = disnake.Embed(title="次のおすすめ曲:", color=player.bot.get_color(player.guild.me),
                                             description=f"\n{queue_txt}")
                 embed_queue.set_image(url=rainbow_bar)
 
@@ -161,64 +161,64 @@ class DefaultProgressbarSkin:
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
             disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue, disabled=not (player.queue or player.queue_autoplay)),
             disnake.ui.Select(
-                placeholder="Mais opções:",
+                placeholder="その他のオプション:",
                 custom_id="musicplayer_dropdown_inter",
                 min_values=0, max_values=1, required = False,
                 options=[
                     disnake.SelectOption(
-                        label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                        label="曲を追加", emoji="<:add_music:588172015760965654>",
                         value=PlayerControls.add_song,
-                        description="Adicionar uma música/playlist na fila."
+                        description="曲/プレイリストをキューに追加します。"
                     ),
                     disnake.SelectOption(
-                        label="Adicionar nos seus favoritos", emoji="💗",
+                        label="お気に入りに追加", emoji="💗",
                         value=PlayerControls.add_favorite,
-                        description="Adicionar a música atual nos seus favoritos."
+                        description="現在の曲をお気に入りに追加します。"
                     ),
                     disnake.SelectOption(
-                        label="Tocar do inicio", emoji="⏪",
+                        label="最初から再生", emoji="⏪",
                         value=PlayerControls.seek_to_start,
-                        description="Voltar o tempo da música atual para o inicio."
+                        description="現在の曲を最初から再生します。"
                     ),
                     disnake.SelectOption(
                         label=f"Volume: {player.volume}%", emoji="🔊",
                         value=PlayerControls.volume,
-                        description="Ajustar volume."
+                        description="音量を調整します。"
                     ),
                     disnake.SelectOption(
-                        label="Misturar", emoji="🔀",
+                        label="シャッフル", emoji="🔀",
                         value=PlayerControls.shuffle,
-                        description="Misturar as músicas da fila."
+                        description="キュー内の曲をシャッフルします。"
                     ),
                     disnake.SelectOption(
-                        label="Readicionar", emoji="🎶",
+                        label="再追加", emoji="🎶",
                         value=PlayerControls.readd,
-                        description="Readicionar as músicas tocadas de volta na fila."
+                        description="再生済みの曲をキューに戻します。"
                     ),
                     disnake.SelectOption(
-                        label="Repetição", emoji="🔁",
+                        label="リピート", emoji="🔁",
                         value=PlayerControls.loop_mode,
-                        description="Ativar/Desativar repetição da música/fila."
+                        description="曲/キューのリピートを切り替えます。"
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
+                        label=("無効にする" if player.nightcore else "有効にする") + " nightcoreエフェクト", emoji="🇳",
                         value=PlayerControls.nightcore,
-                        description="Efeito que aumenta velocidade e tom da música."
+                        description="曲の速度と音程を上げるエフェクトです。"
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.autoplay else "Ativar") + " a reprodução automática", emoji="🔄",
+                        label=("無効にする" if player.autoplay else "有効にする") + " 自動再生", emoji="🔄",
                         value=PlayerControls.autoplay,
-                        description="Sistema de adição de música automática quando a fila estiver vazia."
+                        description="キューが空になった時に自動で曲を追加します。"
                     ),
                     disnake.SelectOption(
                         label="Last.fm scrobble", emoji="<:Lastfm:1278883704097341541>",
                         value=PlayerControls.lastfm_scrobble,
-                        description="Ativar/desativar o scrobble/registro de músicas na sua conta do last.fm."
+                        description="Last.fmアカウントへの記録を切り替えます。"
                     ),
                     disnake.SelectOption(
-                        label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
+                        label= ("無効にする" if player.restrict_mode else "有効にする") + " 制限モード", emoji="🔐",
                         value=PlayerControls.restrict_mode,
-                        description="Apenas DJ's/Staff's podem usar comandos restritos."
+                        description="DJ/スタッフのみが制限コマンドを使用できます。"
                     ),
                 ]
             ),
@@ -227,9 +227,9 @@ class DefaultProgressbarSkin:
         if player.current.ytid and player.node.lyric_support:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label= "Visualizar letras", emoji="📃",
+                    label="歌詞を表示", emoji="📃",
                     value=PlayerControls.lyrics,
-                    description="Obter letra da música atual."
+                    description="現在の曲の歌詞を取得します。"
                 )
             )
 
@@ -237,27 +237,27 @@ class DefaultProgressbarSkin:
         if player.mini_queue_feature:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
+                    label="ミニキュー", emoji="<:music_queue:703761160679194734>",
                     value=PlayerControls.miniqueue,
-                    description="Ativar/Desativar a mini-fila do player."
+                    description="プレイヤーのミニキューを切り替えます。"
                 )
             )
 
         if isinstance(player.last_channel, disnake.VoiceChannel):
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Status automático", emoji="📢",
+                    label="自動ステータス", emoji="📢",
                     value=PlayerControls.set_voice_status,
-                    description="Configurar o status automático do canal de voz."
+                    description="ボイスチャンネルの自動ステータスを設定します。"
                 )
             )
 
         if not player.has_thread:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Song-Request Thread", emoji="💬",
+                    label="リクエストスレッド", emoji="💬",
                     value=PlayerControls.song_request_thread,
-                    description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                    description="曲名/リンクでリクエストできる一時スレッドを作成します。"
                 )
             )
 

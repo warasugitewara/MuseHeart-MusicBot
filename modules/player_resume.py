@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# nota: este sistema é totalmente experimental.
+# 注意: このシステムは完全に実験的なものです。
 import asyncio
 import os
 import pickle
@@ -59,7 +59,7 @@ class PlayerSession(commands.Cog):
         await self.save_info(player)
 
     @commands.is_owner()
-    @commands.command(hidden=True, description="Salvar informações dos players na database instantaneamente.", aliases=["svplayers"])
+    @commands.command(hidden=True, description="プレーヤー情報をデータベースに即座に保存します。", aliases=["svplayers"])
     async def saveplayers(self, ctx: CustomContext):
 
         await ctx.defer()
@@ -74,7 +74,7 @@ class PlayerSession(commands.Cog):
                 except:
                     continue
 
-        txt = f"As informações dos players atuais foram salvos com sucesso ({player_count})!" if player_count else "Não há player ativo..."
+        txt = f"現在のプレーヤー情報が正常に保存されました（{player_count}件）！" if player_count else "アクティブなプレーヤーがありません..."
         await ctx.send(txt)
 
     async def queue_updater_task(self, player: LavalinkPlayer):
@@ -243,7 +243,7 @@ class PlayerSession(commands.Cog):
             if self.bot.config["PLAYER_SESSIONS_MONGODB"] and self.bot.config["MONGO"]:
                 for d in local_sessions:
                     data_list[d["_id"]] = d
-                    print(f"{self.bot.user} - Migrando dados de sessões do server: {d['_id']} | DB Local -> Mongo")
+                    print(f"{self.bot.user} - サーバーのセッションデータを移行中: {d['_id']} | ローカルDB -> Mongo")
                     await self.save_session_mongo(d["_id"], d)
                     self.delete_data_local(d["_id"])
                 for d in mongo_sessions:
@@ -252,7 +252,7 @@ class PlayerSession(commands.Cog):
             else:
                 for d in mongo_sessions:
                     data_list[d["_id"]] = d
-                    print(f"{self.bot.user} - Migrando dados de sessões do server: {d['_id']} | Mongo -> DB Local")
+                    print(f"{self.bot.user} - サーバーのセッションデータを移行中: {d['_id']} | Mongo -> ローカルDB")
                     await self.save_session_local(d["_id"], d)
                     if self.bot.config["MONGO"]:
                         await self.delete_data_mongo(d["_id"])
@@ -273,7 +273,7 @@ class PlayerSession(commands.Cog):
                     await asyncio.sleep(1)
 
         except Exception:
-            print(f"{self.bot.user} - Falha ao retomar player {data['_id']}:\n{traceback.format_exc()}")
+            print(f"{self.bot.user} - プレーヤーの復元に失敗しました {data['_id']}:\n{traceback.format_exc()}")
 
         self.bot.player_resumed = True
 
@@ -348,7 +348,7 @@ class PlayerSession(commands.Cog):
             break
 
         if not wait_counter:
-            print(f"{self.bot.user} - {guild.name}: Player ignorado devido a demora para conectar no canal de voz.")
+            print(f"{self.bot.user} - {guild.name}: ボイスチャンネルへの接続に時間がかかったため、プレーヤーは無視されました。")
             return
 
         if isinstance(voice_channel, disnake.StageChannel) and \
@@ -362,7 +362,7 @@ class PlayerSession(commands.Cog):
             try:
                 await guild.me.edit(suppress=False)
             except Exception as e:
-                print(f"{self.bot.user} - Falha ao falar no palco do servidor {guild.name}. Erro: {repr(e)}")
+                print(f"{self.bot.user} - サーバー {guild.name} のステージで発言できませんでした。エラー: {repr(e)}")
 
     async def resume_player(self, data: dict, hints: list = None):
 
@@ -377,12 +377,12 @@ class PlayerSession(commands.Cog):
             db_date = data.get("time")
 
             if not db_date or (not guild and ((disnake.utils.utcnow() - db_date)).total_seconds() > 172800):
-                print(f"{self.bot.user} - Limpando informações do player: {data['_id']}")
+                print(f"{self.bot.user} - プレーヤー情報をクリアしています: {data['_id']}")
                 await self.delete_data(data["_id"])
                 return
 
             if not guild:
-                print(f"{self.bot.user} - Player Ignorado: {data['_id']} | Servidor inexistente...")
+                print(f"{self.bot.user} - プレーヤーを無視しました: {data['_id']} | サーバーが存在しません...")
                 return
 
             try:
@@ -446,13 +446,13 @@ class PlayerSession(commands.Cog):
                             if text_channel.owner_id == self.bot.user.id:
                                 await text_channel.edit(archived=False)
                             else:
-                                await text_channel.send("Desarquivando o tópico.", delete_after=2)
+                                await text_channel.send("トピックをアーカイブ解除しています。", delete_after=2)
 
                     if text_channel:
                         try:
                             can_send_message(text_channel, self.bot.user)
                         except Exception:
-                            print(f"{self.bot.user} - Controller Ignorado (falta de permissão) [Canal: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
+                            print(f"{self.bot.user} - コントローラーを無視しました（権限不足）[チャンネル: {text_channel.name} | ID: {text_channel.id}] - [ {guild.name} - {guild.id} ]")
                             text_channel = None
                         else:
                             if data["message_id"]:
@@ -483,7 +483,7 @@ class PlayerSession(commands.Cog):
                             message_without_thread = msg
 
                     except Exception as e:
-                        print(f"{self.bot.user} - Falha ao obter mensagem: {repr(e)}\n"
+                        print(f"{self.bot.user} - メッセージの取得に失敗しました: {repr(e)}\n"
                               f"channel_id: {text_channel.id} | message_id {data['message']}")
 
                 if not voice_channel or not voice_channel.permissions_for(guild.me).connect:
@@ -495,9 +495,9 @@ class PlayerSession(commands.Cog):
                             pass
 
                 if not voice_channel:
-                    print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\nO canal de voz não existe...")
+                    print(f"{self.bot.user} - プレーヤーを無視しました: {guild.name} [{guild.id}]\nボイスチャンネルが存在しません...")
                     try:
-                        msg = "Player finalizado pois o canal de voz não existe ou foi deletado."
+                        msg = "ボイスチャンネルが存在しないか削除されたため、プレーヤーは終了しました。"
                         if not data["skin_static"]:
                             await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
                         else:
@@ -505,8 +505,8 @@ class PlayerSession(commands.Cog):
                                 cog = self.bot.get_cog("Music")
                                 if cog:
                                     await cog.reset_controller_db(guild.id, guild_data)
-                                print(f"{self.bot.user} - Controller resetado por config de canal inválido.\n"
-                                      f"Server: {guild.name} [{guild.id}] | channel: {text_channel.name} [{text_channel.id}] {type(text_channel)}")
+                                print(f"{self.bot.user} - 無効なチャンネル設定のためコントローラーをリセットしました。\n"
+                                      f"サーバー: {guild.name} [{guild.id}] | チャンネル: {text_channel.name} [{text_channel.id}] {type(text_channel)}")
                                 return
                             await send_idle_embed(text_channel, bot=self.bot, text=msg)
                     except Exception:
@@ -518,9 +518,9 @@ class PlayerSession(commands.Cog):
                 try:
                     can_connect(voice_channel, guild=guild, bot=self.bot)
                 except Exception as e:
-                    print(f"{self.bot.user} - Player Ignorado: {guild.name} [{guild.id}]\n{repr(e)}")
+                    print(f"{self.bot.user} - プレーヤーを無視しました: {guild.name} [{guild.id}]\n{repr(e)}")
                     try:
-                        msg = f"O player foi finalizado devido a falta da permissão de conectar no canal {voice_channel.mention}."
+                        msg = f"チャンネル {voice_channel.mention} への接続権限がないため、プレーヤーは終了しました。"
                         if not data["skin_static"]:
                             await text_channel.send(embed=disnake.Embed(description=msg, color=self.bot.get_color(guild.me)))
                         else:
@@ -568,7 +568,7 @@ class PlayerSession(commands.Cog):
                         session_resuming=True,
                     )
                 except Exception:
-                    print(f"{self.bot.user} - Falha ao criar player: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
+                    print(f"{self.bot.user} - プレーヤーの作成に失敗しました: {guild.name} [{guild.id}]\n{traceback.format_exc()}")
                     if not data.get("autoplay") and (disnake.utils.utcnow() - data.get("time", disnake.utils.utcnow())).total_seconds() > 172800:
                         await self.delete_data(guild.id)
                     return
@@ -633,7 +633,7 @@ class PlayerSession(commands.Cog):
 
             if started:
                 player.set_command_log(
-                    text="Os dados do player foram restaurados com sucessos!",
+                    text="プレーヤーのデータが正常に復元されました！",
                     emoji="🔰"
                 )
                 player.update = True
@@ -648,7 +648,7 @@ class PlayerSession(commands.Cog):
                         player.played.clear()
 
                 player.set_command_log(
-                    text="O player foi restaurado com sucesso!",
+                    text="プレーヤーが正常に復元されました！",
                     emoji="🔰"
                 )
 
@@ -682,13 +682,13 @@ class PlayerSession(commands.Cog):
 
                     player._session_resuming = False
                 except Exception:
-                    print(f"{self.bot.user} - Falha na reprodução da música ao retomar player do servidor {guild.name} [{guild.id}]:\n{traceback.format_exc()}")
+                    print(f"{self.bot.user} - サーバー {guild.name} [{guild.id}] のプレーヤー復元時に音楽の再生に失敗しました:\n{traceback.format_exc()}")
                     return
 
-            print(f"▶️ - {self.bot.user} - Player Retomado: {guild.name} [{guild.id}] - Server: {player.node.identifier}")
+            print(f"▶️ - {self.bot.user} - プレーヤー復元完了: {guild.name} [{guild.id}] - サーバー: {player.node.identifier}")
 
         except Exception:
-            print(f"{self.bot.user} - Falha Crítica ao retomar players:\n{traceback.format_exc()}")
+            print(f"{self.bot.user} - プレーヤーの復元中に重大なエラーが発生しました:\n{traceback.format_exc()}")
 
     async def get_player_sessions_mongo(self):
 
@@ -793,7 +793,7 @@ class PlayerSession(commands.Cog):
                 await self.save_session_local(player.guild.id, data)
 
         except asyncio.CancelledError as e:
-            print(f"❌ - {self.bot.user} - Salvamento cancelado: {repr(e)}")
+            print(f"❌ - {self.bot.user} - 保存がキャンセルされました: {repr(e)}")
 
     async def delete_data_mongo(self, id_: Union[LavalinkPlayer, int]):
         await self.bot.pool.mongo_database.delete_data(id_=str(id_), db_name=str(self.bot.user.id),

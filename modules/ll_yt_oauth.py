@@ -27,14 +27,14 @@ class YtOauthView(disnake.ui.View):
         self.bot = bot
         self.data = {}
 
-        # dados obtidos no repositório: https://github.com/lavalink-devs/youtube-source/blob/main/common/src/main/java/dev/lavalink/youtube/http/YoutubeOauth2Handler.java#L34
+        # このリポジトリから取得したデータ: https://github.com/lavalink-devs/youtube-source/blob/main/common/src/main/java/dev/lavalink/youtube/http/YoutubeOauth2Handler.java#L34
         self.client_id = '861556708454-d6dlm3lh05idd8npek18k6be8ba3oc68.apps.googleusercontent.com'
         self.client_secret = 'SboVhoG9s0rNafixCSGGKXAT'
 
         self.interaction: Optional[disnake.MessageInteraction] = None
         self.exception_txt = ""
 
-        btn = disnake.ui.Button(label="Vincular conta do google")
+        btn = disnake.ui.Button(label="Googleアカウントを連携する")
         btn.callback = self.send_authurl_callback
         self.add_item(btn)
 
@@ -59,7 +59,7 @@ class YtOauthView(disnake.ui.View):
                 if response.status != 200:
 
                     if response_data["error"] != "authorization_pending":
-                        self.exception_txt = f"**Falha ao aguardar autorização da conta:** `({response.status}) - {response_data['error_description']}`"
+                        self.exception_txt = f"**アカウント認証の待機中にエラーが発生しました:** `({response.status}) - {response_data['error_description']}`"
                         return
 
                     await asyncio.sleep(15)
@@ -83,7 +83,7 @@ class YtOauthView(disnake.ui.View):
             response_data = await response.json()
 
             if response.status != 200:
-                raise GenericError(f"**Falha ao solicitar código de dispositivo:** `({response.status}) - {response_data}`")
+                raise GenericError(f"**デバイスコードのリクエストに失敗しました:** `({response.status}) - {response_data}`")
 
             return response_data
 
@@ -93,7 +93,7 @@ class YtOauthView(disnake.ui.View):
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if interaction.user.id != self.ctx.author.id:
-            await interaction.send("Você não pode usar esse botão", ephemeral=True)
+            await interaction.send("このボタンは使用できません", ephemeral=True)
             return False
         return True
 
@@ -120,11 +120,11 @@ class YtOauthView(disnake.ui.View):
 
         await interaction.send(embed=disnake.Embed(
             color=self.bot.get_color(self.ctx.guild.me),
-            description=f"**Link para autenticar conta do google:**"
+            description=f"**Googleアカウント認証用リンク:**"
                         f" ```\n{verification_url}``` "
-                        "`Caso já tenha autorizado a aplicação você deve aguardar até 15 segundos para "
-                        "essa mensagem atualizar confirmando o processo.`"),
-            components=[disnake.ui.Button(label="Abrir link", url=verification_url)],
+                        "`アプリケーションを既に認証済みの場合は、このメッセージが更新されて"
+                        "プロセスが確認されるまで最大15秒お待ちください。`"),
+            components=[disnake.ui.Button(label="リンクを開く", url=verification_url)],
             ephemeral=True)
 
 class YtOauthLL(commands.Cog):
@@ -156,9 +156,9 @@ class YtOauthLL(commands.Cog):
 
         embed = disnake.Embed(
             color=color,
-            description=f"## Obter refresh-token de uma conta do google\n\n"
-                        f"⚠️ **Cuidado!** Use (ou crie) uma conta descartável ao invés de prosseguir com uma conta de "
-                        f"uso pessoal devido a alta chance da conta ser banida pelo google (evite usar contas que podem conter algum número de telefone ou email de recuperação, caso crie uma agora evite colocar número de telefone e email de recuperação)."
+            description=f"## Googleアカウントのrefresh-tokenを取得\n\n"
+                        f"⚠️ **注意！** Googleによるアカウント停止のリスクが高いため、個人用アカウントではなく、"
+                        f"使い捨てアカウントを使用（または作成）してください（電話番号やリカバリーメールが登録されているアカウントの使用は避けてください。新規作成する場合も電話番号やリカバリーメールの登録は避けてください）。"
         )
 
         msg = await ctx.send(embed=embed, view=view)
@@ -172,7 +172,7 @@ class YtOauthLL(commands.Cog):
             raise GenericError(view.exception_txt)
 
         if not (refresh_token:=view.data.get('refresh_token')):
-            raise GenericError("**Tempo para vincular conta do google esgotado!**")
+            raise GenericError("**Googleアカウントの連携時間が切れました！**")
 
         async with self.bot.session.get(
                 'https://www.googleapis.com/oauth2/v3/userinfo',
@@ -196,10 +196,10 @@ class YtOauthLL(commands.Cog):
 
         embed = disnake.Embed(
             color=color,
-            description=f"## Confirmação de conta:\n"
-                        f"**Email autorizado:** ```ansi\n[31;1m{data['email']}[0m``` "
-                        f"**Nome:** ```ansi\n[31;1m{name}[0m``` "
-                        "⚠️ Cuidado! Caso essa conta seja de uso pessoal, clique no botão \"Não\" e use (ou crie) uma conta descartável!"
+            description=f"## アカウント確認:\n"
+                        f"**認証されたメールアドレス:** ```ansi\n[31;1m{data['email']}[0m``` "
+                        f"**名前:** ```ansi\n[31;1m{name}[0m``` "
+                        "⚠️ 注意！このアカウントが個人用の場合は、「いいえ」ボタンをクリックして、使い捨てアカウントを使用（または作成）してください！"
         ).set_thumbnail(data["picture"])
 
         view_confirm = AskView(ctx=ctx)
@@ -216,7 +216,7 @@ class YtOauthLL(commands.Cog):
                 func = ctx.inter.response.edit_message
 
         if not view_confirm.selected:
-            await func(content="**Operação cancelada.**", embed=None, view=None)
+            await func(content="**操作がキャンセルされました。**", embed=None, view=None)
             return
 
         await view_confirm.interaction_resp.response.defer()
@@ -232,7 +232,7 @@ class YtOauthLL(commands.Cog):
                     db_name="global",
                 )
             except Exception as e:
-                txts.append(f"Falha ao salvar refreshToken no MongoDB: {repr(e)}")
+                txts.append(f"MongoDBへのrefreshToken保存に失敗しました: {repr(e)}")
 
         if os.path.isfile("./application.yml"):
 
@@ -265,25 +265,25 @@ class YtOauthLL(commands.Cog):
                     )
 
                     if resp.status != 204:
-                        txts.append(f"Erro ao aplicar refreshToken no lavalink LOCAL: {resp.status} - {await resp.text()}")
+                        txts.append(f"ローカルlavalinkへのrefreshToken適用エラー: {resp.status} - {await resp.text()}")
                     else:
-                        txts.append("O refreshToken foi configurado automaticamente no servidor lavalink LOCAL")
+                        txts.append("ローカルlavalinkサーバーにrefreshTokenが自動設定されました")
 
                 else:
-                    txts.append("O refreshToken foi adicionado no application.yml com sucesso!")
+                    txts.append("application.ymlにrefreshTokenが正常に追加されました！")
 
             except Exception as e:
                 traceback.print_exc()
-                txts.append(f"Erro ao salvar refreshToken no application.yml: {repr(e)}")
+                txts.append(f"application.ymlへのrefreshToken保存エラー: {repr(e)}")
 
-        txts.append("Evite mostrar esse token publicamente!")
+        txts.append("このトークンを公開しないでください！")
 
         await func(embed=disnake.Embed(
             color=color,
-            description=f"### refreshToken da conta do google obtido com sucesso!\n```{refresh_token}``` "
-                        f"**Usuário autorizado:**  ```ansi\n[34;1m{name}[0m``` "
-                        f"**Email:** ```ansi\n[34;1m{data['email']}[0m``` "
-                        f"**Nota{'s'[:len(txts)^1]}:**\n" + "\n".join(f"* {t}" for t in txts)
+            description=f"### GoogleアカウントのrefreshTokenを正常に取得しました！\n```{refresh_token}``` "
+                        f"**認証されたユーザー:**  ```ansi\n[34;1m{name}[0m``` "
+                        f"**メールアドレス:** ```ansi\n[34;1m{data['email']}[0m``` "
+                        f"**備考:**\n" + "\n".join(f"* {t}" for t in txts)
         ).set_thumbnail(data["picture"]), view=None)
 
 def setup(bot: BotCore):

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 import datetime
 import re
 from os.path import basename
@@ -35,40 +35,40 @@ class EmbedLinkSkin:
         txt = ""
 
         if player.current_hint:
-            txt += f"> -# `💡` **⠂Dica:** `{player.current_hint}`"
+            txt += f"> -# `💡` **⠂ヒント:** `{player.current_hint}`"
 
         if player.current.is_stream:
-            duration_txt = f"\n> -# `🔴` **⠂Duração:** `Livestream`"
+            duration_txt = f"\n> -# `🔴` **⠂再生時間:** `Livestream`"
         else:
-            duration_txt = f"\n> -# `⏰` **⠂Duração:** `{time_format(player.current.duration)}`"
+            duration_txt = f"\n> -# `⏰` **⠂再生時間:** `{time_format(player.current.duration)}`"
 
         title = f"`{fix_characters(player.current.title)}`" if not player.current.uri else f"[`{fix_characters(player.current.title, 40)}`]({player.current.uri})"
 
         if player.paused:
-            txt += f"\n> -# ⏸️ **⠂Em Pausa:** {title}{duration_txt}"
+            txt += f"\n> -# ⏸️ **⠂一時停止中:** {title}{duration_txt}"
 
         else:
-            txt += f"\n> -# ▶️ **⠂Tocando Agora:** {title}{duration_txt}"
+            txt += f"\n> -# ▶️ **⠂再生中:** {title}{duration_txt}"
             if not player.current.is_stream:
                 txt += f" `[`<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=player.current.duration - player.position)).timestamp())}:R>`]`" \
                 if not player.paused else ''
 
         if q:=len(player.queue):
-            txt += f" `[Na fila: {q}]`"
+            txt += f" `[キュー: {q}]`"
 
         if not player.current.autoplay:
             txt += f" <@{player.current.requester}>\n"
         else:
             try:
-                txt += f" [`[Música Recomendada]`](<{player.current.info['extra']['related']['uri']}>)"
+                txt += f" [`[おすすめ曲]`](<{player.current.info['extra']['related']['uri']}>)"
             except:
-                txt += " `[Música Recomendada]`"
+                txt += " `[おすすめ曲]`"
 
         if player.command_log:
 
-            log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # remover links do command_log p/ evitar gerar mais de uma preview.
+            log = re.sub(r"\[(.+)]\(.+\)", r"\1", player.command_log.replace("`", "")) # プレビューの重複を避けるためにcommand_logからリンクを削除
 
-            txt += f"> -# {player.command_log_emoji} **⠂Última Interação:** {log}\n"
+            txt += f"> -# {player.command_log_emoji} **⠂最後の操作:** {log}\n"
 
         data["content"] = txt
 
@@ -79,64 +79,64 @@ class EmbedLinkSkin:
             disnake.ui.Button(emoji="⏭️", custom_id=PlayerControls.skip),
             disnake.ui.Button(emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue, disabled=not (player.queue or player.queue_autoplay)),
             disnake.ui.Select(
-                placeholder="Mais opções:",
+                placeholder="その他のオプション:",
                 custom_id="musicplayer_dropdown_inter",
                 min_values=0, max_values=1, required = False,
                 options=[
                     disnake.SelectOption(
-                        label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                        label="曲を追加", emoji="<:add_music:588172015760965654>",
                         value=PlayerControls.add_song,
-                        description="Adicionar uma música/playlist na fila."
+                        description="曲/プレイリストをキューに追加します。"
                     ),
                     disnake.SelectOption(
-                        label="Adicionar nos seus favoritos", emoji="💗",
+                        label="お気に入りに追加", emoji="💗",
                         value=PlayerControls.add_favorite,
-                        description="Adicionar a música atual nos seus favoritos."
+                        description="現在の曲をお気に入りに追加します。"
                     ),
                     disnake.SelectOption(
-                        label="Tocar do inicio", emoji="⏪",
+                        label="最初から再生", emoji="⏪",
                         value=PlayerControls.seek_to_start,
-                        description="Voltar o tempo da música atual para o inicio."
+                        description="現在の曲を最初から再生します。"
                     ),
                     disnake.SelectOption(
                         label=f"Volume: {player.volume}%", emoji="🔊",
                         value=PlayerControls.volume,
-                        description="Ajustar volume."
+                        description="音量を調整します。"
                     ),
                     disnake.SelectOption(
-                        label="Misturar", emoji="🔀",
+                        label="シャッフル", emoji="🔀",
                         value=PlayerControls.shuffle,
-                        description="Misturar as músicas da fila."
+                        description="キュー内の曲をシャッフルします。"
                     ),
                     disnake.SelectOption(
-                        label="Readicionar", emoji="🎶",
+                        label="再追加", emoji="🎶",
                         value=PlayerControls.readd,
-                        description="Readicionar as músicas tocadas de volta na fila."
+                        description="再生済みの曲をキューに戻します。"
                     ),
                     disnake.SelectOption(
-                        label="Repetição", emoji="🔁",
+                        label="リピート", emoji="🔁",
                         value=PlayerControls.loop_mode,
-                        description="Ativar/Desativar repetição da música/fila."
+                        description="曲/キューのリピートを切り替えます。"
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
+                        label=("無効にする" if player.nightcore else "有効にする") + " nightcoreエフェクト", emoji="🇳",
                         value=PlayerControls.nightcore,
-                        description="Efeito que aumenta velocidade e tom da música."
+                        description="曲の速度と音程を上げるエフェクトです。"
                     ),
                     disnake.SelectOption(
-                        label=("Desativar" if player.autoplay else "Ativar") + " a reprodução automática", emoji="🔄",
+                        label=("無効にする" if player.autoplay else "有効にする") + " 自動再生", emoji="🔄",
                         value=PlayerControls.autoplay,
-                        description="Sistema de adição de música automática quando a fila estiver vazia."
+                        description="キューが空になった時に自動で曲を追加します。"
                     ),
                     disnake.SelectOption(
                         label="Last.fm scrobble", emoji="<:Lastfm:1278883704097341541>",
                         value=PlayerControls.lastfm_scrobble,
-                        description="Ativar/desativar o scrobble/registro de músicas na sua conta do last.fm."
+                        description="Last.fmアカウントへの記録を切り替えます。"
                     ),
                     disnake.SelectOption(
-                        label= ("Desativar" if player.restrict_mode else "Ativar") + " o modo restrito", emoji="🔐",
+                        label= ("無効にする" if player.restrict_mode else "有効にする") + " 制限モード", emoji="🔐",
                         value=PlayerControls.restrict_mode,
-                        description="Apenas DJ's/Staff's podem usar comandos restritos."
+                        description="DJ/スタッフのみが制限コマンドを使用できます。"
                     ),
                 ]
             ),
@@ -145,9 +145,9 @@ class EmbedLinkSkin:
         if player.current.ytid and player.node.lyric_support:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label= "Visualizar letras", emoji="📃",
+                    label="歌詞を表示", emoji="📃",
                     value=PlayerControls.lyrics,
-                    description="Obter letra da música atual."
+                    description="現在の曲の歌詞を取得します。"
                 )
             )
 
@@ -155,18 +155,18 @@ class EmbedLinkSkin:
         if isinstance(player.last_channel, disnake.VoiceChannel):
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Status automático", emoji="📢",
+                    label="自動ステータス", emoji="📢",
                     value=PlayerControls.set_voice_status,
-                    description="Configurar o status automático do canal de voz."
+                    description="ボイスチャンネルの自動ステータスを設定します。"
                 )
             )
 
         if not player.has_thread:
             data["components"][5].options.append(
                 disnake.SelectOption(
-                    label="Song-Request Thread", emoji="💬",
+                    label="リクエストスレッド", emoji="💬",
                     value=PlayerControls.song_request_thread,
-                    description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                    description="曲名/リンクでリクエストできる一時スレッドを作成します。"
                 )
             )
 

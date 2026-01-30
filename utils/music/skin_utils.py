@@ -29,7 +29,7 @@ def track_title_format(
         replace('{track.title}', track_title). \
         replace('{track.url}', track_url). \
         replace('{track.author}', track_author). \
-        replace('{track.duration}', time_format(track_duration) if track_duration else "🔴 Ao vivo"). \
+        replace('{track.duration}', time_format(track_duration) if track_duration else "🔴 ライブ配信"). \
         replace('{track.number}', str(track_number))
 
 
@@ -48,13 +48,13 @@ def replaces(
                 requester_mention = requester.mention
                 requester_avatar = requester.display_avatar.replace(static_format="png", size=512).url
             else:
-                requester_global_name = "Recomendação"
-                requester_display_name = "Recomendação"
-                requester_mention = "Recomendação"
+                requester_global_name = "おすすめ"
+                requester_display_name = "おすすめ"
+                requester_mention = "おすすめ"
                 requester_avatar = guild.me.display_avatar.replace(static_format="png", size=512).url
         except:
-            requester_global_name = "Desconhecido..."
-            requester_display_name = "Desconhecido..."
+            requester_global_name = "不明..."
+            requester_display_name = "不明..."
             requester_mention = f"<@{player.current.requester}>"
             requester_avatar = "https://i.ibb.co/LNpG5TM/unknown.png"
 
@@ -66,15 +66,15 @@ def replaces(
             data=txt
         ). \
             replace('{track.thumb}', player.current.thumb). \
-            replace('{playlist.name}', player.current.playlist_name or "Sem playlist"). \
+            replace('{playlist.name}', player.current.playlist_name or "プレイリストなし"). \
             replace('{playlist.url}', player.current.playlist_url or player.controller_link). \
-            replace('{player.loop.mode}', 'Desativado' if not player.loop else 'Música atual' if player.loop == "current" else "Fila"). \
+            replace('{player.loop.mode}', '無効' if not player.loop else '現在の曲' if player.loop == "current" else "キュー"). \
             replace('{player.queue.size}', str(len(player.queue or player.queue_autoplay))). \
             replace('{player.volume}', str(player.volume)). \
-            replace('{player.autoplay}', "Ativado" if player.autoplay else "Desativado"). \
-            replace('{player.nightcore}', "Ativado" if player.nightcore else "Desativado"). \
+            replace('{player.autoplay}', "有効" if player.autoplay else "無効"). \
+            replace('{player.nightcore}', "有効" if player.nightcore else "無効"). \
             replace('{player.hint}', player.current_hint). \
-            replace('{player.log.text}', player.command_log or "Sem registro."). \
+            replace('{player.log.text}', player.command_log or "記録なし。"). \
             replace('{player.log.emoji}', player.command_log_emoji or ""). \
             replace('{requester.global_name}', requester_global_name). \
             replace('{requester.display_name}', requester_display_name). \
@@ -84,7 +84,7 @@ def replaces(
             replace('{guild.icon}', guild.icon.with_static_format("png").url if guild.icon else ""). \
             replace('{guild.name}', guild.name). \
             replace('{guild.id}', str(guild.id)). \
-            replace('{queue_format}', queue_text or "Fila vazia...")
+            replace('{queue_format}', queue_text or "キューは空です...")
 
     else:
 
@@ -107,13 +107,13 @@ def replaces(
             replace('{track.thumb}', "https://img.youtube.com/vi/2vFA0HL9kTk/mqdefault.jpg"). \
             replace('{playlist.name}', "🎵 DV 🎶"). \
             replace('{playlist.url}', "https://www.youtube.com/playlist?list=PLKlXSJdWVVAD3iztmL2vFVrwA81sRkV7n"). \
-            replace('{player.loop.mode}', "Música Atual"). \
+            replace('{player.loop.mode}', "現在の曲"). \
             replace('{player.queue.size}', f"{queue_max_entries}"). \
             replace('{player.volume}', "100"). \
-            replace('{player.autoplay}', "Ativado"). \
-            replace('{player.nightcore}', "Ativado"). \
+            replace('{player.autoplay}', "有効"). \
+            replace('{player.nightcore}', "有効"). \
             replace('{player.log.emoji}', "⏭️"). \
-            replace('{player.log.text}', f"{ctx.author} pulou a música."). \
+            replace('{player.log.text}', f"{ctx.author} が曲をスキップしました。"). \
             replace('{requester.global_name}', ctx.author.global_name). \
             replace('{requester.display_name}', ctx.author.display_name). \
             replace('{requester.mention}', ctx.author.mention). \
@@ -122,7 +122,7 @@ def replaces(
             replace('{guild.icon}', guild.icon.with_static_format("png").url if guild.icon else ""). \
             replace('{guild.name}', guild.name). \
             replace('{guild.id}', str(guild.id)). \
-            replace('{queue_format}', queue_text or "(Sem músicas).")
+            replace('{queue_format}', queue_text or "(曲がありません)。")
 
     return txt
 

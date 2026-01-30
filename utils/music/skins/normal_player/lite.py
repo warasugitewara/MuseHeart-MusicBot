@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 from os.path import basename
 
 import disnake
@@ -41,19 +41,19 @@ class LiteSkin:
             embed.description += f"<@{player.current.requester}>"
         else:
             try:
-                embed.description = f"[`[Recomendada]`]({player.current.info['extra']['related']['uri']})"
+                embed.description = f"[`[おすすめ]`]({player.current.info['extra']['related']['uri']})"
             except:
-                embed.description = "`[Recomendada]`"
+                embed.description = "`[おすすめ]`"
 
         if player.current.playlist_name:
-            embed.description += f"\n> -# 🎼 **┃ Playlist:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
+            embed.description += f"\n> -# 🎼 **┃ プレイリスト:** [`{player.current.playlist_name}`]({player.current.playlist_url})"
 
         embed.set_thumbnail(player.current.thumb)
 
         data["embeds"].append(embed)
 
         if player.current_hint:
-            data["embeds"].append(disnake.Embed(color=player.bot.get_color(player.guild.me)).set_footer(text=f"💡 Dica: {player.current_hint}"))
+            data["embeds"].append(disnake.Embed(color=player.bot.get_color(player.guild.me)).set_footer(text=f"💡 ヒント: {player.current_hint}"))
 
         return data
 

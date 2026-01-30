@@ -248,7 +248,7 @@ class BotPool:
                         return
 
                     self.killing_state = "ratelimit"
-                    print("Aplicação com ratelimit do discord!")
+                    print("Discordのレート制限が発生しました！")
                     await asyncio.sleep(10)
                     raise e
 
@@ -256,8 +256,8 @@ class BotPool:
                     return
 
                 print(
-                    "Aplicação com ratelimit do discord!\n"
-                    "Finalizando/Reiniciando o processo em 5 segundos..."
+                    "Discordのレート制限が発生しました！\n"
+                    "5秒後にプロセスを終了/再起動します..."
                 )
 
                 self.killing_state = True
@@ -276,24 +276,24 @@ class BotPool:
         if e:
 
             if isinstance(e, disnake.PrivilegedIntentsRequired):
-                e = "Você não ativou as Privileged Intents na sua aplicação<br>" \
-                    "Acesse o discord developer portal:<br>" \
+                e = "アプリケーションでPrivileged Intentsが有効になっていません<br>" \
+                    "Discord Developer Portalにアクセスしてください:<br>" \
                     "https://discord.com/developers/applications/<br>" \
-                    "e clique na sua aplicação e depois clique no menu \"bot\"<br>" \
-                    "e em seguida ative todas as intents.<br>" \
-                    "Print de exemplo: https://i.imgur.com/a9c1DHT.png<br>" \
-                    "Após corrigir, reinicie a aplicação."
+                    "アプリケーションをクリックし、\"bot\"メニューをクリックして<br>" \
+                    "すべてのIntentsを有効にしてください。<br>" \
+                    "参考画像: https://i.imgur.com/a9c1DHT.png<br>" \
+                    "修正後、アプリケーションを再起動してください。"
 
-                print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
+                print(("=" * 30) + f"\nボットの起動に失敗しました: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ("=" * 30))
 
             elif isinstance(e, disnake.LoginFailure) and "Improper token" in str(e):
-                e = "Foi utilizado um token inválido.<br>" \
-                    "Revise se o token informado está correto<br>" \
-                    "ou se o token foi resetado<br>" \
-                    "ou copiado do local correto ( ex: https://i.imgur.com/k894c1q.png )<br>" \
-                    "Após corrigir, reinicie a aplicação."
+                e = "無効なトークンが使用されました。<br>" \
+                    "入力されたトークンが正しいか確認してください<br>" \
+                    "またはトークンがリセットされていないか<br>" \
+                    "正しい場所からコピーされているか確認してください（例: https://i.imgur.com/k894c1q.png）<br>" \
+                    "修正後、アプリケーションを再起動してください。"
 
-                print(("=" * 30) + f"\nFalha ao iniciar o bot configurado no: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ( "=" * 30))
+                print(("=" * 30) + f"\nボットの起動に失敗しました: {bot.identifier}\n" + e.replace('<br>', '\n') + "\n" + ( "=" * 30))
 
             else:
                 traceback.print_tb(e.__traceback__)
@@ -335,12 +335,12 @@ class BotPool:
         retries = 0
         exception = None
 
-        print(f"📶 - Verificando se o servidor de música [{data['identifier']}] está disponível.")
+        print(f"📶 - 音楽サーバー [{data['identifier']}] の可用性を確認しています。")
 
         while True:
             if retries >= max_retries:
                 print(
-                    f"❌ - Todas as tentativas de verificar o servidor [{data['identifier']}] falharam. Causa: {repr(exception)}")
+                    f"❌ - サーバー [{data['identifier']}] の確認がすべて失敗しました。原因: {repr(exception)}")
                 return
             else:
                 await asyncio.sleep(backoff)
@@ -352,7 +352,7 @@ class BotPool:
                                 data["info"] = await r.json()
                                 data["info"]["check_version"] = 4
                             elif r.status == 403:
-                                print(f"❌ - Lavalink Server [{data['identifier']}] - Senha incorreta!")
+                                print(f"❌ - Lavalinkサーバー [{data['identifier']}] - パスワードが間違っています！")
                                 return
                             elif r.status != 404:
                                 raise Exception(f"❌ - [{r.status}]: {await r.text()}"[:300])
@@ -365,8 +365,8 @@ class BotPool:
                 except Exception as e:
                     exception = e
                     if data["identifier"] != "LOCAL":
-                        print(f'⚠️ - Falha ao verificar o servidor [{data["identifier"]}], '
-                              f'nova tentativa [{retries}/{max_retries}] em {backoff} segundos.')
+                        print(f'⚠️ - サーバー [{data["identifier"]}] の確認に失敗しました。'
+                              f'再試行 [{retries}/{max_retries}] を{backoff}秒後に行います。')
                     backoff += 2
                     retries += 1
 
@@ -388,10 +388,10 @@ class BotPool:
                                 if resp.status != 204:
                                     resp.raise_for_status()
                         except Exception as e:
-                            print(f"🌋 - Falha ao aplicar o Youtube refreshToken no servidor lavalink: {data['identifier']} - {repr(e)}")
+                            print(f"🌋 - LavalinkサーバーへのYoutube refreshTokenの適用に失敗しました: {data['identifier']} - {repr(e)}")
                             break
                         else:
-                            print(f"🌋 - Youtube refreshToken aplicado no servidor lavalink: {data['identifier']}")
+                            print(f"🌋 - LavalinkサーバーにYoutube refreshTokenを適用しました: {data['identifier']}")
                             break
 
         for bot in self.get_all_bots():
@@ -492,17 +492,17 @@ class BotPool:
             skin = skin[:-3]
 
             if skin in self.config["IGNORE_SKINS"].split() and skin != "default":
-                print(f"Skin {skin}.py ignorada")
+                print(f"スキン {skin}.py を無視しました")
                 continue
 
             try:
                 skin_file = import_module(f"utils.music.skins.normal_player.{skin}")
                 if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
+                    print(f"スキンを無視しました: {skin}.py | load()関数が設定/見つかりません...")
                     continue
                 self.player_skins[skin] = skin_file.load()
             except Exception:
-                print(f"Falha ao carregar skin [normal_player]: {traceback.format_exc()}")
+                print(f"スキン [normal_player] の読み込みに失敗しました: {traceback.format_exc()}")
 
         if self.default_skin not in self.player_skins:
             self.default_skin = "default"
@@ -514,17 +514,17 @@ class BotPool:
             skin = skin[:-3]
 
             if skin in self.config["IGNORE_STATIC_SKINS"].split() and skin != "default":
-                print(f"Skin {skin}.py ignorada")
+                print(f"スキン {skin}.py を無視しました")
                 continue
 
             try:
                 skin_file = import_module(f"utils.music.skins.static_player.{skin}")
                 if not hasattr(skin_file, "load"):
-                    print(f"Skin ignorada: {skin}.py | Função load() não configurada/encontrada...")
+                    print(f"スキンを無視しました: {skin}.py | load()関数が設定/見つかりません...")
                     continue
                 self.player_static_skins[skin] = skin_file.load()
             except Exception:
-                print(f"Falha ao carregar skin [static_player]: {traceback.format_exc()}")
+                print(f"スキン [static_player] の読み込みに失敗しました: {traceback.format_exc()}")
         if self.default_static_skin not in self.player_static_skins:
             self.default_static_skin = "default"
 
@@ -589,7 +589,7 @@ class BotPool:
             except Exception:
                 traceback.print_exc()
                 ini_file = "auto_lavalink.ini"
-                print(f"Baixando lista de servidores lavalink (arquivo: {ini_file})")
+                print(f"Lavalinkサーバーリストをダウンロードしています（ファイル: {ini_file}）")
                 try:
                     r = requests.get(self.config["LAVALINK_SERVER_LIST"], allow_redirects=False)
                     with open("auto_lavalink.ini", 'wb') as f:
@@ -606,7 +606,7 @@ class BotPool:
                 try:
                     LAVALINK_SERVERS[key] = json.loads(value)
                 except Exception as e:
-                    print(f"Falha ao adicionar node: {key}, erro: {repr(e)}")
+                    print(f"ノードの追加に失敗しました: {key}、エラー: {repr(e)}")
 
         if ini_file:
             config = ConfigParser()
@@ -642,9 +642,9 @@ class BotPool:
             self.mongo_database = MongoDatabase(mongo_key, timeout=self.config["MONGO_TIMEOUT"],
                                                 cache_maxsize=self.config["DBCACHE_SIZE"],
                                                 cache_ttl=self.config["DBCACHE_TTL"])
-            print("🍃 - Database em uso: MongoDB")
+            print("🍃 - 使用中のデータベース: MongoDB")
         else:
-            print("🎲 - Database em uso: TinyMongo | Nota: Os arquivos da database serão salvos localmente na pasta: local_database")
+            print("🎲 - 使用中のデータベース: TinyMongo | 注意: データベースファイルはlocal_databaseフォルダにローカル保存されます")
 
         self.local_database = LocalDatabase(cache_maxsize=self.config["DBCACHE_SIZE"],
                                             cache_ttl=self.config["DBCACHE_TTL"])
@@ -660,7 +660,7 @@ class BotPool:
 
         try:
             self.commit = check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
-            print(f"📥 - Commit ver: {self.commit}")
+            print(f"📥 - コミットバージョン: {self.commit}")
         except:
             self.commit = None
 
@@ -684,7 +684,7 @@ class BotPool:
                 playlist_extra_page_limit=self.config['SPOTIFY_PLAYLIST_EXTRA_PAGE_LIMIT']
             )
         except Exception as e:
-            print(f"⚠️ - Suporte interno ao spotify desativado: {repr(e)}")
+            print(f"⚠️ - Spotifyの内部サポートが無効になりました: {repr(e)}")
             spotify_client = None
 
         self.spotify = spotify_client
@@ -723,7 +723,7 @@ class BotPool:
                 pass
 
             if not token:
-                print(f"{bot_name} Ignorado (token não informado)...")
+                print(f"{bot_name} をスキップしました（トークンが指定されていません）...")
                 return
 
             try:
@@ -754,8 +754,8 @@ class BotPool:
                 async def check_commands(ctx: CustomContext):
 
                     if not (await bot.is_owner(ctx.author)):
-                        raise GenericError("**Os comandos de texto estão desativados!\n"
-                                           "Use os comandos de barra /**", self_delete=True, delete_original=15)
+                        raise GenericError("**テキストコマンドは無効になっています！\n"
+                                           "スラッシュコマンド / を使用してください**", self_delete=True, delete_original=15)
 
                     return True
 
@@ -796,7 +796,7 @@ class BotPool:
                     allow_private = False
 
                 if inter.bot.exclusive_guild_id and inter.guild_id != inter.bot.exclusive_guild_id:
-                    raise GenericError("Esse servidor não está autorizado para usar meus comandos...")
+                    raise GenericError("このサーバーは私のコマンドを使用する権限がありません...")
 
                 if self.config["COMMAND_LOG"] and inter.guild and not (await inter.bot.is_owner(inter.author)):
                     try:
@@ -812,8 +812,8 @@ class BotPool:
                     if allow_private:
                         return True
 
-                    raise GenericError("Esse comando não pode ser executado em mensagens privadas.\n"
-                                     "Use em algum servidor onde há bot compatível adicionado.")
+                    raise GenericError("このコマンドはプライベートメッセージでは実行できません。\n"
+                                     "互換性のあるボットが追加されているサーバーで使用してください。")
 
                 if not allow_private and not isinstance(inter.guild, disnake.Guild):
 
@@ -828,8 +828,8 @@ class BotPool:
 
                     if not available_bot:
                         raise GenericError(
-                            "**Não há bots disponíveis no servidor, Adicione pelo menos um clicando no botão abaixo.**",
-                            components=[disnake.ui.Button(custom_id="bot_invite", label="Adicionar bots")])
+                            "**サーバーに利用可能なボットがありません。下のボタンをクリックして少なくとも1つ追加してください。**",
+                            components=[disnake.ui.Button(custom_id="bot_invite", label="ボットを追加")])
 
                 if not kwargs:
                     kwargs["return_first"] = True
@@ -858,7 +858,7 @@ class BotPool:
 
             @bot.event
             async def on_ready():
-                print(f'🟢 - {bot.user} - [{bot.user.id}] Online.')
+                print(f'🟢 - {bot.user} - [{bot.user.id}] オンラインになりました。')
 
             async def initial_setup():
 
@@ -932,17 +932,17 @@ class BotPool:
 
         if not self.bots:
 
-            message = "O token do bot não foi configurado devidamente!"
+            message = "ボットのトークンが正しく設定されていません！"
 
             if os.environ.get("REPL_SLUG"):
-                message += f"Confira se o token foi adicionado nas secrets da replit"
+                message += f"トークンがReplitのsecretsに追加されているか確認してください"
 
-                print(message + ": Guia de como configurar: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo")
+                print(message + ": 設定ガイド: https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo")
 
-                message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo" target="_blank">Clique aqui</a> para ver o guia de como configurar.'
+                message += f'. <a href="https://gist.github.com/zRitsu/70737984cbe163f890dae05a80a3ddbe#2---com-o-projeto-j%C3%A1-criado-prossiga-as-etapas-abaixo" target="_blank">ここをクリック</a>して設定ガイドをご覧ください。'
 
             else:
-                message += " Confira se o token foi configurado na ENV/ENVIRONMENT ou no arquivo .env"
+                message += " トークンがENV/ENVIRONMENTまたは.envファイルに設定されているか確認してください"
 
                 print(f"⚠️ - {message}")
 
@@ -1017,12 +1017,12 @@ class BotCore(commands.AutoShardedBot):
             try:
                 self.env_owner_ids.add(int(i))
             except ValueError:
-                print(f"Owner_ID inválido: {i}")
+                print(f"無効なOwner_ID: {i}")
 
     async def edit_voice_channel_status(
             self, status: Optional[str], *, channel_id: int, reason: Optional[str] = None
     ):
-        # Obtido do discord.py: https://github.com/Rapptz/discord.py/blob/9ce733321b445db245924bfd21fedf20a01a570b/discord/http.py#L1166
+        # discord.pyから取得: https://github.com/Rapptz/discord.py/blob/9ce733321b445db245924bfd21fedf20a01a570b/discord/http.py#L1166
         r = Route('PUT', '/channels/{channel_id}/voice-status', channel_id=channel_id)
         payload = {'status': status}
         return await self.http.request(r, reason=reason, json=payload)
@@ -1107,7 +1107,7 @@ class BotCore(commands.AutoShardedBot):
 
         if current_cmds == synced_cmds:
             if current_cmds:
-                print(f"⚠️ - {self.user} - Os comandos já estão sincronizados.")
+                print(f"⚠️ - {self.user} - コマンドは既に同期されています。")
             return
 
         self._command_sync_flags = self.pool.command_sync_config
@@ -1180,7 +1180,7 @@ class BotCore(commands.AutoShardedBot):
             perm_check = message.channel.permissions_for(message.guild.me).send_messages
 
         if not perm_check:
-            print(f"Can't send message in: {message.channel.name} [{message.channel.id}] (Missing permissions)")
+            print(f"メッセージを送信できません: {message.channel.name} [{message.channel.id}] (権限がありません)")
             return
 
         return True
@@ -1224,18 +1224,18 @@ class BotCore(commands.AutoShardedBot):
             if not isinstance(prefix, str):
                 prefix = prefix[-1]
 
-            embed.description = f"**Olá {message.author.mention}.**"
+            embed.description = f"**こんにちは {message.author.mention}さん。**"
 
             if not self.config["INTERACTION_COMMAND_ONLY"]:
-                embed.description += f"\n\nMeu prefixo no servidor é: **{prefix}** `(minha menção também funciona como prefixo).`\n"\
-                                    f"Pra ver todos os meus comandos use **{prefix}help**"
+                embed.description += f"\n\nこのサーバーでのプレフィックスは: **{prefix}** `（メンションもプレフィックスとして機能します）`\n"\
+                                    f"すべてのコマンドを見るには **{prefix}help** を使用してください"
 
-            embed.description += "\n\n**Pra ver todos os meus comandos use: /**"
+            embed.description += "\n\n**すべてのコマンドを見るには: / を使用してください**"
 
             kwargs = {
                 "components": [
                     disnake.ui.Button(
-                        label="Me adicione no seu servidor.",
+                        label="あなたのサーバーに追加してください",
                         url=disnake.utils.oauth_url(self.user.id, permissions=disnake.Permissions(self.config['INVITE_PERMISSIONS']), scopes=('bot',))
                     )
                 ]
@@ -1314,8 +1314,8 @@ class BotCore(commands.AutoShardedBot):
                     if raise_error is False:
                         return False
 
-                    raise GenericError("**Você não pode usar comandos prefixed na postagem atual...**\n"
-                                       "`Use comando de barra (/) aqui.`", self_delete=True)
+                    raise GenericError("**この投稿ではプレフィックスコマンドを使用できません...**\n"
+                                       "`ここではスラッシュコマンド (/) を使用してください。`", self_delete=True)
         except AttributeError:
             pass
 
@@ -1358,21 +1358,20 @@ class BotCore(commands.AutoShardedBot):
                 if not [dev for dev in owners if check_member(dev, guild)]:
                     guilds.add(guild)
 
-            warn_msg = f"Atenção: O bot [{self.user}] (ID: {self.user.id}) foi configurado no portal do desenvolvedor " \
-                  "como bot público\n" \
-                  "lembrando que se caso o bot seja divulgado pra ser adicionado publicamente o mesmo terá que " \
-                  "estar sob as condições da licença GPL-2: " \
+            warn_msg = f"注意: ボット [{self.user}] (ID: {self.user.id}) はDeveloper Portalで" \
+                  "公開ボットとして設定されています\n" \
+                  "ボットが公開的に追加されるよう宣伝される場合、" \
+                  "GPL-2ライセンスの条件に従う必要があります: " \
                   "https://github.com/zRitsu/MuseHeart-MusicBot/blob/main/LICENSE\n" \
-                  "Caso não queira seguir as condições da licença no seu bot, você pode deixar o bot privado desmarcando a " \
-                  f"opção public bot acessando o link: https://discord.com/developers/applications/{self.user.id}/bot"
+                  "ライセンスの条件に従いたくない場合は、以下のリンクからpublic botオプションの" \
+                  f"チェックを外してボットをプライベートにできます: https://discord.com/developers/applications/{self.user.id}/bot"
 
             if guilds:
-                warn_msg += "\n\nAtualmente o bot se encontra em servidores no qual o dono do bot (ou membro da equipe) não "\
-                            f"estão ou que não possuem permissão de gerenciar servidor pra adicionar o próprio bot " \
-                             f"[{self.user}] nos servidores abaixo:\n\n" + "\n".join(f"{g.name} [ID: {g.id}]" for g in list(guilds)[:10])
+                warn_msg += "\n\n現在、ボットはボットの所有者（またはチームメンバー）が存在しないか、" \
+                            f"ボット [{self.user}] を追加するためのサーバー管理権限を持っていないサーバーに存在しています:\n\n" + "\n".join(f"{g.name} [ID: {g.id}]" for g in list(guilds)[:10])
 
                 if (gcount:=len(guilds)) > 10:
-                    warn_msg += F"\ne em mais {gcount-10} servidor(es)."
+                    warn_msg += F"\n他に{gcount-10}個のサーバーにも存在しています。"
 
             print(("="*50) + f"\n{warn_msg}\n" + ("="*50))
 
@@ -1392,7 +1391,7 @@ class BotCore(commands.AutoShardedBot):
     async def on_application_command(self, inter: disnake.ApplicationCommandInteraction):
 
         if not self.bot_ready or self.is_closed():
-            await inter.send("Ainda estou inicializando...\nPor favor aguarde mais um pouco...", ephemeral=True)
+            await inter.send("まだ初期化中です...\nもう少しお待ちください...", ephemeral=True)
             return
 
         await super().on_application_command(inter)
@@ -1425,22 +1424,22 @@ class BotCore(commands.AutoShardedBot):
                         self.unload_extension(module_filename)
                         self.load_extension(module_filename)
                         if not self.bot_ready and load_modules_log:
-                            print(f"🟦 - {bot_name} - {filename}.py Recarregado.")
+                            print(f"🟦 - {bot_name} - {filename}.py 再読み込みしました。")
                         load_status["reloaded"].append(f"{filename}.py")
                     except (commands.ExtensionAlreadyLoaded, commands.ExtensionNotLoaded):
                         try:
                             self.load_extension(module_filename)
                             if not self.bot_ready and load_modules_log:
-                                print(f"🟩 - {bot_name} - {filename}.py Carregado.")
+                                print(f"🟩 - {bot_name} - {filename}.py 読み込みました。")
                             load_status["loaded"].append(f"{filename}.py")
                         except Exception as e:
-                            print(f"❌- {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                            print(f"❌- {bot_name} - モジュールの読み込み/再読み込みに失敗しました: {filename}")
                             if not self.bot_ready:
                                 raise e
                             load_status["failed"].append(f"{filename}.py")
                             traceback.print_exc()
                     except Exception as e:
-                        print(f"❌ - {bot_name} - Falha ao carregar/recarregar o módulo: {filename}")
+                        print(f"❌ - {bot_name} - モジュールの読み込み/再読み込みに失敗しました: {filename}")
                         if not self.bot_ready:
                             raise e
                         load_status["failed"].append(f"{filename}.py")
@@ -1451,7 +1450,7 @@ class BotCore(commands.AutoShardedBot):
 
         for c in self.slash_commands:
             if (desc:=len(c.description)) > 100:
-                raise Exception(f"A descrição do comando {c.name} excedeu a quantidade de caracteres permitido "
-                                f"no discord (100), quantidade atual: {desc}")
+                raise Exception(f"コマンド {c.name} の説明がDiscordで許可されている文字数（100）を超えています。"
+                                f"現在の文字数: {desc}")
 
         return load_status

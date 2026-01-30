@@ -52,16 +52,16 @@ class LastFMView(disnake.ui.View):
 
         if self.session_key:
 
-            btn1 = disnake.ui.Button(label=f"{'Desativar' if self.scrobble_enabled else 'Ativar'} scrobble/registro")
+            btn1 = disnake.ui.Button(label=f"スクロブル/記録を{'無効' if self.scrobble_enabled else '有効'}にする")
             btn1.callback = self.scrobble_enable
             self.add_item(btn1)
 
-            btn2 = disnake.ui.Button(label="Desvincular conta do last.fm", style=disnake.ButtonStyle.red)
+            btn2 = disnake.ui.Button(label="Last.fmアカウントの連携を解除", style=disnake.ButtonStyle.red)
             btn2.callback = self.disconnect_account
             self.add_item(btn2)
 
         else:
-            btn3 = disnake.ui.Button(label="Vincular conta do last.fm")
+            btn3 = disnake.ui.Button(label="Last.fmアカウントを連携")
             btn3.callback = self.send_authurl_callback
             self.add_item(btn3)
 
@@ -90,14 +90,14 @@ class LastFMView(disnake.ui.View):
 
     async def interaction_check(self, interaction: disnake.MessageInteraction) -> bool:
         if interaction.user.id != self.ctx.author.id:
-            await interaction.send("Você não pode usar esse botão", ephemeral=True)
+            await interaction.send("このボタンは使用できません", ephemeral=True)
             return False
         return True
 
     async def scrobble_enable(self, interaction: disnake.MessageInteraction):
 
         if (retry_after := self.cooldown_scrobble_btn.get_bucket(interaction).update_rate_limit()):
-            await interaction.send(f"**Você terá que aguardar {(rta := int(retry_after))} segundo{'s'[:rta ^ 1]} para ativar/desativar o scrobble/registro.**", ephemeral=True)
+            await interaction.send(f"**スクロブル/記録の有効/無効を切り替えるには、あと{int(retry_after)}秒お待ちください。**", ephemeral=True)
             return
 
         self.scrobble_enabled = not self.scrobble_enabled
@@ -125,12 +125,12 @@ class LastFMView(disnake.ui.View):
             self.auth_url = f'http://www.last.fm/api/auth/?api_key={self.ctx.bot.last_fm.api_key}&token={self.token}'
             self.last_timestamp = int((disnake.utils.utcnow() + datetime.timedelta(minutes=5)).timestamp())
 
-        await interaction.send(f"### [Clique aqui](<{self.auth_url}>) para vincular sua conta do last.fm (na página clique em \"allow\")\n\n"
-                               f"`O link expira em` <t:{self.last_timestamp}:R> `(Caso esteja expirado, clique no botão novamente).`\n\n"
-                               f"`Atenção: Não mostre o link do \"clique aqui\" pra ninguem e nem envie em locais "
-                               f"públicos, pois esse link pode conceder acesso a sua conta do last.fm`\n\n"
-                               "`Caso já tenha autorizado a aplicação você deve aguardar até 20 segundos para a "
-                               "mensagem acima atualizar confirmando o processo.`",
+        await interaction.send(f"### [こちらをクリック](<{self.auth_url}>)してLast.fmアカウントを連携してください（ページで「allow」をクリック）\n\n"
+                               f"`リンクの有効期限:` <t:{self.last_timestamp}:R> `（期限切れの場合は、もう一度ボタンをクリックしてください）`\n\n"
+                               f"`注意: 「こちらをクリック」のリンクを他の人に見せたり、公開の場所に送信しないでください。"
+                               f"このリンクを使用すると、あなたのLast.fmアカウントにアクセスできてしまいます。`\n\n"
+                               "`アプリケーションをすでに承認している場合は、上記のメッセージが更新されて処理が"
+                               "確認されるまで最大20秒お待ちください。`",
                                ephemeral=True, delete_after=300)
 
 class LastFmCog(commands.Cog):
@@ -146,14 +146,14 @@ class LastFmCog(commands.Cog):
     lastfm_mc = commands.MaxConcurrency(1, per=commands.BucketType.user, wait=False)
 
     @commands.command(hidden=True, name="lastfm", aliases=["lastfmconnect", "lfm"],
-                      description="Vincular sua conta do last.fm para registrar as músicas via scrobble.",
+                      description="Last.fmアカウントを連携してスクロブルで楽曲を記録します。",
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     async def lastfm_legacy(self, ctx: CustomContext):
 
         await self.lastfm.callback(self=self, inter=ctx)
 
     @commands.slash_command(hidden=True, name="lastfm",
-                      description=f"{desc_prefix}Vincular sua conta do last.fm para registrar as músicas via scrobble.",
+                      description=f"{desc_prefix}Last.fmアカウントを連携してスクロブルで楽曲を記録します。",
                       extras={"allow_private": True},
                       cooldown=lastfm_cd, max_concurrency=lastfm_mc)
     @commands.contexts(guild=True)
@@ -161,7 +161,7 @@ class LastFmCog(commands.Cog):
 
         try:
             if not inter.permissions.embed_links:
-                raise GenericError(f"**Você não possui permissão de inserir links/anexos no canal <#{inter.channel_id}>**")
+                raise GenericError(f"**チャンネル <#{inter.channel_id}> でリンク/添付ファイルを挿入する権限がありません**")
         except AttributeError:
             pass
 
@@ -200,17 +200,17 @@ class LastFmCog(commands.Cog):
 
             name = lastfm_user['realname'] or lastfm_user['name']
 
-            txt = f"> `👤` **⠂Usuário:** [`{name}`](<{lastfm_user['url']}>)\n" \
-                  f"> `⏰` **⠂Conta criada em:** <t:{lastfm_user['registered']['#text']}:f>\n"
+            txt = f"> `👤` **⠂ユーザー:** [`{name}`](<{lastfm_user['url']}>)\n" \
+                  f"> `⏰` **⠂アカウント作成日:** <t:{lastfm_user['registered']['#text']}:f>\n"
 
             if lastfm_user['country']:
-                txt += f"> `🌎` **⠂País:** `{lastfm_user['country']}`\n"
+                txt += f"> `🌎` **⠂国:** `{lastfm_user['country']}`\n"
 
             if playcount := lastfm_user['playcount']:
-                txt += f"> `🔊` **⠂Total de músicas reproduzidas:** [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n"
+                txt += f"> `🔊` **⠂総再生曲数:** [`{int(playcount):,}`](<https://www.last.fm/user/{lastfm_user['name']}/library>)\n"
 
             if playlists := lastfm_user['playlists'] != "0":
-                txt += f"> `📄` **⠂Playlists públicas:** [`{int(playlists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
+                txt += f"> `📄` **⠂公開プレイリスト:** [`{int(playlists):,}`](<https://www.last.fm/user/{lastfm_user['name']}/playlists>)\n"
 
             try:
                 slashcmd = f"</play:" + str(self.bot.get_global_command_named("play",
@@ -218,13 +218,13 @@ class LastFmCog(commands.Cog):
             except AttributeError:
                 slashcmd = "/play"
 
-            txt += f"\n`Ouça suas músicas em um canal de voz usando o comando` {slashcmd} `para registra-las na sua " \
-                    f"conta do last.fm`\n"
+            txt += f"\n`ボイスチャンネルで` {slashcmd} `コマンドを使って音楽を聴くと、Last.fmアカウントに" \
+                    f"記録されます`\n"
 
             embeds = [disnake.Embed(
                 description=txt, color=self.bot.get_color()
             ).set_thumbnail(url=lastfm_user['image'][-1]["#text"][:-4] + ".gif").set_author(
-                name="Last.fm: Informações da conta vinculada",
+                name="Last.fm: 連携済みアカウント情報",
                 icon_url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
             try:
@@ -233,8 +233,8 @@ class LastFmCog(commands.Cog):
                 if top_tracks:
 
                     embed = disnake.Embed(
-                        description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `De:` [`{t['artist']['name']}`]({t['artist']['url']}) `(x{int(t['playcount']):,})`" for n, t in enumerate(top_tracks)),
-                        color=embed_color).set_author(name=f"Top 3: Músicas que você mais ouviu (do total de {int(lastfm_user['track_count']):,}):",
+                        description="\n".join(f"> ` {n+1}位 ` [`{t['name']}`]({t['url']}) `アーティスト:` [`{t['artist']['name']}`]({t['artist']['url']}) `(x{int(t['playcount']):,})`" for n, t in enumerate(top_tracks)),
+                        color=embed_color).set_author(name=f"トップ3: 最も再生した楽曲（全{int(lastfm_user['track_count']):,}曲中）:",
                         icon_url="https://i.ibb.co/Hhcwdf9/muse-heart-disc.jpg",
                         url=f"https://www.last.fm/user/{lastfm_user['name']}/library")
 
@@ -268,8 +268,8 @@ class LastFmCog(commands.Cog):
                 if top_artists:
 
                     embed = disnake.Embed(
-                        description="\n".join(f"> ` {n+1}º ` [`{t['name']}`]({t['url']}) `(x{int(t['playcount']):,})`" for n, t in enumerate(top_artists)),
-                        color=embed_color).set_author(name=f"Top 3: Artistas que você mais ouviu (do total de {int(lastfm_user['artist_count']):,}):",
+                        description="\n".join(f"> ` {n+1}位 ` [`{t['name']}`]({t['url']}) `(x{int(t['playcount']):,})`" for n, t in enumerate(top_artists)),
+                        color=embed_color).set_author(name=f"トップ3: 最も再生したアーティスト（全{int(lastfm_user['artist_count']):,}組中）:",
                         icon_url="https://i.ibb.co/8KQzkyy/muse-heart-artist-icon.jpg",
                         url=f"https://www.last.fm/user/{lastfm_user['name']}/library/artists")
 
@@ -293,8 +293,8 @@ class LastFmCog(commands.Cog):
                 if top_albuns:
 
                     embed = disnake.Embed(
-                        description="\n".join(f"> ` {n+1}º ` [`{b['name']}`]({b['url']}) `de:` [`{b['artist']['name']}`]({b['artist']['url']}) `(x{int(b['playcount']):,})`" for n, b in enumerate(top_albuns)),
-                        color=embed_color).set_author(name=f"Top 3: Álbuns que você mais ouviu (do total de {int(lastfm_user['album_count']):,}):",
+                        description="\n".join(f"> ` {n+1}位 ` [`{b['name']}`]({b['url']}) `アーティスト:` [`{b['artist']['name']}`]({b['artist']['url']}) `(x{int(b['playcount']):,})`" for n, b in enumerate(top_albuns)),
+                        color=embed_color).set_author(name=f"トップ3: 最も再生したアルバム（全{int(lastfm_user['album_count']):,}枚中）:",
                         icon_url="https://i.ibb.co/s6TQK5D/muse-heart-disc-album.jpg",
                         url=f"https://www.last.fm/user/{lastfm_user['name']}/library/albums")
 
@@ -318,10 +318,10 @@ class LastFmCog(commands.Cog):
 
         else:
             embeds = [disnake.Embed(
-                description="**Vincule (ou crie) uma conta no [last.fm](<https://www.last.fm/home>) para registrar "
-                            "todas as músicas que você ouvir por aqui no seu perfil do last.fm para obter sugestões de "
-                            "músicas/artistas/álbuns e ter uma estatística geral das músicas que você ouviu alem de ter "
-                            "acesso a uma comunidade incrível da plataforma.**",
+                description="**[Last.fm](<https://www.last.fm/home>)のアカウントを連携（または作成）すると、"
+                            "ここで聴いたすべての楽曲がLast.fmプロフィールに記録されます。楽曲/アーティスト/アルバムの"
+                            "おすすめを受け取ったり、聴いた音楽の統計情報を確認したり、プラットフォームの素晴らしい"
+                            "コミュニティにアクセスできます。**",
                 color=embed_color
             ).set_thumbnail(url="https://www.last.fm/static/images/lastfm_avatar_twitter.52a5d69a85ac.png")]
 
@@ -345,7 +345,7 @@ class LastFmCog(commands.Cog):
                 raise view.error
 
             embeds[-1].set_footer(
-                text="O tempo para interagir nessa mensagem foi esgotado.",
+                text="このメッセージの操作時間が終了しました。",
                 icon_url="https://i.ibb.co/gb0cZQw/warning.png",
             )
 
@@ -383,9 +383,9 @@ class LastFmCog(commands.Cog):
                     await inter.edit_original_message(view=view)
                 return
 
-            embeds[0].description += f"\n### A conta [{view.username}](<https://www.last.fm/user/{view.username}>) foi " \
-                                 "vinculada com sucesso!\n\n`Agora ao ouvir suas músicas no canal de voz elas " \
-                                "serão registradas automaticamente na sua conta do last.fm`"
+            embeds[0].description += f"\n### アカウント [{view.username}](<https://www.last.fm/user/{view.username}>) が" \
+                                 "正常に連携されました！\n\n`これからボイスチャンネルで音楽を聴くと、" \
+                                "自動的にLast.fmアカウントに記録されます`"
 
             await func(embeds=embeds, view=view, content=None)
 
@@ -400,7 +400,7 @@ class LastFmCog(commands.Cog):
 
         else:
             embeds[-1].set_footer(
-                text="Sua conta foi desvinculada com sucesso!",
+                text="アカウントの連携が正常に解除されました！",
                 icon_url="https://i.ibb.co/xLFhCd2/confirm.png",
             )
             await func(embeds=embeds, view=view, content=None)
@@ -560,7 +560,7 @@ class LastFmCog(commands.Cog):
                                     traceback.print_exc()
 
                     if not result:
-                        print(f"⚠️ - Last.FM Scrobble - Sem resultados para a música: {track_query}")
+                        print(f"⚠️ - Last.FM Scrobble - 楽曲の検索結果がありません: {track_query}")
                         self.bot.last_fm.cache[track_query] = {}
                         self.bot.last_fm.scrobble_save_cache()
                         await self.save_scrobble(query=track_query, track=track, users=users)
@@ -578,7 +578,7 @@ class LastFmCog(commands.Cog):
                     self.bot.last_fm.scrobble_save_cache()
 
                 if not fmdata:
-                    print(f"⚠️ - Last.FM Scrobble - Ignorado: {track_query}")
+                    print(f"⚠️ - Last.FM Scrobble - スキップしました: {track_query}")
                     await self.save_scrobble(query=track_query, track=track, users=users)
                     return
 
@@ -655,6 +655,6 @@ class LastFmCog(commands.Cog):
 
 def setup(bot):
     if not bot.pool.config["LASTFM_KEY"] or not bot.pool.config["LASTFM_SECRET"]:
-        print(("="*48) + "\n⚠️ - Os recursos do Last.FM estarão desativados devido a falta de configuração do LASTFM_KEY e LASTFM_SECRET")
+        print(("="*48) + "\n⚠️ - LASTFM_KEYとLASTFM_SECRETが設定されていないため、Last.FM機能は無効になります")
         return
     bot.add_cog(LastFmCog(bot))

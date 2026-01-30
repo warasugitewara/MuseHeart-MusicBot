@@ -201,7 +201,7 @@ class EmbedPaginator(disnake.ui.View):
 
         if interaction.author != self.ctx.author:
             await interaction.send(
-                f"Apenas o membro {self.ctx.author.mention} pode usar os botões dessa mensagem...",
+                f"このメッセージのボタンを使用できるのは {self.ctx.author.mention} さんのみです...",
                 ephemeral=True
             )
             return False
@@ -226,7 +226,7 @@ class EmbedPaginator(disnake.ui.View):
             self.current += 1
         await interaction.response.edit_message(embed=self.embeds[self.current])
 
-    @disnake.ui.button(emoji='⏹️', style=disnake.ButtonStyle.red, label="Fechar")
+    @disnake.ui.button(emoji='⏹️', style=disnake.ButtonStyle.red, label="閉じる")
     async def close(self, button, interaction: disnake.MessageInteraction):
 
         await interaction.message.delete()
@@ -243,7 +243,7 @@ class EmbedPaginator(disnake.ui.View):
 
 
 song_request_buttons = [
-    disnake.ui.Button(label="Pedir uma música", emoji="🎶", custom_id=PlayerControls.add_song),
+    disnake.ui.Button(label="曲をリクエスト", emoji="🎶", custom_id=PlayerControls.add_song),
 ]
 
 
@@ -298,7 +298,7 @@ async def send_message(
         **kwargs,
 ):
 
-    # correção temporária usando variavel kwargs.
+    # kwargs変数を使用した一時的な修正
 
     try:
         bot = inter.music_bot
@@ -410,16 +410,16 @@ async def send_idle_embed(
         except:
             continue
 
-    embed = disnake.Embed(description="**Entre em um canal de voz e peça uma música aqui " +
-                                      ("no post" if is_forum else "no canal ou na conversa abaixo") +
-                                      f" (ou clique no botão abaixo ou use o comando {cmd} aqui ou em algum outro canal)**\n\n"
-                                      "**Você pode usar um nome ou um link de site compatível:**\n"
+    embed = disnake.Embed(description="**ボイスチャンネルに参加して、" +
+                                      ("この投稿" if is_forum else "このチャンネルまたは下の会話") +
+                                      f"で曲をリクエストしてください（または下のボタンをクリックするか、ここまたは他のチャンネルで {cmd} コマンドを使用してください）**\n\n"
+                                      "**曲名または対応サイトのリンクを使用できます：**\n"
                                       "[`Youtube`](<https://www.youtube.com/>), [`Soundcloud`](<https://soundcloud.com/>), " \
                                       "[`Spotify`](<https://open.spotify.com/>), [`Twitch`](<https://www.twitch.tv/>)",
                           color=bot.get_color(target.guild.me))
 
     if text:
-        embed.description += f"\n\n**ÚLTIMA AÇÃO:** {text.replace('**', '')}\n"
+        embed.description += f"\n\n**最後のアクション:** {text.replace('**', '')}\n"
 
     embed.set_thumbnail(target.guild.me.display_avatar.replace(size=256).url)
 
@@ -430,7 +430,7 @@ async def send_idle_embed(
     if opts:
         components.append(
             disnake.ui.Select(
-                placeholder="Músicas/Playlists do servidor.",
+                placeholder="サーバーの曲/プレイリスト",
                 options=opts, custom_id="player_guild_pin",
                 min_values=0, max_values=1, required = False,
             )
@@ -439,7 +439,7 @@ async def send_idle_embed(
     components.extend(song_request_buttons)
 
     if is_forum:
-        content = "🎶 Entre em um canal de voz e peça sua música aqui."
+        content = "🎶 ボイスチャンネルに参加して、ここで曲をリクエストしてください。"
     else:
         content = None
 
@@ -511,7 +511,7 @@ async def send_idle_embed(
             message = await channel.send(embed=embed, components=components, content=content)
 
     if isinstance(message.channel, (disnake.Thread, disnake.TextChannel)) and not message.pinned and not is_forum and target.guild.me.guild_permissions.manage_messages:
-        await message.pin(reason="Player controller")
+        await message.pin(reason="プレイヤーコントローラー")
 
     return message
 
@@ -631,7 +631,7 @@ def music_source_emoji_url(url: str):
     if url == ">> saved_queue <<":
         return "💾", ""
 
-    return "<:play:734221719774035968>", "Plat. Desconhecida"
+    return "<:play:734221719774035968>", "不明なプラットフォーム"
 
 def music_source_emoji_id(id_: str):
 
@@ -676,18 +676,18 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
 
         if (bcount:=len([b for b in inter.bot.pool.get_guild_bots(inter.guild_id) if b.appinfo and b.appinfo.bot_public])):
             raise GenericError(
-                f"**Será necessário adicionar no servidor pelo menos um bot compatível clicando no botão abaixo:**",
-                components=[disnake.ui.Button(custom_id="bot_invite", label=f"Adicionar bot{'s'[:bcount^1]}")]
+                f"**下のボタンをクリックして、互換性のあるボットを少なくとも1つサーバーに追加する必要があります：**",
+                components=[disnake.ui.Button(custom_id="bot_invite", label=f"ボットを追加{'する'[:bcount^1]}")]
             )
         else:
-            raise GenericError("**Não há bots compatíveis com meus comandos no servidor...**")
+            raise GenericError("**サーバーに私のコマンドと互換性のあるボットがありません...**")
 
     if len(bots) == 1 or first:
         return inter, list(bots.values())[0]
     else:
         opts = [disnake.SelectOption(label=f"{b.user}", value=f"{b.user.id}", emoji="🎶") for b in bots.values()]
 
-        opts.append(disnake.SelectOption(label="Cancelar", value="cancel", emoji="❌"))
+        opts.append(disnake.SelectOption(label="キャンセル", value="cancel", emoji="❌"))
 
         try:
             add_id = f"_{inter.id}"
@@ -696,8 +696,8 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
 
         embed = disnake.Embed(
             color=inter.bot.get_color(),
-            description="**Selecione um bot abaixo:**\n"
-                        f'Nota: você tem apenas <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> para escolher!'
+            description="**下からボットを選択してください：**\n"
+                        f'注意: 選択できる時間は <t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=45)).timestamp())}:R> までです！'
         )
 
         components = [
@@ -725,7 +725,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
             )
         except asyncio.TimeoutError:
             try:
-                await msg.edit(conent="Tempo de seleção esgotado!", embed=None, view=None)
+                await msg.edit(conent="選択時間が切れました！", embed=None, view=None)
             except:
                 pass
             return None, None
@@ -740,7 +740,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
         if new_inter.data.values[0] == "cancel":
             await func(
                 embed=disnake.Embed(
-                    description="**Seleção cancelada!**",
+                    description="**選択がキャンセルされました！**",
                     color=inter.bot.get_color()
                 ),
                 components=None
@@ -756,7 +756,7 @@ async def select_bot_pool(inter: Union[CustomContext, disnake.MessageInteraction
         try:
             return inter, bots[int(new_inter.data.values[0])]
         except KeyError:
-            raise GenericError("**O bot selecionado foi removido do servidor antes de sua seleção...**")
+            raise GenericError("**選択したボットは、選択する前にサーバーから削除されました...**")
 
 def queue_track_index(inter: disnake.ApplicationCommandInteraction, bot: BotCore, query: str, match_count: int = 1,
                       case_sensitive: bool = False):

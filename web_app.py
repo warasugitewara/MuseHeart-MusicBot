@@ -51,7 +51,7 @@ class IndexHandler(tornado.web.RequestHandler):
             killing_state = False
 
         if killing_state is True:
-            self.write('<h1 style=\"font-size:5vw\">A aplicação será reiniciada em breve...</h1>')
+            self.write('<h1 style=\"font-size:5vw\">アプリケーションはまもなく再起動されます...</h1>')
             return
 
         msg = ""
@@ -87,20 +87,20 @@ class IndexHandler(tornado.web.RequestHandler):
                 ready_bots.append(
                     f"<tr><td><img src=\"{avatar}\" width=128 weight=128></img></td>\n"
                     "<td style=\"padding-top: 10px ; padding-bottom: 10px; padding-left: 10px; padding-right: 10px\">"
-                    f"Adicionar:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)}\" "
-                    f"rel=\"nofollow\" target=\"_blank\">{bot.user}</a>" + (f"<br>Servers: {guilds}" if guilds else "") + "</td></tr>"
+                    f"追加:<br><a href=\"{disnake.utils.oauth_url(bot.user.id, permissions=disnake.Permissions(bot.config['INVITE_PERMISSIONS']), scopes=('bot', 'applications.commands'), **kwargs)}\" "
+                    f"rel=\"nofollow\" target=\"_blank\">{bot.user}</a>" + (f"<br>サーバー数: {guilds}" if guilds else "") + "</td></tr>"
                 )
             else:
                 pending_bots.append(f"<tr><td>{bot.identifier}</td></tr>")
 
         if ready_bots:
-            msg += f"\n<p style=\"font-size:20px\">Bots Disponíveis:</p>" \
+            msg += f"\n<p style=\"font-size:20px\">利用可能なボット:</p>" \
                    f"{style}\n<table cellpadding=\"3\">{''.join(ready_bots)}</table>"
 
         if pending_bots:
-            msg += f"\n<p style=\"font-size:20px\">Bots em inicialização:</p>" \
+            msg += f"\n<p style=\"font-size:20px\">起動中のボット:</p>" \
                    f"{style}\n<table cellpadding=\"10\">{''.join(pending_bots)}</table>\n" \
-                   f"Nota: Recarregue a página para conferir se o bot está disponível."
+                   f"注意: ボットが利用可能かどうか確認するには、ページを再読み込みしてください。"
 
         if failed_bots:
 
@@ -111,8 +111,8 @@ class IndexHandler(tornado.web.RequestHandler):
             }
             </style>"""
 
-            msg += f"\n<p style=\"font-size:20px\">Os seguintes tokens configurado na ENV/SECRET/.env falharam " \
-                   f"na inicialização:</p>" \
+            msg += f"\n<p style=\"font-size:20px\">ENV/SECRET/.envに設定された以下のトークンは" \
+                   f"初期化に失敗しました:</p>" \
                    f"{failed_table_style}\n<table cellpadding=\"10\">{''.join(failed_bots)}</table>"
 
         ws_url = "<Body onLoad=\" rpcUrl()\" ><p id=\"url\" style=\"color:blue\"></p><script>function rpcUrl(){document." \
@@ -120,16 +120,16 @@ class IndexHandler(tornado.web.RequestHandler):
                      ".replace(\"https\", \"wss\") + \"ws\"}</script></body>"
 
         msg += f"<p><a href=\"https://github.com/zRitsu/DC-MusicBot-RPC" \
-              f"/releases\" target=\"_blank\">Baixe o app de rich presence aqui.</a></p>Link para adicionar no app " \
-              f"de RPC: {ws_url}"
+              f"/releases\" target=\"_blank\">リッチプレゼンスアプリはこちらからダウンロードしてください。</a></p>RPCアプリに追加するリンク" \
+              f": {ws_url}"
 
         if self.config["ENABLE_RPC_AUTH"]:
-            msg += f"\nNão esqueça de obter o token para configurar no app, use o comando /rich_presence para obter um.\n<br><br>"
+            msg += f"\nアプリに設定するトークンを取得することを忘れないでください。/rich_presence コマンドを使用してトークンを取得できます。\n<br><br>"
 
-        msg += f"\nPrefixo padrão: {self.pool.config['DEFAULT_PREFIX']}<br><br>"
+        msg += f"\nデフォルトプレフィックス: {self.pool.config['DEFAULT_PREFIX']}<br><br>"
 
         if self.pool.commit:
-            msg += f"\nCommit Atual: <a href=\"{self.pool.remote_git_url}/commit/{self.pool.commit}\" target=\"_blank\">{self.pool.commit[:7]}</a>"
+            msg += f"\n現在のコミット: <a href=\"{self.pool.remote_git_url}/commit/{self.pool.commit}\" target=\"_blank\">{self.pool.commit[:7]}</a>"
 
         self.write(msg)
 
@@ -157,8 +157,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         if not ws_id:
 
             if not bot_id:
-                print(f"desconectando: por falta de id de usuario {self.request.remote_ip}\nDados: {data}")
-                self.write_message(json.dumps({"op": "disconnect", "reason": "Desconectando por falta de ids de usuario"}))
+                print(f"切断中: ユーザーIDがありません {self.request.remote_ip}\nデータ: {data}")
+                self.write_message(json.dumps({"op": "disconnect", "reason": "ユーザーIDがないため切断しています"}))
                 self.close(code=4200)
                 return
 
@@ -174,8 +174,8 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                         data.update(
                             {
                                 "op": "exception",
-                                "message": "token inválido! Por via das dúvidas gere um novo token usando o comando no "
-                                           "bot: /rich_presence."
+                                "message": "無効なトークンです！念のため、ボットのコマンド /rich_presence を使用して"
+                                           "新しいトークンを生成してください。"
                             }
                         )
 
@@ -192,43 +192,43 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             except KeyError:
                 pass
             except Exception as e:
-                print(f"Erro ao processar dados do rpc para o user [{data['user']}]: {repr(e)}")
+                print(f"ユーザー [{data['user']}] のRPCデータ処理中にエラーが発生しました: {repr(e)}")
 
             return
 
         is_bot = data.pop("bot", False)
 
         if is_bot:
-            print(f"🤖 - Nova conexão - Bot: {ws_id} {self.request.remote_ip}")
+            print(f"🤖 - 新しい接続 - Bot: {ws_id} {self.request.remote_ip}")
             self.bot_ids = ws_id
             bots_ws.append(self)
             return
 
         if app_version < minimal_version:
-            self.write_message(json.dumps({"op": "disconnect", "reason": "Versão do app não suportado! Certifique-se de que está usando "
-                                         f"a versão mais recente do app ({minimal_version} ou superior)."}))
+            self.write_message(json.dumps({"op": "disconnect", "reason": "アプリのバージョンがサポートされていません！最新バージョンのアプリ"
+                                         f"（{minimal_version} 以上）を使用していることを確認してください。"}))
             self.close(code=4200)
             return
 
         if len(ws_id) > 3:
-            self.write_message(json.dumps({"op": "disconnect", "reason": "Você está tentando conectar mais de 3 usuários consecutivamente..."}))
+            self.write_message(json.dumps({"op": "disconnect", "reason": "3人以上のユーザーを同時に接続しようとしています..."}))
             self.close(code=4200)
             return
 
         if len(token) not in (0, 50):
             self.write_message(
-                json.dumps({"op": "disconnect", "reason": f"O token precisa ter 50 caracteres..."}))
+                json.dumps({"op": "disconnect", "reason": f"トークンは50文字である必要があります..."}))
             self.close(code=4200)
             return
 
         self.user_ids = ws_id
 
-        print("\n".join(f"👤 - Nova conexão - User: {u}" for u in self.user_ids))
+        print("\n".join(f"👤 - 新しい接続 - ユーザー: {u}" for u in self.user_ids))
 
         for u_id in ws_id:
             try:
                 users_ws[u_id].write_message(json.dumps({"op": "disconnect",
-                                               "reason": "Nova sessão iniciada em outro local..."}))
+                                               "reason": "別の場所で新しいセッションが開始されました..."}))
                 users_ws[u_id].close(code=4200)
             except:
                 pass
@@ -241,7 +241,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             try:
                 w.write_message(json.dumps(data))
             except Exception as e:
-                print(f"🤖 - Erro ao processar dados do rpc para os bot's {w.bot_ids}: {repr(e)}")
+                print(f"🤖 - ボット {w.bot_ids} のRPCデータ処理中にエラーが発生しました: {repr(e)}")
 
     def check_origin(self, origin: str):
         return True
@@ -249,7 +249,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
 
         if self.user_ids:
-            print("\n".join(f"👤 - Conexão Finalizada - User: {u}" for u in self.user_ids))
+            print("\n".join(f"👤 - 接続終了 - ユーザー: {u}" for u in self.user_ids))
             for u_id in self.user_ids:
                 try:
                     del users_ws[u_id]
@@ -258,11 +258,11 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
             return
 
         if not self.bot_ids:
-            print(f"Conexão Finalizada - IP: {self.request.remote_ip}")
+            print(f"接続終了 - IP: {self.request.remote_ip}")
 
         else:
 
-            print(f"🌐 - Conexão Finalizada - Bot ID's: {self.bot_ids}")
+            print(f"🌐 - 接続終了 - Bot ID: {self.bot_ids}")
 
             data = {"op": "close", "bot_id": self.bot_ids}
 
@@ -275,7 +275,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
                     w.write_message(data)
                 except Exception as e:
                     print(
-                        f"👤 - Erro ao processar dados do rpc para os usuários: [{', '.join(str(i) for i in w.user_ids)}]: {repr(e)}")
+                        f"👤 - ユーザー [{', '.join(str(i) for i in w.user_ids)}] のRPCデータ処理中にエラーが発生しました: {repr(e)}")
 
         bots_ws.remove(self)
 
@@ -307,7 +307,7 @@ class WSClient:
 
         self.backoff = 7
 
-        print("🌐 - RPC client conectado, sincronizando rpc dos bots...")
+        print("🌐 - RPCクライアントが接続されました。ボットのRPCを同期中...")
 
         if not self.all_bots:
             self.all_bots = self.pool.get_all_bots()
@@ -327,7 +327,7 @@ class WSClient:
             bot_ids.add(bot.user.id)
 
         if not bot_ids:
-            print("🌐 - Conexão com servidor RPC ignorado: Lista de bots vazia...")
+            print("🌐 - RPCサーバーへの接続をスキップしました: ボットリストが空です...")
             return
 
         await self.send({"user_ids": list(bot_ids), "bot": True, "auth_enabled": self.pool.config["ENABLE_RPC_AUTH"]})
@@ -343,7 +343,7 @@ class WSClient:
                 if player.guild.me.voice.channel.voice_states:
                     bot.loop.create_task(player.process_rpc(player.last_channel))
 
-        print(f"🌐 - [RPC client] - Os dados de rpc foram sincronizados com sucesso.")
+        print(f"🌐 - [RPCクライアント] - RPCデータが正常に同期されました。")
 
     async def send(self, data: dict):
 
@@ -377,9 +377,9 @@ class WSClient:
 
             except Exception as e:
                 if isinstance(e, aiohttp.WSServerHandshakeError):
-                    print(f"🌐 - Falha ao conectar no servidor RPC, tentando novamente em {(b:=int(self.backoff))} segundo{'s'[:b^1]}.")
+                    print(f"🌐 - RPCサーバーへの接続に失敗しました。{(b:=int(self.backoff))}秒後に再試行します。")
                 else:
-                    print(f"🌐 - Conexão com servidor RPC perdida - Reconectando em {(b:=int(self.backoff))} segundo{'s'[:b^1]}.")
+                    print(f"🌐 - RPCサーバーとの接続が切断されました - {(b:=int(self.backoff))}秒後に再接続します。")
 
                 await asyncio.sleep(self.backoff)
                 self.backoff *= 2.5
@@ -388,12 +388,12 @@ class WSClient:
             message = await self.connection.receive()
 
             if message.type in (aiohttp.WSMsgType.CLOSED, aiohttp.WSMsgType.ERROR):
-                print(f"🌐 - RPC Websocket Closed: {message.extra}\nReconnecting in {self.backoff}s")
+                print(f"🌐 - RPC Websocketが閉じられました: {message.extra}\n{self.backoff}秒後に再接続します")
                 await asyncio.sleep(self.backoff)
                 continue
 
             elif message.type in (aiohttp.WSMsgType.CLOSING, aiohttp.WSMsgType.CLOSE):
-                print(f"🌐 - RPC Websocket Finalizado: {message.extra}")
+                print(f"🌐 - RPC Websocketが終了しました: {message.extra}")
                 return
 
             data = json.loads(message.data)

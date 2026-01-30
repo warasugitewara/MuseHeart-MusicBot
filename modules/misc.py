@@ -48,7 +48,7 @@ def remove_blank_spaces(d):
 class Misc(commands.Cog):
 
     emoji = "🔰"
-    name = "Diversos"
+    name = "その他"
     desc_prefix = f"[{emoji} {name}] | "
 
     def __init__(self, bot: BotCore):
@@ -242,16 +242,15 @@ class Misc(commands.Cog):
             else:
                 bots_outside_guild.append(bot)
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Precisa de mais bots de música? Clique aqui.")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
+        components = [disnake.ui.Button(custom_id="bot_invite", label="音楽ボットがもっと必要ですか？こちらをクリック。")] if [b for b in self.bot.pool.bots if b.appinfo and b.appinfo.bot_public] else []
 
         if cmd:=self.bot.get_command("setup"):
-            cmd_text = f"Se desejar, use o comando **/{cmd.name}** para criar um canal dedicado pra pedir " \
-                        "músicas sem comandos e deixar o music player fixo em um canal dedicado.\n\n"
+            cmd_text = f"ご希望であれば、**/{cmd.name}** コマンドを使用して、コマンドなしで曲をリクエストできる専用チャンネルを作成し、ミュージックプレーヤーを固定チャンネルに設置できます。\n\n"
         else:
             cmd_text = ""
 
         if self.bot.config["SUPPORT_SERVER"]:
-            support_server = f"Caso tenha alguma dúvida ou queira acompanhar as últimas novidades, você pode entrar no meu [`servidor de suporte`]({self.bot.config['SUPPORT_SERVER']})"
+            support_server = f"ご質問がある場合や最新情報をフォローしたい場合は、私の[`サポートサーバー`]({self.bot.config['SUPPORT_SERVER']})に参加できます"
         else:
             support_server = ""
 
@@ -285,42 +284,37 @@ class Misc(commands.Cog):
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Olá! Agradeço muito por ter me adicionado no servidor: **{guild.name}** :)"
+                                description=f"こんにちは！サーバー **{guild.name}** に追加していただき、誠にありがとうございます :)"
                             ).set_image(url=image)
                         )
 
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Para ver todos os meus comandos use barra (**/**) no servidor " \
-                                             f"**{guild.name}**"
+                                description=f"すべてのコマンドを表示するには、サーバー **{guild.name}** でスラッシュ(**/**)を使用してください"
                             ).set_image(url=image)
                         )
 
                         if prefix:
-                            prefix_msg = f"Meu prefixo no servidor **{guild.name}** é: **{prefix}**"
+                            prefix_msg = f"サーバー **{guild.name}** での私のプレフィックスは: **{prefix}**"
                         else:
                             prefix = self.bot.default_prefix
-                            prefix_msg = f"Meu prefixo padrão é **{prefix}**"
+                            prefix_msg = f"私のデフォルトプレフィックスは **{prefix}**"
 
                         embeds.append(
                             disnake.Embed(
                                 color=color,
-                                description=f"Também tenho comandos de texto por prefixo. {prefix_msg} (minha menção "
-                                            f"também funciona como prefixo). Pra ver todos os meus comandos de texto "
-                                            f"use **{prefix}help** em um canal do servidor **{guild.name}**. "
-                                            f"Caso queira alterar meu prefixo use o comando **{prefix}setprefix** "
-                                            f"(você pode ter um prefixo pessoal usando o comando "
-                                            f"**{prefix}setmyprefix**)."
+                                description=f"プレフィックスによるテキストコマンドもあります。{prefix_msg}（私へのメンションもプレフィックスとして機能します）。"
+                                            f"すべてのテキストコマンドを表示するには、サーバー **{guild.name}** のチャンネルで **{prefix}help** を使用してください。"
+                                            f"プレフィックスを変更したい場合は **{prefix}setprefix** コマンドを使用してください"
+                                            f"（**{prefix}setmyprefix** コマンドで個人用プレフィックスを設定することもできます）。"
                             ).set_image(url=image)
                         )
 
                         if bots_in_guild:
 
-                            msg = f"Notei que há outros bots no servidor **{guild.name}** no qual sou compatível com " \
-                                   f"o sistema de multi-voice: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
-                                   f"Ao usar usar os comandos de música (ex: play) sem um dos bots conectado no canal, " \
-                                    "será usado um dos bots que estiver livre no servidor."
+                            msg = f"サーバー **{guild.name}** にマルチボイスシステムと互換性のある他のボットがあることに気づきました: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
+                                   f"ボットがチャンネルに接続していない状態で音楽コマンド（例: play）を使用すると、サーバー内の空いているボットが使用されます。"
 
                             if not self.bot.pool.config.get("MULTIVOICE_VIDEO_DEMO_URL"):
                                 embeds.append(
@@ -334,10 +328,10 @@ class Misc(commands.Cog):
                                 send_video = msg
 
                         elif bots_outside_guild and self.bot.config.get('MULTIVOICE_VIDEO_DEMO_URL'):
-                            send_video = "**Caso tenha demanda no seu servidor você também pode adicionar mais bots de músicas extras.\n" \
-                                         "Todos os bots compartilham o mesmo prefixo e comando de barra o que descarta a necessidade " \
-                                         f"de ficar decorando prefixos e comandos de barra de cada bot individualmente.\n\n" \
-                                         f"Confira o [vídeo]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando o uso de multi-bot na prática.**"
+                            send_video = "**サーバーで需要がある場合は、追加の音楽ボットを追加することもできます。\n" \
+                                         "すべてのボットは同じプレフィックスとスラッシュコマンドを共有しているため、" \
+                                         f"各ボットのプレフィックスやスラッシュコマンドを個別に覚える必要がありません。\n\n" \
+                                         f"マルチボットの使用方法を示す[動画]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']})をご覧ください。**"
 
                         if support_server:
                             embeds.append(disnake.Embed(color=color, description=support_server).set_image(url=image))
@@ -367,35 +361,33 @@ class Misc(commands.Cog):
 
         embeds = [
             disnake.Embed(
-                color=color, description="Olá! Para ver todos os meus comandos use barra (**/**)\n"
-                                         "`Nota: Caso os comandos estejam aparecendo no seu servidor,"
-                                         "talvez o mesmo tenha atingido o limite de bots com comandos de barra "
-                                         "registrados (caso tenha mais de 50 integrações/apps no seu servidor).`"
+                color=color, description="こんにちは！すべてのコマンドを表示するにはスラッシュ(**/**)を使用してください\n"
+                                         "`注意: コマンドがサーバーに表示されない場合は、"
+                                         "スラッシュコマンドを登録したボット/統合が50を超えている可能性があります。`"
             ).set_image(url=image)
         ]
 
         if prefix:
-            prefix_msg = f"Meu prefixo no servidor é: **{prefix}**"
+            prefix_msg = f"サーバーでの私のプレフィックスは: **{prefix}**"
         else:
             prefix = self.bot.default_prefix
-            prefix_msg = f"Meu prefixo padrão é **{prefix}**"
+            prefix_msg = f"私のデフォルトプレフィックスは **{prefix}**"
 
         embeds.append(
             disnake.Embed(
                 color=color,
-                description=f"Também tenho comandos de texto por prefixo. {prefix_msg} (minha menção "
-                            f"também funciona como prefixo). Pra ver todos os meus comandos de texto use "
-                            f"**{prefix}help**. Caso queira alterar meu prefixo use o comando **{prefix}setprefix** "
-                            f"(você pode ter um prefixo pessoal usando o comando **{prefix}setmyprefix**)."
+                description=f"プレフィックスによるテキストコマンドもあります。{prefix_msg}（私へのメンションもプレフィックスとして機能します）。"
+                            f"すべてのテキストコマンドを表示するには **{prefix}help** を使用してください。"
+                            f"プレフィックスを変更したい場合は **{prefix}setprefix** コマンドを使用してください"
+                            f"（**{prefix}setmyprefix** コマンドで個人用プレフィックスを設定することもできます）。"
             ).set_image(url=image)
         )
 
         if bots_in_guild:
 
-            msg = f"Notei que há outros bots no servidor **{guild.name}** no qual sou compatível com " \
-                  f"o sistema de multi-voice: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
-                  f"Ao usar usar os comandos de música (ex: play) sem um dos bots conectado no canal, será usado um " \
-                   f"dos bots que estiver livre no servidor."
+            msg = f"サーバー **{guild.name}** にマルチボイスシステムと互換性のある他のボットがあることに気づきました: {', '.join(b.user.mention for b in bots_in_guild)}\n\n" \
+                  f"ボットがチャンネルに接続していない状態で音楽コマンド（例: play）を使用すると、" \
+                   f"サーバー内の空いているボットが使用されます。"
 
             if not self.bot.config.get('MULTIVOICE_VIDEO_DEMO_URL'):
                 embeds.append(
@@ -408,10 +400,10 @@ class Misc(commands.Cog):
                 send_video = msg
 
         elif bots_outside_guild and self.bot.config.get('MULTIVOICE_VIDEO_DEMO_URL'):
-            send_video = "**Caso tenha demanda no seu servidor você também pode adicionar mais bots de músicas extras.\n" \
-                          "Todos os bots compartilham o mesmo prefixo e comando de barra o que descarta a necessidade " \
-                          f"de ficar decorando prefixos e comandos de barra de cada bot individualmente.\n\n" \
-                        f"Confira o [vídeo]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando o uso de multi-bot na prática.**"
+            send_video = "**サーバーで需要がある場合は、追加の音楽ボットを追加することもできます。\n" \
+                          "すべてのボットは同じプレフィックスとスラッシュコマンドを共有しているため、" \
+                          f"各ボットのプレフィックスやスラッシュコマンドを個別に覚える必要がありません。\n\n" \
+                        f"マルチボットの使用方法を示す[動画]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']})をご覧ください。**"
 
         embeds.append(disnake.Embed(color=color, description=cmd_text).set_image(url=image))
 
@@ -422,7 +414,7 @@ class Misc(commands.Cog):
 
         timestamp = int((disnake.utils.utcnow() + datetime.timedelta(seconds=kwargs["delete_after"])).timestamp())
 
-        embeds[-1].description += f"\nEssa mensagem será deletada automaticamente <t:{timestamp}:R>"
+        embeds[-1].description += f"\nこのメッセージは <t:{timestamp}:R> に自動的に削除されます"
 
         try:
             await channel.send(embeds=embeds, components=components, **kwargs)
@@ -430,24 +422,24 @@ class Misc(commands.Cog):
                 if "delete_after" in kwargs:
                     kwargs["delete_after"] = 600
                 await asyncio.sleep(1)
-                await channel.send(f"{send_video}\n\nConfira o [**vídeo**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']}) demonstrando essa funcionalidade.", **kwargs)
+                await channel.send(f"{send_video}\n\nこの機能を紹介する[**動画**]({self.bot.config['MULTIVOICE_VIDEO_DEMO_URL']})をご覧ください。", **kwargs)
         except:
-            print(f"Falha ao enviar mensagem de novo servidor no canal: {channel}\n"
-                  f"ID do canal: {channel.id}\n"
-                  f"Tipo de canal: {type(channel)}\n"
+            print(f"新しいサーバーのメッセージをチャンネルに送信できませんでした: {channel}\n"
+                  f"チャンネルID: {channel.id}\n"
+                  f"チャンネルタイプ: {type(channel)}\n"
                   f"{traceback.format_exc()}")
 
 
     about_cd = commands.CooldownMapping.from_cooldown(1, 5, commands.BucketType.member)
 
-    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="Exibir informações sobre mim.",
+    @commands.command(name="about", aliases=["sobre", "info", "botinfo"], description="私についての情報を表示します。",
                       cooldown=about_cd)
     async def about_legacy(self, ctx: CustomContext):
         await self.about.callback(self=self, interaction=ctx)
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir informações sobre mim.", cooldown=about_cd,
+        description=f"{desc_prefix}私についての情報を表示します。", cooldown=about_cd,
         extras={"allow_private": True}
     )
     @commands.contexts(guild=True)
@@ -470,11 +462,11 @@ class Misc(commands.Cog):
 
         python_ram = psutil.Process(getpid()).memory_info().rss
 
-        ram_msg = f"> 🖥️ **⠂Uso de RAM (Python):** `{humanize.naturalsize(python_ram)}`\n"
+        ram_msg = f"> 🖥️ **⠂RAM使用量 (Python):** `{humanize.naturalsize(python_ram)}`\n"
 
         if lavalink_ram:
-            ram_msg += f"> 🌋 **⠂Uso de RAM (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
-                        f"> 🖥️ **⠂Uso de RAM (Total):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
+            ram_msg += f"> 🌋 **⠂RAM使用量 (Lavalink):** `{humanize.naturalsize(lavalink_ram)}`\n" \
+                        f"> 🖥️ **⠂RAM使用量 (合計):** `{humanize.naturalsize(python_ram + lavalink_ram)}`\n"
 
         guild = bot.get_guild(inter.guild_id) or inter.guild
 
@@ -596,72 +588,72 @@ class Misc(commands.Cog):
 
         if len(allbots) < 2:
 
-            embed.description += "### Estatíticas (bot atual):\n" \
-                                 f"> 🏙️ **⠂Servidor{'es'[:(svcount:=len(bot.guilds))^1]}:** `{svcount:,}`\n" \
-                                 f"> 👥 **⠂Usuário{'s'[:user_count^1]}:** `{user_count:,}`\n"
+            embed.description += "### 統計 (現在のボット):\n" \
+                                 f"> 🏙️ **⠂サーバー数:** `{(svcount:=len(bot.guilds)):,}`\n" \
+                                 f"> 👥 **⠂ユーザー数:** `{user_count:,}`\n"
 
             if bot_count:
-                embed.description += f"> 🤖 **⠂Bot{'s'[:bot_count^1]}:** `{bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂ボット数:** `{bot_count:,}`\n"
 
         else:
 
-            embed.description += "### Estatísticas (totais em todos os bots):\n"
+            embed.description += "### 統計 (全ボット合計):\n"
 
             if public_bot_count:
-                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:public_bot_count^1])} público{s}:** `{public_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂公開ボット数:** `{public_bot_count:,}`\n"
 
             if private_bot_count:
-                embed.description += f"> 🤖 **⠂Bot{(s:='s'[:private_bot_count^1])} privado{s}:** `{private_bot_count:,}`\n"
+                embed.description += f"> 🤖 **⠂非公開ボット数:** `{private_bot_count:,}`\n"
 
-            embed.description += f"> 🏙️ **⠂Servidor{'es'[:guilds_size^1]}:** `{guilds_size:,}`\n"
+            embed.description += f"> 🏙️ **⠂サーバー数:** `{guilds_size:,}`\n"
 
             if users_amount := len(users):
-                embed.description += f"> 👥 **⠂Usuário{'s'[:users_amount^1]}:** `{users_amount:,}`\n"
+                embed.description += f"> 👥 **⠂ユーザー数:** `{users_amount:,}`\n"
 
             if bots_amount := len(bots):
-                embed.description += f"> 🤖 **⠂Bot{'s'[:bots_amount^1]}:** `{bots_amount:,}`\n"
+                embed.description += f"> 🤖 **⠂ボット数:** `{bots_amount:,}`\n"
 
-        embed.description += "### Outras informações:\n"
+        embed.description += "### その他の情報:\n"
 
         if active_players_other_bots:
-            embed.description += f"> ▶️ **⠂Player{(s:='s'[:active_players_other_bots^1])} ativo{s}:** `{active_players_other_bots:,}`\n"
+            embed.description += f"> ▶️ **⠂アクティブなプレーヤー:** `{active_players_other_bots:,}`\n"
 
         if paused_players_other_bots:
-            embed.description += f"> ⏸️ **⠂Player{'s'[:paused_players_other_bots^1]} em pausa:** `{paused_players_other_bots:,}`\n"
+            embed.description += f"> ⏸️ **⠂一時停止中のプレーヤー:** `{paused_players_other_bots:,}`\n"
 
         if inactive_players_other_bots:
-            embed.description += f"> 💤 **⠂Player{(s:='s'[:inactive_players_other_bots^1])} inativo{s}:** `{inactive_players_other_bots:,}`\n"
+            embed.description += f"> 💤 **⠂非アクティブなプレーヤー:** `{inactive_players_other_bots:,}`\n"
 
         if listeners:
-            embed.description += f"> 🎧 **⠂Ouvinte{'s'[:(lcount:=len(listeners))^1]} atua{'is'[:lcount^1] or 'l'}:** `{lcount:,}`\n"
+            embed.description += f"> 🎧 **⠂現在のリスナー:** `{(lcount:=len(listeners)):,}`\n"
 
         if bot.pool.commit:
-            embed.description += f"> 📥 **⠂Commit atual:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
+            embed.description += f"> 📥 **⠂現在のコミット:** [`{bot.pool.commit[:7]}`]({bot.pool.remote_git_url}/commit/{bot.pool.commit})\n"
 
-        embed.description += f"> 🐍 **⠂Versão do Python:** `{platform.python_version()}`\n" \
-                             f"> 📦 **⠂Versão do Disnake:** `{disnake.__version__}`\n" \
-                             f"> 📶 **⠂Latencia:** `{round(bot.latency * 1000)}ms`\n" \
+        embed.description += f"> 🐍 **⠂Pythonバージョン:** `{platform.python_version()}`\n" \
+                             f"> 📦 **⠂Disnakeバージョン:** `{disnake.__version__}`\n" \
+                             f"> 📶 **⠂レイテンシ:** `{round(bot.latency * 1000)}ms`\n" \
                              f"{ram_msg}" \
-                             f"> ⏰ **⠂Uptime:** <t:{int(bot.uptime.timestamp())}:R>\n"
+                             f"> ⏰ **⠂稼働時間:** <t:{int(bot.uptime.timestamp())}:R>\n"
 
         if not bot.config["INTERACTION_COMMAND_ONLY"]:
 
             guild_data = await bot.get_global_data(inter.guild_id, db_name=DBModel.guilds)
 
             if guild_data["prefix"]:
-                embed.description += f"> ⌨️ **⠂Prefixo do servidor:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂サーバープレフィックス:** `{disnake.utils.escape_markdown(guild_data['prefix'], as_needed=True)}`\n"
             else:
-                embed.description += f"> ⌨️ **⠂Prefixo padrão:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂デフォルトプレフィックス:** `{disnake.utils.escape_markdown(bot.default_prefix, as_needed=True)}`\n"
 
             user_data = await bot.get_global_data(inter.author.id, db_name=DBModel.users)
 
             if user_data["custom_prefix"]:
-                embed.description += f"> ⌨️ **⠂Seu prefixo de usuário:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
+                embed.description += f"> ⌨️ **⠂あなたのユーザープレフィックス:** `{disnake.utils.escape_markdown(user_data['custom_prefix'], as_needed=True)}`\n"
 
-        links = "[`[Source]`](https://github.com/zRitsu/MuseHeart-MusicBot)"
+        links = "[`[ソース]`](https://github.com/zRitsu/MuseHeart-MusicBot)"
 
         if bot.config["SUPPORT_SERVER"]:
-            links = f"[`[Suporte]`]({bot.config['SUPPORT_SERVER']})  **|** {links}"
+            links = f"[`[サポート]`]({bot.config['SUPPORT_SERVER']})  **|** {links}"
 
         embed.description += f"> 🌐 **⠂**{links}\n"
 
@@ -672,7 +664,7 @@ class Misc(commands.Cog):
 
         if node_txt_final:
 
-            embed.description += f"### Servidores de música (Lavalink Servers):\n{node_txt_final}"
+            embed.description += f"### 音楽サーバー (Lavalink Servers):\n{node_txt_final}"
 
         try:
             avatar = owner.avatar.with_static_format("png").url
@@ -681,10 +673,10 @@ class Misc(commands.Cog):
 
         embed.set_footer(
             icon_url=avatar,
-            text=f"Dono(a): {owner} [{owner.id}]"
+            text=f"オーナー: {owner} [{owner.id}]"
         )
 
-        components = [disnake.ui.Button(custom_id="bot_invite", label="Me adicione no seu servidor")] if [b for b in self.bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
+        components = [disnake.ui.Button(custom_id="bot_invite", label="あなたのサーバーに追加")] if [b for b in self.bot.pool.bots if b.appinfo and (b.appinfo.bot_public or await b.is_owner(inter.author))] else None
 
         try:
             await inter.edit_original_message(embed=embed, components=components)
@@ -738,13 +730,13 @@ class Misc(commands.Cog):
         txt = ""
 
         if bots_invites:
-            txt += "## Bots de música disponíveis:\n"
+            txt += "## 利用可能な音楽ボット:\n"
             for i in disnake.utils.as_chunks(bots_invites, 2):
                 txt += " | ".join(i) + "\n"
             txt += "\n"
 
         if bots_in_guild:
-            txt += "## Bots de música que já estão no servidor atual:\n"
+            txt += "## 現在のサーバーにある音楽ボット:\n"
             for i in disnake.utils.as_chunks(bots_in_guild, 2):
                 txt += " | ".join(i) + "\n"
 
@@ -754,7 +746,7 @@ class Misc(commands.Cog):
                     colour=self.bot.get_color(
                         inter.guild.me if inter.guild else guild.me if guild else None
                     ),
-                    description="## Não há bots públicos disponível...",
+                    description="## 利用可能な公開ボットがありません...",
                 ), ephemeral=True
             )
             return
@@ -771,13 +763,13 @@ class Misc(commands.Cog):
         await inter.send(embeds=embeds, ephemeral=True)
 
 
-    @commands.command(name="invite", aliases=["convidar"], description="Exibir meu link de convite para você me adicionar no seu servidor.")
+    @commands.command(name="invite", aliases=["convidar"], description="あなたのサーバーに追加するための招待リンクを表示します。")
     async def invite_legacy(self, ctx):
         await self.invite.callback(self=self, inter=ctx)
 
 
     @commands.slash_command(
-        description=f"{desc_prefix}Exibir meu link de convite para você me adicionar no seu servidor.",
+        description=f"{desc_prefix}あなたのサーバーに追加するための招待リンクを表示します。",
         extras={"allow_private": True}
     )
     @commands.contexts(guild=True)
@@ -865,14 +857,14 @@ class Misc(commands.Cog):
             )
 
         if inter.user.id != user.id:
-            embeds[-1].set_footer(text=f"Solicitado por: {inter.author}", icon_url=requester)
+            embeds[-1].set_footer(text=f"リクエスト者: {inter.author}", icon_url=requester)
 
         await inter.send(embeds=embeds, ephemeral=True)
 
     @commands.is_owner()
     @commands.max_concurrency(1, commands.BucketType.default)
-    @commands.command(hidden=True, description="Comando temporário para corrigir favoritos com espaços em branco "
-                                               "que ocasionam erros em algumas situações.")
+    @commands.command(hidden=True, description="空白を含むお気に入りを修正するための一時的なコマンドです。"
+                                               "これは特定の状況でエラーを引き起こす可能性があります。")
     async def fixfavs(self, ctx: CustomContext):
 
         if not os.path.isdir("./local_database/fixfavs_backup"):
@@ -903,7 +895,7 @@ class Misc(commands.Cog):
                 remove_blank_spaces(data["fav_links"])
                 await self.bot.update_global_data(id_=data["_id"], data=data, db_name=DBModel.users)
 
-            await ctx.send("os favoritos foram corrigidos com sucesso!")
+            await ctx.send("お気に入りが正常に修正されました！")
 
     async def cog_check(self, ctx):
         return await check_requester_channel(ctx)
@@ -927,12 +919,12 @@ class GuildLog(commands.Cog):
             if URL_REG.match(bot.config["BOT_ADD_REMOVE_LOG"]):
                 self.hook_url = bot.config["BOT_ADD_REMOVE_LOG"]
             else:
-                print("URL do webhook inválido (para envio de logs ao adicionar/remover bot).")
+                print("Webhookの URL が無効です（ボットの追加/削除ログの送信用）。")
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: disnake.Guild):
 
-        print(f"😭 - Bot {self.bot.user.name} foi removido(a) do servidor: {guild.name} - [{guild.id}]")
+        print(f"😭 - ボット {self.bot.user.name} がサーバーから削除されました: {guild.name} - [{guild.id}]")
 
         try:
             await self.bot.music.players[guild.id].destroy()
@@ -945,7 +937,7 @@ class GuildLog(commands.Cog):
             return
 
         try:
-            await self.send_hook(guild, title="Me removeram do servidor", color=disnake.Color.red())
+            await self.send_hook(guild, title="サーバーから削除されました", color=disnake.Color.red())
         except:
             traceback.print_exc()
 
@@ -954,7 +946,7 @@ class GuildLog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_join(self, guild: disnake.Guild):
 
-        print(f"🎉 - Bot {self.bot.user.name} foi adicionado(a) no servidor: {guild.name} - [{guild.id}]")
+        print(f"🎉 - ボット {self.bot.user.name} がサーバーに追加されました: {guild.name} - [{guild.id}]")
 
         try:
             guild_data = await self.bot.get_data(guild.id, db_name=DBModel.guilds)
@@ -967,7 +959,7 @@ class GuildLog(commands.Cog):
             return
 
         try:
-            await self.send_hook(guild, title="Me adicionaram em um novo servidor", color=disnake.Color.green())
+            await self.send_hook(guild, title="新しいサーバーに追加されました", color=disnake.Color.green())
         except:
             traceback.print_exc()
 
@@ -981,11 +973,11 @@ class GuildLog(commands.Cog):
             description=f"__**{title}:**__\n"
                         f"```{guild.name}```\n"
                         f"**ID:** `{guild.id}`\n"
-                        f"**Dono:** `{guild.owner} [{guild.owner.id}]`\n"
-                        f"**Criado em:** <t:{created_at}:f> - <t:{created_at}:R>\n"
-                        f"**Nível de verificação:** `{guild.verification_level or 'nenhuma'}`\n"
-                        f"**Membros:** `{len([m for m in guild.members if not m.bot])}`\n"
-                        f"**Bots:** `{len([m for m in guild.members if m.bot])}`\n",
+                        f"**オーナー:** `{guild.owner} [{guild.owner.id}]`\n"
+                        f"**作成日:** <t:{created_at}:f> - <t:{created_at}:R>\n"
+                        f"**認証レベル:** `{guild.verification_level or 'なし'}`\n"
+                        f"**メンバー:** `{len([m for m in guild.members if not m.bot])}`\n"
+                        f"**ボット:** `{len([m for m in guild.members if m.bot])}`\n",
             color=color
         )
 

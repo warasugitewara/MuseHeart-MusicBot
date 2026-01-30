@@ -184,7 +184,7 @@ class PartialTrack:
 
     @property
     def author(self) -> str:
-        return self.info["author"] or "Artista Desconhecido"
+        return self.info["author"] or "不明なアーティスト"
 
     @property
     def authors_string(self) -> str:
@@ -549,12 +549,12 @@ class LavalinkPlayer(wavelink.Player):
         self.lyric_task: Optional[asyncio.Task] = None
         self.listen_along_invite = kwargs.pop("listen_along_invite", "")
         self.message_updater_task: Optional[asyncio.Task] = None
-        # limitar apenas para dj's e staff's
+        # DJとスタッフのみに制限
         self.restrict_mode = kwargs.pop('restrict_mode', False)
-        self.ignore_np_once = False  # não invocar player controller em determinadas situações
+        self.ignore_np_once = False  # 特定の状況でプレイヤーコントローラーを呼び出さない
         self.allowed_mentions = disnake.AllowedMentions(users=False, everyone=False, roles=False)
         self.uptime = kwargs.pop("uptime", None) or int(disnake.utils.utcnow().timestamp())
-        # ativar/desativar modo controller (apenas para uso em skins)
+        # コントローラーモードの有効化/無効化（スキン専用）
         self.controller_mode = True
         self.mini_queue_feature = False
         self.mini_queue_enabled = False
@@ -571,7 +571,7 @@ class LavalinkPlayer(wavelink.Player):
         self.track_load_task: Optional[asyncio.Task] = None
         self.native_yt: bool = True
         self.stage_title_event = False
-        self.stage_title_template: str = kwargs.pop("stage_title_template", None) or "Tocando: {track.title} | {track.author}"
+        self.stage_title_template: str = kwargs.pop("stage_title_template", None) or "再生中: {track.title} | {track.author}"
         self.last_stage_title = ""
 
         self.channel_purged = False
@@ -589,19 +589,19 @@ class LavalinkPlayer(wavelink.Player):
         self.extra_info = {}
 
         self.initial_hints = [
-            f"É possível alterar a skin/aparência do player usando o comando /change_skin ou {self.prefix_info}skin "
-            f"(Apenas membros com permissão de gerenciar servidor podem usar esse comando).",
+            f"/change_skin または {self.prefix_info}skin コマンドを使用してプレイヤーのスキン/外観を変更できます "
+            f"（このコマンドはサーバー管理権限を持つメンバーのみが使用できます）。",
 
-            "Dê uma nova cara para o player de música no servidor criando skins personalizadas. Experimente usando "
-            f"o comando /custom_skin ou {self.prefix_info}customskin (Apenas membros com permissão de administrador "
-            "podem usar esse comando).",
+            "カスタムスキンを作成してプレイヤーに新しい外観を与えましょう。"
+            f"/custom_skin または {self.prefix_info}customskin コマンドをお試しください（管理者権限を持つメンバーのみ "
+            "がこのコマンドを使用できます）。",
 
-            "É possível definir o status automático no canal de voz com informações sobre "
-            "a música que está sendo tocada no momento. Experimente usando o comando /set_voice_status ou "
-            f"{self.prefix_info}stageannounce (Apenas membros com permissão de gerenciar servidor podem usar esse recurso).",
+            "現在再生中の曲の情報を音声チャンネルのステータスに自動表示することができます。"
+            f"/set_voice_status または {self.prefix_info}stageannounce コマンドをお試しください"
+            f"（このコマンドはサーバー管理権限を持つメンバーのみが使用できます）。",
 
-            f"Caso a música esteja com lag, audio travando etc. Experimente alterar a região do canal de voz "
-            f"(caso esteja em um palco/stage use o comando {self.prefix_info}stageregion)."
+            f"音楽にラグや音切れがある場合は、音声チャンネルの地域を変更してみてください "
+            f"（ステージの場合は {self.prefix_info}stageregion コマンドを使用してください）。"
         ]
 
         self.retry_setup_hints = False
@@ -615,16 +615,16 @@ class LavalinkPlayer(wavelink.Player):
 
         if self.bot.config["LASTFM_KEY"] and self.bot.config["LASTFM_SECRET"]:
             self.initial_hints.append(
-                f"Você pode vincular uma conta do last.fm para registrar as músicas que você ouvir por aqui na sua "
-                f"lista de músicas tocadas. Experimente usando o comando /lastfm ou {self.prefix_info}lastfm."
+                f"last.fmアカウントを連携して、ここで聴いた曲を再生履歴に記録することができます。"
+                f"/lastfm または {self.prefix_info}lastfm コマンドをお試しください。"
             )
 
         if hint_platforms:
             self.initial_hints.append(
-                "Você pode adicionar/integrar link de perfis/canais do " + " e ".join(hint_platforms) + " para tocar "
-                f"playlists pública que tem no canal/perfil via comando {self.prefix_info}play (sem incluir "
-                "nome/link) ou no comando /play (via preenchimento automático da busca). Experimente usando o "
-                f"comando /fav_manager ou {self.prefix_info}favmanager selecionando a opção \"integrações\"."
+                " や ".join(hint_platforms) + " のプロフィール/チャンネルリンクを追加/連携して、"
+                f"チャンネル/プロフィールにある公開プレイリストを {self.prefix_info}play コマンド（名前/リンクなし）や "
+                "/play コマンド（検索の自動補完機能）で再生することができます。"
+                f"/fav_manager または {self.prefix_info}favmanager コマンドで「連携」オプションを選択してお試しください。"
             )
 
         try:
@@ -646,7 +646,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_create", player=self)
 
     def __str__(self) -> str:
-        return f"Servidor de música atual: {self.node.identifier} (v{self.node.version})"
+        return f"現在の音楽サーバー: {self.node.identifier} (v{self.node.version})"
 
     def __repr__(self):
         return f"<volume={self.volume} " \
@@ -712,15 +712,15 @@ class LavalinkPlayer(wavelink.Player):
 
         if cog and cog.error_report_queue:
 
-            embed.description += f"\n**Fonte:** `{track.info['sourceName']}`" \
-                                 f"\n**Servidor:** `{disnake.utils.escape_markdown(self.guild.name)} [{self.guild.id}]`"
+            embed.description += f"\n**ソース:** `{track.info['sourceName']}`" \
+                                 f"\n**サーバー:** `{disnake.utils.escape_markdown(self.guild.name)} [{self.guild.id}]`"
 
             try:
-                embed.description += f"\n**Canal:** `{disnake.utils.escape_markdown(self.guild.me.voice.channel.name)} [{self.guild.me.voice.channel.id}]`\n"
+                embed.description += f"\n**チャンネル:** `{disnake.utils.escape_markdown(self.guild.me.voice.channel.name)} [{self.guild.me.voice.channel.id}]`\n"
             except:
                 pass
 
-            embed.description += f"**Data:** <t:{int(disnake.utils.utcnow().timestamp())}:F>"
+            embed.description += f"**日時:** <t:{int(disnake.utils.utcnow().timestamp())}:F>"
 
             if self.guild.icon:
                 embed.set_thumbnail(url=self.guild.icon.with_format("png").url)
@@ -758,7 +758,7 @@ class LavalinkPlayer(wavelink.Player):
                     await asyncio.sleep(3 * channel_check_retries)
                     continue
 
-                msg = "O canal de voz foi excluido..."
+                msg = "音声チャンネルが削除されました..."
 
                 if self.static:
                     self.set_command_log(msg, controller=True)
@@ -794,21 +794,21 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     can_connect(vc, self.guild, bot=self.bot)
                 except (GenericError, PoolException) as e:
-                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {e}.", controller=True)
+                    self.set_command_log(f"音声チャンネルへのプレイヤー再接続中にエラーが発生しました: {e}。", controller=True)
                     self.update = True
                 except Exception as e:
-                    self.set_command_log(f"Ocorreu uma falha ao reconectar o player no canal de voz: {repr(e)}.", controller=True)
+                    self.set_command_log(f"音声チャンネルへのプレイヤー再接続中にエラーが発生しました: {repr(e)}。", controller=True)
                     self.update = True
                 else:
                     if (ping := round(self.bot.latency * 1000)) > 250:
-                        voice_msg = f"Reconectei no canal de voz devido a um possível problema de instabilidade ne conexão (ping: {ping}ms)."
+                        voice_msg = f"接続の不安定さの可能性があるため、音声チャンネルに再接続しました（ping: {ping}ms）。"
                     elif self.keep_connected:
-                        voice_msg = f"Notei uma tentativa de me desconectarem do canal <#{vc.id}>."
+                        voice_msg = f"チャンネル <#{vc.id}> から切断しようとする試みを検出しました。"
                     else:
                         voice_msg = None
 
                     if not voice_msg:
-                        self.set_command_log(text=f"O plater foi finalizado por perca de conexão no canal <#{vc.id}>.",
+                        self.set_command_log(text=f"チャンネル <#{vc.id}> での接続が切断されたため、プレイヤーが終了しました。",
                                              emoji="⚠️", controller=True)
                         await self.destroy()
                         return
@@ -816,7 +816,7 @@ class LavalinkPlayer(wavelink.Player):
                     try:
                         await self.connect(vc.id)
                         self.set_command_log(
-                            text=f"{voice_msg}\nCaso realmente queira me desconectar, use o comando/botão: **stop**.",
+                            text=f"{voice_msg}\n本当に切断したい場合は、コマンド/ボタン: **stop** を使用してください。",
                             emoji="⚠️", controller=True)
                         self.update = True
                         await asyncio.sleep(5)
@@ -845,12 +845,12 @@ class LavalinkPlayer(wavelink.Player):
             if event.code == 4022:
                 if self.keep_connected and vc:
                     await asyncio.sleep(5)
-                    self.set_command_log(emoji="⚠️", text=f"Caso queira me desconectar do canal {vc.mention} com o modo 24/7 ativo, use o comando ou o botão **stop/parar**.")
+                    self.set_command_log(emoji="⚠️", text=f"24/7モードが有効なチャンネル {vc.mention} から切断したい場合は、**stop/停止** コマンドまたはボタンを使用してください。")
                     await self.connect(vc.id)
                     self.update = True
                 else:
                     await self.destroy(force=True)
-                    print(f"Bot: {self.bot.user} | Desconectado do canal de voz: {self.guild_id}")
+                    print(f"Bot: {self.bot.user} | 音声チャンネルから切断されました: {self.guild_id}")
                 return
 
             if event.code == 4014 and self.guild.me.voice:
@@ -858,12 +858,12 @@ class LavalinkPlayer(wavelink.Player):
             else:
                 print(
                     ("-" * 15) +
-                    f"\nErro no canal de voz!"
+                    f"\n音声チャンネルでエラーが発生しました!"
                     f"\nBot: {self.bot.user} [{self.bot.user.id}] | " + (
-                        "Online" if self.bot.is_ready() else "Offline") +
-                    f"\nGuild: {self.guild.name} [{self.guild.id}]"
-                    f"\nCanal: {vc.name} [{vc.id}]"
-                    f"\nServer: {self.node.identifier} | code: {event.code} | reason: {event.reason}\n" +
+                        "オンライン" if self.bot.is_ready() else "オフライン") +
+                    f"\nサーバー: {self.guild.name} [{self.guild.id}]"
+                    f"\nチャンネル: {vc.name} [{vc.id}]"
+                    f"\nサーバー: {self.node.identifier} | コード: {event.code} | 理由: {event.reason}\n" +
                     ("-" * 15)
                 )
 
@@ -1007,18 +1007,18 @@ class LavalinkPlayer(wavelink.Player):
                     track = self.current or self.last_track
                     node_info = f"`{event.node.identifier}`" if event.node.identifier == self.node.identifier else f"`{self.node.identifier} | {event.node.identifier}`"
                     embed = disnake.Embed(
-                        description=f"**Falha ao reproduzir música{' (parcial)' if isinstance(track, PartialTrack) else ''}:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
-                                    f"**Causa:** ```java\n{event.cause[:200]}```\n"
-                                    f"**Nível:** `{event.severity}`\n"
-                                    f"**Servidor de música:** {node_info}",
+                        description=f"**曲の再生に失敗しました{' (部分的)' if isinstance(track, PartialTrack) else ''}:\n[{track.title}]({track.uri or track.search_uri})** ```java\n{event.message}```\n"
+                                    f"**原因:** ```java\n{event.cause[:200]}```\n"
+                                    f"**レベル:** `{event.severity}`\n"
+                                    f"**音楽サーバー:** {node_info}",
                         color=disnake.Colour.red())
 
                     error_format = pprint.pformat(event.data)
 
                     async def send_report():
 
-                        print(("-" * 50) + f"\nErro ao reproduzir a música: {track.uri or track.search_uri}\n"
-                                           f"Servidor: {self.node.identifier}\n"
+                        print(("-" * 50) + f"\n曲の再生中にエラーが発生しました: {track.uri or track.search_uri}\n"
+                                           f"サーバー: {self.node.identifier}\n"
                                            f"{error_format}\n" + ("-" * 50))
 
                         await self.report_error(embed, track)
@@ -1029,7 +1029,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     if self.locked:
                         self.set_command_log(
-                            text=f"A reprodução da música falhou (tentando tocar novamente): [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **Causa:** `{event.cause[:50]}`", controller=True)
+                            text=f"曲の再生に失敗しました（再試行中）: [`{fix_characters(track.title, 15)}`](<{track.uri or track.search_uri}>). **原因:** `{event.cause[:50]}`", controller=True)
                         self.update = True
                         await send_report()
                         continue
@@ -1114,7 +1114,7 @@ class LavalinkPlayer(wavelink.Player):
 
                         if new_node:
                             self.native_yt = True
-                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}` o player foi movido para o servidor `{new_node.identifier}`."
+                            txt = f"サーバー `{self.node.identifier}` でのYouTube制限のため、プレイヤーはサーバー `{new_node.identifier}` に移動しました。"
                             if self.controller_mode:
                                 self.set_command_log(txt, emoji="⚠️", controller=True)
                             elif self.text_channel:
@@ -1130,10 +1130,9 @@ class LavalinkPlayer(wavelink.Player):
                             continue
 
                         if not getattr(self, "yt_warn", None):
-                            txt = f"Devido a restrições do youtube no servidor `{self.node.identifier}`. Durante a sessão atual " \
-                                  "será feito uma tentativa de obter a mesma música em outras plataformas de música usando o nome " \
-                                  "das músicas do youtube que estão na fila (talvez a música tocada seja diferente do esperado " \
-                                  "ou até mesmo ignoradas caso não retorne resultados)."
+                            txt = f"サーバー `{self.node.identifier}` でのYouTube制限のため、現在のセッション中は " \
+                                  "キュー内のYouTube曲の名前を使用して他の音楽プラットフォームから同じ曲を取得しようとします " \
+                                  "（再生される曲が予想と異なる場合や、結果が見つからない場合はスキップされることがあります）。"
                             try:
                                 await self.text_channel.send(embed=disnake.Embed(
                                     description=txt, color=self.bot.get_color(self.guild.me)
@@ -1159,7 +1158,7 @@ class LavalinkPlayer(wavelink.Player):
                         "com.github.topi314.lavasrc.mirror.TrackNotFoundException: No mirror found for track",
                     )):
                         embed = disnake.Embed(
-                            description=f"`Ignorando a música` [`{track.title}`](<{track.url}>)`. Pois não houve resultados em outras plataformas de música.`",
+                            description=f"`曲をスキップします` [`{track.title}`](<{track.url}>)`。他の音楽プラットフォームで結果が見つかりませんでした。`",
                             color=self.bot.get_color(self.guild.me)
                         ).set_thumbnail(track.thumb)
 
@@ -1191,7 +1190,7 @@ class LavalinkPlayer(wavelink.Player):
                     self.update = False
 
                     try:
-                        self.set_command_log(text=f"A música [{fix_characters(self.current.single_title, 25)}](<{self.current.uri}>) travou.", emoji="⚠️", controller=True)
+                        self.set_command_log(text=f"曲 [{fix_characters(self.current.single_title, 25)}](<{self.current.uri}>) が停止しました。", emoji="⚠️", controller=True)
                     except:
                         pass
 
@@ -1199,7 +1198,7 @@ class LavalinkPlayer(wavelink.Player):
 
                     continue
 
-                print(f"Unknown Wavelink event: {repr(event)}")
+                print(f"不明なWavelinkイベント: {repr(event)}")
 
             except Exception:
                 traceback.print_exc()
@@ -1239,7 +1238,7 @@ class LavalinkPlayer(wavelink.Player):
         try:
             await self.text_channel.purge(check=check)
         except Exception:
-            print(f"Falha ao limpar mensagens do canal {self.text_channel} [ID: {self.text_channel.id}]:\n"
+            print(f"チャンネル {self.text_channel} [ID: {self.text_channel.id}] のメッセージのクリアに失敗しました:\n"
                   f"{traceback.format_exc()}")
             pass
 
@@ -1270,7 +1269,7 @@ class LavalinkPlayer(wavelink.Player):
             (self.bot.player_static_skins[self.skin_static]
              if self.static else self.bot.player_skins[self.skin]).setup_features(self)
         except:
-            # linha temporária para resolver possíveis problemas com skins custom criadas por usuarios antes desse commit.
+            # このコミット以前にユーザーが作成したカスタムスキンの問題を解決するための一時的な行
             self.auto_update = 0
             self.controller_mode = True
 
@@ -1279,14 +1278,14 @@ class LavalinkPlayer(wavelink.Player):
         hints = list(self.initial_hints)
 
         if self.static:
-            hints.append("É possível fixar músicas/playlists na mensagem do player quando tiver no modo de "
-                         "espera/oscioso para permitir os membros ouvi-las de forma pública. Pra isso use o "
-                         f"comando /fav_manager ou {self.prefix_info}favmanager (apenas membros com permissão "
-                         "de gerenciar servidor podem usar esse recurso).")
+            hints.append("プレイヤーが待機/アイドル状態の時に曲/プレイリストをプレイヤーメッセージに固定して、"
+                         "メンバーが公開で聴けるようにすることができます。"
+                         f"/fav_manager または {self.prefix_info}favmanager コマンドを使用してください"
+                         "（このコマンドはサーバー管理権限を持つメンバーのみが使用できます）。")
 
         elif self.bot.intents.message_content and self.controller_mode:
-            hints.append("Ao criar uma conversa/thread na mensagem do player, será ativado o modo de song-request "
-                         "nela (possibilitando pedir música apenas enviando o nome/link da música na conversa).")
+            hints.append("プレイヤーメッセージでスレッド/会話を作成すると、そこでソングリクエストモードが有効になります"
+                         "（スレッドで曲の名前/リンクを送信するだけで曲をリクエストできます）。")
 
         if len(self.bot.pool.get_guild_bots(self.guild.id)) > 1:
 
@@ -1311,24 +1310,23 @@ class LavalinkPlayer(wavelink.Player):
 
             if bots_in_guild:
                 hints.append(
-                    "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
-                    f"desconectarem ou me interromperem do canal atual, há mais {bots_in_guild} bot{'s'[:bots_in_guild^1]} no servidor que "
-                    f"funciona{'m'[:bots_in_guild^1]} com o meu sistema/comandos (usando o mesmo prefixo/comandos de barra). "
-                    f"Experimente entrar em um canal de voz diferente do meu atual e use o comando "
-                    f"{self.prefix_info}play ou /play."
+                    "別の音声チャンネルで私を使用したい場合、現在のチャンネルから切断したり中断したりする必要はありません。"
+                    f"このサーバーには私のシステム/コマンドで動作する{bots_in_guild}台の追加のBot{'s'[:bots_in_guild^1]}があります"
+                    f"（同じプレフィックス/スラッシュコマンドを使用）。"
+                    f"現在のチャンネルとは別の音声チャンネルに入って、{self.prefix_info}play または /play コマンドをお試しください。"
                 )
 
             elif bots_outside_guild:
                 hints.append(
-                    "Caso algum membro queira me usar em outro canal de voz sem precisar aguardar me "
-                    f"desconectarem ou me interromperem do canal atual. Dá para adicionar mais {bots_outside_guild} bot{'s'[:bots_outside_guild^1]} "
-                    f"extras no servidor atual que funciona(m) com o mesmo sistema/comandos (usando o mesmo "
-                    f"prefixo/comandos de barra). Use o comando {self.prefix_info}invite ou /invite para adicioná-los."
+                    "別の音声チャンネルで私を使用したい場合、現在のチャンネルから切断したり中断したりする必要はありません。"
+                    f"同じシステム/コマンドで動作する{bots_outside_guild}台の追加Bot{'s'[:bots_outside_guild^1]}を"
+                    f"このサーバーに追加できます（同じプレフィックス/スラッシュコマンドを使用）。"
+                    f"{self.prefix_info}invite または /invite コマンドを使用して追加してください。"
                 )
 
         if self.controller_mode:
             hints.append(
-                "Ao clicar nesse emoji 🎛️ das mensagens de alguns comandos você será redirecionado para o player-controller."
+                "🎛️ 絵文字をクリックすると、プレイヤーコントローラーにリダイレクトされます。"
             )
 
         random.shuffle(hints)
@@ -1371,7 +1369,7 @@ class LavalinkPlayer(wavelink.Player):
                 self.auto_pause = False
 
                 try:
-                    self.set_command_log(emoji="🔋", text="O modo **[economia de recursos]** foi desativado.", controller=True)
+                    self.set_command_log(emoji="🔋", text="**[省電力モード]** が無効になりました。", controller=True)
                     if self.current:
                         self.queue.insert(0, self.current)
                     await self.process_next(start_position=self.position)
@@ -1431,8 +1429,8 @@ class LavalinkPlayer(wavelink.Player):
                 pass
             self.set_command_log(
                 emoji="🪫",
-                text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                     f"um membro entrar no canal <#{self.channel_id}>).", controller=True
+                text="プレイヤーは**[省電力モード]**で動作しています（メンバーがチャンネル "
+                     f"<#{self.channel_id}> に参加すると自動的に無効になります）。", controller=True
             )
             self.update = True
             self.start_auto_skip()
@@ -1451,7 +1449,7 @@ class LavalinkPlayer(wavelink.Player):
             if vc and [m for m in vc.members if not m.bot]:
                 return
 
-            msg = "O player foi desligado por falta de membros no canal" + (f" <#{vc.id}>" if vc else '') + "..."
+            msg = "チャンネルにメンバーがいないため、プレイヤーが停止しました" + (f" <#{vc.id}>" if vc else '') + "..."
 
             self.command_log = msg
 
@@ -1508,7 +1506,7 @@ class LavalinkPlayer(wavelink.Player):
                             result = await self.bot.spotify.track_search(tracks_search[0].author, limit=100)
                             break
                         except Exception as e:
-                            self.set_command_log(emoji="⚠️", text=f"Falha ao obter músicas recomendadas do spotify, tentativa {i+1} de 3.", controller=True)
+                            self.set_command_log(emoji="⚠️", text=f"Spotifyからのおすすめ曲の取得に失敗しました。{i+1}回目/3回。", controller=True)
                             self.update = True
                             traceback.print_exc()
                             exception = e
@@ -1730,18 +1728,18 @@ class LavalinkPlayer(wavelink.Player):
 
                 if exception:
                     if isinstance(exception, wavelink.TrackLoadError):
-                        error_msg = f"**Causa:** ```java\n{exception.cause}```\n" \
-                                    f"**Mensagem:** `\n{exception.message}`\n" \
-                                    f"**Nível:** `{exception.severity}`\n" \
-                                    f"**Servidor de música:** `{self.node.identifier}`"
+                        error_msg = f"**原因:** ```java\n{exception.cause}```\n" \
+                                    f"**メッセージ:** `\n{exception.message}`\n" \
+                                    f"**レベル:** `{exception.severity}`\n" \
+                                    f"**音楽サーバー:** `{self.node.identifier}`"
                     else:
-                        error_msg = f"**Detalhes:** ```py\n{repr(exception)}```"
+                        error_msg = f"**詳細:** ```py\n{repr(exception)}```"
                 else:
-                    error_msg = "Não houve resultados relacionados as músicas tocadas..."
+                    error_msg = "再生した曲に関連する結果が見つかりませんでした..."
 
                 try:
                     embed = disnake.Embed(
-                        description=f"**Falha ao obter dados do autoplay:**\n"
+                        description=f"**オートプレイデータの取得に失敗しました:**\n"
                                     f"{error_msg}",
                         color=disnake.Colour.red())
                     await self.text_channel.send(embed=embed, delete_after=10)
@@ -1925,7 +1923,7 @@ class LavalinkPlayer(wavelink.Player):
                             try:
                                 await self.text_channel.send(
                                     embed=disnake.Embed(
-                                        description=f"Houve um problema ao tentar processar a música [{track.title}]({track.uri})... "
+                                        description=f"曲の処理中に問題が発生しました [{track.title}]({track.uri})... "
                                                     f"```py\n{repr(e)}```",
                                         color=self.bot.get_color()
                                     )
@@ -1943,8 +1941,8 @@ class LavalinkPlayer(wavelink.Player):
                             try:
                                 await self.text_channel.send(
                                     embed=disnake.Embed(
-                                        description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                                    f"Pulando para a próxima música...",
+                                        description=f"曲 [{track.title}]({track.uri}) は利用できません...\n"
+                                                    f"次の曲にスキップします...",
                                         color=self.bot.get_color()
                                     ), delete_after=10
                                 )
@@ -2050,8 +2048,8 @@ class LavalinkPlayer(wavelink.Player):
                                     if exceptions:
                                         print(exceptions)
                                     self.played.append(track)
-                                    self.set_command_log(emoji="⚠️", text=f"A música [`{track.title[:15]}`](<{track.uri}>) será pulada devido a falta de resultado "
-                                                                          "em outras plataformas de música.", controller=True)
+                                    self.set_command_log(emoji="⚠️", text=f"曲 [`{track.title[:15]}`](<{track.uri}>) は他の音楽プラットフォームで"
+                                                                          "結果が見つからないためスキップされます。", controller=True)
                                     await asyncio.sleep(3)
                                     self.locked = False
                                     self.native_yt = True
@@ -2064,7 +2062,7 @@ class LavalinkPlayer(wavelink.Player):
                                 self.bot.pool.partial_track_cache[cache_key] = [alt_track]
                                 self.set_command_log(
                                     emoji="▶️",
-                                    text=f"Tocando música obtida via metadados: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| Por: {fix_characters(alt_track.author, 15)}`", controller=True
+                                    text=f"メタデータから取得した曲を再生中: [`{fix_characters(alt_track.title, 20)}`](<{alt_track.uri}>) `| By: {fix_characters(alt_track.author, 15)}`", controller=True
                                 )
                                 self.native_yt = True
 
@@ -2076,8 +2074,8 @@ class LavalinkPlayer(wavelink.Player):
                         try:
                             await self.text_channel.send(
                                 embed=disnake.Embed(
-                                    description=f"A música [{track.title}]({track.uri}) não está disponível...\n"
-                                                "Pulando para a próxima música...",
+                                    description=f"曲 [{track.title}]({track.uri}) は利用できません...\n"
+                                                "次の曲にスキップします...",
                                     color=self.bot.get_color()
                                 ), delete_after=10
                             )
@@ -2119,13 +2117,13 @@ class LavalinkPlayer(wavelink.Player):
                 self.bot.loop.create_task(self.node.on_event(TrackStart({"track": track, "player": self,"node": self.node})))
                 self.set_command_log(
                     emoji="🪫",
-                    text="O player está no modo **[economia de recursos]** (esse modo será desativado automaticamente quando "
-                         f"um membro entrar no canal <#{self.channel_id}>).", controller=True
+                    text="プレイヤーは**[省電力モード]**で動作しています（メンバーがチャンネル "
+                         f"<#{self.channel_id}> に参加すると自動的に無効になります）。", controller=True
                 )
             else:
                 await self.play(track, start=start_position, temp_id=encoded_track)
 
-            # TODO: rever essa parte caso adicione função de ativar track loops em músicas da fila
+            # TODO: キューの曲でトラックループを有効にする機能を追加する場合はこの部分を再確認
             if self.loop != "current" or force_np or (not self.controller_mode and self.current.track_loops == 0):
 
                 if start_position:
@@ -2140,7 +2138,7 @@ class LavalinkPlayer(wavelink.Player):
             print(traceback.format_exc())
 
             embed = disnake.Embed(
-                description="**Ocorreu um erro ao reproduzir a música:**"
+                description="**曲の再生中にエラーが発生しました:**"
             )
 
             if self.current:
@@ -2156,7 +2154,7 @@ class LavalinkPlayer(wavelink.Player):
 
             cog = self.bot.get_cog("ErrorHandler")
             if cog:
-                embed.add_field(name="Servidor:", value=f"{self.guild.name} [{self.guild.id}]")
+                embed.add_field(name="サーバー:", value=f"{self.guild.name} [{self.guild.id}]")
                 try:
                     await cog.send_webhook(
                         embed=embed,
@@ -2236,8 +2234,8 @@ class LavalinkPlayer(wavelink.Player):
 
         controller_opts = [
             disnake.SelectOption(
-                emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="Adicionar música",
-                description=f"Tocar nova música/playlist."
+                emoji="<:add_music:588172015760965654>", value=PlayerControls.add_song, label="曲を追加",
+                description=f"新しい曲/プレイリストを再生します。"
             ),
         ]
 
@@ -2251,13 +2249,13 @@ class LavalinkPlayer(wavelink.Player):
             controller_opts.extend(
                 [
                     disnake.SelectOption(
-                        emoji="⏮️", value=PlayerControls.back, label="Voltar",
-                        description=f"Ouvir novamente: {play_txt[:31]}"
+                        emoji="⏮️", value=PlayerControls.back, label="戻る",
+                        description=f"もう一度聴く: {play_txt[:31]}"
                     ),
                     disnake.SelectOption(
-                        label="Ativar a reprodução automática", emoji="🔄",
+                        label="自動再生を有効にする", emoji="🔄",
                         value=PlayerControls.autoplay,
-                        description=f"Tocar música relacionadas a: {play_txt[:19]}"
+                        description=f"関連曲を再生: {play_txt[:19]}"
                     ),
                 ]
             )
@@ -2265,21 +2263,21 @@ class LavalinkPlayer(wavelink.Player):
         if played > 1:
             controller_opts.append(
                 disnake.SelectOption(
-                    emoji="↪️", value=PlayerControls.readd, label="Tocar novamente",
-                    description=f"Tocar todas as músicas novamente ({played})"
+                    emoji="↪️", value=PlayerControls.readd, label="再度再生",
+                    description=f"すべての曲をもう一度再生 ({played})"
                 )
             )
 
         controller_opts.append(
             disnake.SelectOption(
-                emoji="🛑", value=PlayerControls.stop, label="Finalizar",
-                description=f"Finalizar o player e me desconectar do canal."
+                emoji="🛑", value=PlayerControls.stop, label="終了",
+                description=f"プレイヤーを終了してチャンネルから切断します。"
             ),
         )
 
         components = [
             disnake.ui.Select(
-                placeholder="Executar uma ação:", options=controller_opts,
+                placeholder="アクションを実行:", options=controller_opts,
                 custom_id="musicplayer_dropdown_idle", min_values=0, max_values=1, required = False
             )
         ]
@@ -2292,22 +2290,22 @@ class LavalinkPlayer(wavelink.Player):
         if opts:
             components.append(
                 disnake.ui.Select(
-                    placeholder="Tocar música/playlist do servidor.",
+                    placeholder="サーバーの曲/プレイリストを再生。",
                     options=opts, custom_id="player_guild_pin"
                 )
             )
 
         embed = disnake.Embed(
-            description="**Não há músicas na fila... Adicione uma música ou use uma das opções abaixo.**",
+            description="**キューに曲がありません... 曲を追加するか、以下のオプションを使用してください。**",
             color=self.bot.get_color(self.guild.me)
         )
 
         embed.set_thumbnail(url=self.bot.user.display_avatar.replace(size=512, static_format="png").url)
 
         if not self.keep_connected:
-            embed.description += "\n\n**Nota:** `O Player será desligado automaticamente` " \
+            embed.description += "\n\n**注意:** `プレイヤーは自動的に停止します` " \
                         f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(seconds=self.bot.config['IDLE_TIMEOUT'])).timestamp())}:R> " \
-                        f"`caso nenhuma ação seja executada...`"
+                        f"`アクションが実行されない場合...`"
 
         kwargs = {
             "embed": embed,
@@ -2318,7 +2316,7 @@ class LavalinkPlayer(wavelink.Player):
 
         try:
             if isinstance(self.text_channel.parent, disnake.ForumChannel) and self.static:
-                kwargs["content"] = "💤 Aguardando por novas músicas..."
+                kwargs["content"] = "💤 新しい曲を待っています..."
         except:
             pass
 
@@ -2370,7 +2368,7 @@ class LavalinkPlayer(wavelink.Player):
 
         await asyncio.sleep(self.bot.config["IDLE_TIMEOUT"])
 
-        msg = "💤 **⠂O player foi desligado por inatividade...**"
+        msg = "💤 **⠂非アクティブのためプレイヤーが停止しました...**"
 
         try:
             if self.static or self.has_thread:
@@ -2417,7 +2415,7 @@ class LavalinkPlayer(wavelink.Player):
             if requester:
                 requester_name = str(requester.display_name)
             else:
-                requester_name = "Membro desconhecido"
+                requester_name = "不明なメンバー"
 
             if not self.current.is_stream and (not self.auto_pause or not self.paused):
                 if isinstance(self.guild.me.voice.channel, disnake.StageChannel):
@@ -2425,15 +2423,15 @@ class LavalinkPlayer(wavelink.Player):
                 else:
                     timestamp = f"<t:{int((disnake.utils.utcnow() + datetime.timedelta(milliseconds=self.current.duration - self.position)).timestamp())}:R>"
             else:
-                timestamp = ("pausado" if (self.paused) else "🔴") + (f" <t:{int(disnake.utils.utcnow().timestamp())}:R>") if not self.current.is_stream else ""
+                timestamp = ("一時停止" if (self.paused) else "🔴") + (f" <t:{int(disnake.utils.utcnow().timestamp())}:R>") if not self.current.is_stream else ""
 
             msg = self.stage_title_template \
                 .replace("{track.title}", self.current.single_title) \
                 .replace("{track.author}", self.current.authors_string) \
                 .replace("{track.duration}",
                          time_format(self.current.duration) if not self.current.is_stream else "Livestream") \
-                .replace("{track.source}", self.current.info.get("sourceName", "desconhecido")) \
-                .replace("{track.playlist}", self.current.playlist_name or "Sem playlist") \
+                .replace("{track.source}", self.current.info.get("sourceName", "不明")) \
+                .replace("{track.playlist}", self.current.playlist_name or "プレイリストなし") \
                 .replace("{requester.name}", requester_name) \
                 .replace("{requester.id}", str(self.current.requester)) \
                 .replace("{track.timestamp}", timestamp)
@@ -2450,7 +2448,7 @@ class LavalinkPlayer(wavelink.Player):
                     msg = msg[:107] + "..."
 
             if not msg:
-                msg = "Status: Aguardando por novas músicas."
+                msg = "ステータス: 新しい曲を待っています。"
             else:
                 emojis = emoji_pattern.findall(msg)
                 for emoji in emojis:
@@ -2482,7 +2480,7 @@ class LavalinkPlayer(wavelink.Player):
             except Exception as e:
                 if isinstance(e, disnake.Forbidden):
                     self.stage_title_event = False
-                    self.set_command_log(emoji="❌", text="O status automático foi desativado devido a falta de permissão pra alterar status.", controller=True)
+                    self.set_command_log(emoji="❌", text="ステータス変更の権限がないため、自動ステータスが無効になりました。", controller=True)
                     self.update = True
                 print(traceback.format_exc())
 
@@ -2610,12 +2608,13 @@ class LavalinkPlayer(wavelink.Player):
 
         else:
 
-            # nenhum controle de botão foi definido na skin (será usado os botões padrões).
+            # スキンでボタンコントロールが定義されていない場合（デフォルトのボタンが使用されます）
             if data.get("components") is None:
 
-                # Aviso: Não modifique os components abaixo, prefira copiar uma das skins da pasta utils -> music -> skins
-                # e deixá-la com outro nome (sem acentos, espaços, caracteres especiais) e modifique-as a seu gosto.
-                # Caso queira deixar uma skin customizada por padrão adicione/modifique a config DEFAULT_SKIN="tuaskin"
+                # 注意: 以下のコンポーネントを変更しないでください。utils -> music -> skins フォルダ内の
+                # スキンをコピーして別の名前（アクセント、スペース、特殊文字なし）で保存し、
+                # お好みに応じて変更することをお勧めします。
+                # カスタムスキンをデフォルトにしたい場合は、設定 DEFAULT_SKIN="yourskin" を追加/変更してください。
 
                 data["components"] = [
                     disnake.ui.Button(
@@ -2630,66 +2629,66 @@ class LavalinkPlayer(wavelink.Player):
                         emoji="<:music_queue:703761160679194734>", custom_id=PlayerControls.queue,
                         disabled=not (self.queue or self.queue_autoplay)),
                     disnake.ui.Select(
-                        placeholder="Mais opções:",
+                        placeholder="その他のオプション:",
                         custom_id="musicplayer_dropdown_inter",
                         min_values=0, max_values=1, required = False,
                         options=[
                             disnake.SelectOption(
-                                label="Adicionar música", emoji="<:add_music:588172015760965654>",
+                                label="曲を追加", emoji="<:add_music:588172015760965654>",
                                 value=PlayerControls.add_song,
-                                description="Adicionar uma música/playlist na fila."
+                                description="曲/プレイリストをキューに追加します。"
                             ),
                             disnake.SelectOption(
-                                label="Adicionar nos seus favoritos", emoji="💗",
+                                label="お気に入りに追加", emoji="💗",
                                 value=PlayerControls.add_favorite,
-                                description="Adicionar a música atual nos seus favoritos."
+                                description="現在の曲をお気に入りに追加します。"
                             ),
                             disnake.SelectOption(
-                                label="Tocar do inicio", emoji="⏪",
+                                label="最初から再生", emoji="⏪",
                                 value=PlayerControls.seek_to_start,
-                                description="Voltar o tempo da música atual para o inicio."
+                                description="現在の曲の時間を最初に戻します。"
                             ),
                             disnake.SelectOption(
-                                label=f"Volume: {self.volume}%", emoji="🔊",
+                                label=f"音量: {self.volume}%", emoji="🔊",
                                 value=PlayerControls.volume,
-                                description="Ajustar volume."
+                                description="音量を調整します。"
                             ),
                             disnake.SelectOption(
-                                label="Misturar", emoji="🔀",
+                                label="シャッフル", emoji="🔀",
                                 value=PlayerControls.shuffle,
-                                description="Misturar as músicas da fila."
+                                description="キューの曲をシャッフルします。"
                             ),
                             disnake.SelectOption(
-                                label="Readicionar", emoji="🎶",
+                                label="再追加", emoji="🎶",
                                 value=PlayerControls.readd,
-                                description="Readicionar as músicas tocadas de volta na fila."
+                                description="再生済みの曲をキューに戻します。"
                             ),
                             disnake.SelectOption(
-                                label="Repetição", emoji="🔁",
+                                label="リピート", emoji="🔁",
                                 value=PlayerControls.loop_mode,
-                                description="Ativar/Desativar repetição da música/fila."
+                                description="曲/キューのリピートを有効化/無効化します。"
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.nightcore else "Ativar") + " o efeito nightcore", emoji="🇳",
+                                label=("無効化" if self.nightcore else "有効化") + " ナイトコアエフェクト", emoji="🇳",
                                 value=PlayerControls.nightcore,
-                                description="Efeito que aumenta velocidade e tom da música."
+                                description="曲の速度とピッチを上げるエフェクトです。"
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.autoplay else "Ativar") + " a reprodução automática",
+                                label=("無効化" if self.autoplay else "有効化") + " 自動再生",
                                 emoji="🔄",
                                 value=PlayerControls.autoplay,
-                                description="Sistema de reprodução de música automática quando a fila tiver vazia."
+                                description="キューが空になった時に自動で曲を再生するシステムです。"
                             ),
                             disnake.SelectOption(
                                 label="Last.fm scrobble", emoji="<:Lastfm:1278883704097341541>",
                                 value=PlayerControls.lastfm_scrobble,
-                                description="Ativar/desativar o scrobble/registro de músicas na sua conta do last.fm."
+                                description="last.fmアカウントへの曲の記録を有効化/無効化します。"
                             ),
                             disnake.SelectOption(
-                                label=("Desativar" if self.restrict_mode else "Ativar") + " o modo restrito",
+                                label=("無効化" if self.restrict_mode else "有効化") + " 制限モード",
                                 emoji="🔐",
                                 value=PlayerControls.restrict_mode,
-                                description="Apenas DJ's/Staff's podem usar comandos restritos."
+                                description="DJ/スタッフのみが制限されたコマンドを使用できます。"
                             ),
                         ]
                     ),
@@ -2699,13 +2698,13 @@ class LavalinkPlayer(wavelink.Player):
                     if (queue := self.queue or self.queue_autoplay):
                         data["components"].append(
                             disnake.ui.Select(
-                                placeholder="Próximas músicas:",
+                                placeholder="次の曲:",
                                 custom_id="musicplayer_queue_dropdown",
                                 min_values=0, max_values=1, required = False,
                                 options=[
                                     disnake.SelectOption(
                                         label=fix_characters(f"{n + 1}. {t.single_title}", 47),
-                                        description=fix_characters(f"[{time_format(t.duration) if not t.is_stream else '🔴 Live'}]. {t.authors_string}", 47),
+                                        description=fix_characters(f"[{time_format(t.duration) if not t.is_stream else '🔴 ライブ'}]. {t.authors_string}", 47),
                                         value=f"{n:02d}.{t.title[:96]}"
                                     ) for n, t in enumerate(itertools.islice(queue, 25))
                                 ]
@@ -2715,36 +2714,36 @@ class LavalinkPlayer(wavelink.Player):
                 if self.current.ytid and self.node.lyric_support:
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Visualizar letras", emoji="📃",
+                            label="歌詞を表示", emoji="📃",
                             value=PlayerControls.lyrics,
-                            description="Obter letra da música atual."
+                            description="現在の曲の歌詞を取得します。"
                         )
                     )
 
                 if self.mini_queue_feature:
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Mini-fila do player", emoji="<:music_queue:703761160679194734>",
+                            label="ミニキュー", emoji="<:music_queue:703761160679194734>",
                             value=PlayerControls.miniqueue,
-                            description="Ativar/Desativar a mini-fila do player."
+                            description="プレイヤーのミニキューを有効化/無効化します。"
                         )
                     )
 
                 if isinstance(self.last_channel, disnake.VoiceChannel):
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Status automático", emoji="📢",
+                            label="自動ステータス", emoji="📢",
                             value=PlayerControls.set_voice_status,
-                            description="Configurar o status automático do canal de voz."
+                            description="音声チャンネルの自動ステータスを設定します。"
                         )
                     )
 
                 if not self.static and not self.has_thread:
                     data["components"][5].options.append(
                         disnake.SelectOption(
-                            label="Song-Request Thread", emoji="💬",
+                            label="ソングリクエストスレッド", emoji="💬",
                             value=PlayerControls.song_request_thread,
-                            description="Criar uma thread/conversa temporária para pedir músicas usando apenas o nome/link."
+                            description="名前/リンクだけで曲をリクエストできる一時スレッドを作成します。"
                         )
                     )
 
@@ -2821,7 +2820,7 @@ class LavalinkPlayer(wavelink.Player):
                                     if self.text_channel.owner_id == self.bot.user.id:
                                         await self.text_channel.edit(archived=False)
                                     else:
-                                        await self.text_channel.send("Desarquivando o tópico.", delete_after=2)
+                                        await self.text_channel.send("トピックをアーカイブ解除しています。", delete_after=2)
 
                                 await self.message.edit(allowed_mentions=self.allowed_mentions, **data)
                                 await asyncio.sleep(0.5)
@@ -2829,7 +2828,7 @@ class LavalinkPlayer(wavelink.Player):
                                 #elif ((
                                 #              self.text_channel.archive_timestamp - disnake.utils.utcnow()).total_seconds() / 60) < (
                                 #thread_archive_time[self.text_channel.auto_archive_duration]):
-                                #    await self.text_channel.send("Evitando o tópico auto-arquivar...", delete_after=2)
+                                #    await self.text_channel.send("トピックの自動アーカイブを防止しています...", delete_after=2)
 
                             elif not self.text_channel.permissions_for(
                                     self.guild.me).send_messages or not self.text_channel.permissions_for(
@@ -2844,7 +2843,7 @@ class LavalinkPlayer(wavelink.Player):
                         print(traceback.format_exc())
                         if self.static or self.has_thread:
                             self.set_command_log(
-                                f"{(interaction.author.mention + ' ') if interaction else ''}houve um erro na interação: {repr(e)}",
+                                f"{(interaction.author.mention + ' ') if interaction else ''}インタラクションでエラーが発生しました: {repr(e)}",
                                 "⚠️", controller=True)
                             self.update = True
                             return
@@ -3077,7 +3076,7 @@ class LavalinkPlayer(wavelink.Player):
                                         await channel.send(
                                             embed=disnake.Embed(
                                                 color=self.bot.get_color(self.guild.me),
-                                                description="**A sessão de pedido de música da conversa atual foi encerrada.**",
+                                                description="**現在の会話のソングリクエストセッションが終了しました。**",
                                             )
                                         )
                                     except:
@@ -3092,7 +3091,7 @@ class LavalinkPlayer(wavelink.Player):
                                 await channel.edit(**kwargs)
                             except Exception:
                                 print(
-                                    f"Falha ao arquivar thread do servidor: {self.guild.name}\n{traceback.format_exc()}")
+                                    f"サーバーのスレッドのアーカイブに失敗しました: {self.guild.name}\n{traceback.format_exc()}")
 
                     elif inter:
 
@@ -3315,7 +3314,7 @@ class LavalinkPlayer(wavelink.Player):
                     selected_track = tracks[0]
                 except:
                     if exceptions:
-                        print("Falha ao resolver PartialTrack:\n" + "\n".join(repr(e) for e in exceptions))
+                        print("PartialTrackの解決に失敗しました:\n" + "\n".join(repr(e) for e in exceptions))
                     return
 
             track.id = selected_track.id
@@ -3339,8 +3338,8 @@ class LavalinkPlayer(wavelink.Player):
         except Exception as e:
             traceback.print_exc()
             embed = disnake.Embed(
-                description=f"**Falha ao obter informação de PartialTrack:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
-                            f"**Servidor de música:** `{self.node.identifier}`",
+                description=f"**PartialTrackの情報取得に失敗しました:\n[{track.title}]({track.uri or track.search_uri})** ```py\n{repr(e)}```\n"
+                            f"**音楽サーバー:** `{self.node.identifier}`",
                 color=disnake.Colour.red())
             await self.report_error(embed, track)
 
@@ -3361,7 +3360,7 @@ class LavalinkPlayer(wavelink.Player):
             original_identifier = str(self.node.identifier)
 
             self.set_command_log(
-                txt or "Não há servidores de música disponível. Irei fazer algumas tentativas de conectar em um novo servidor de música.",
+                txt or "利用可能な音楽サーバーがありません。新しい音楽サーバーへの接続を試みます。",
                 emoji="⏰", controller=True
             )
             self.update = True
@@ -3395,7 +3394,7 @@ class LavalinkPlayer(wavelink.Player):
                         can_connect(self.last_channel, self.guild, bot=self.bot)
                     except Exception as e:
                         print(traceback.format_exc())
-                        self.set_command_log(f"O player foi finalizado devido ao erro: {e}", controller=True)
+                        self.set_command_log(f"エラーのためプレイヤーが終了しました: {e}", controller=True)
                         await self.destroy()
                         return
                     await self.connect(self.last_channel.id)
@@ -3415,9 +3414,9 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     if not self.auto_pause:
                         if original_identifier != node.identifier:
-                            txt = f"O player foi movido para o servidor de música **{node.identifier}**."
+                            txt = f"プレイヤーが音楽サーバー **{node.identifier}** に移動しました。"
                         else:
-                            txt = f"O player foi reconectado no servidor de músca **{self.node.identifier}**"
+                            txt = f"プレイヤーが音楽サーバー **{self.node.identifier}** に再接続しました。"
                         self.set_command_log(emoji="📶", text=txt, controller=True)
                         self.update = True
                 except:
@@ -3467,7 +3466,7 @@ class LavalinkPlayer(wavelink.Player):
                 try:
                     users = voice_channel.voice_states
                 except AttributeError:
-                    # TODO: Investigar possível bug ao mover o bot de canal pelo discord.
+                    # TODO: Discordでボットをチャンネル間で移動する際の潜在的なバグを調査する。
                     return
 
             thumb = self.bot.user.display_avatar.replace(
@@ -3696,7 +3695,7 @@ class LavalinkPlayer(wavelink.Player):
         self.bot.dispatch("player_destroy", player=self)
 
     #######################
-    #### Filter Stuffs ####
+    #### フィルター関連 ####
     #######################
 
     async def seek(self, position: int = 0) -> None:
