@@ -5619,82 +5619,24 @@ class Music(commands.Cog):
 
                 user_data = await self.bot.get_global_data(id_=interaction.user.id, db_name=DBModel.users)
 
-                modal_components = []
-
-                if user_data["fav_links"]:
-
-                    fav_opts = []
-
-                    for k, v in list(user_data["fav_links"].items())[:25]:
-                        emoji, platform = music_source_emoji_url(v)
-                        fav_opts.append(
-                            disnake.SelectOption(
-                                label=fix_characters(k, 35),
-                                value=f"> fav: {k}",
-                                description=f"⭐ -> {platform}",
-                                emoji=emoji
-                            )
-                        )
-
-                    modal_components.append(
-                        disnake.ui.Label(
-                            text="⭐⠂お気に入り:",
-                            component=disnake.ui.StringSelect(
-                                options=fav_opts, min_values=0, custom_id="fav_links"
-                            )
-                        ),
-                    )
-
-                if user_data["integration_links"]:
-
-                    integration_opts = []
-
-                    update = False
-
-                    for k, v in list(user_data["integration_links"].items())[:25]:
-
-                        if not isinstance(v, dict):
-                            v = {"url": v, "avatar": None}
-                            user_data["integration_links"][k] = v
-                            update = True
-
-                        emoji, platform = music_source_emoji_url(v["url"])
-
-                        integration_opts.append(
-                            disnake.SelectOption(
-                                label=fix_characters(k[6:], 35),
-                                value=f"> itg: {k}",
-                                description=f"💠 -> {platform}",
-                                emoji=emoji
-                            )
-                        )
-
-                    modal_components.append(
-                        disnake.ui.Label(
-                            text="💠⠂連携:",
-                            component=disnake.ui.StringSelect(
-                                options=integration_opts, min_values=0, custom_id="integration_links"
-                            )
-                        )
-                    )
-
-                    if update:
-                        await self.bot.update_global_data(interaction.author.id, user_data, db_name=DBModel.users)
+                has_fav = bool(user_data["fav_links"])
 
                 modal_components = [
-                   disnake.ui.Label(
-                       text="名前またはyoutube/spotify/soundcloudのリンク...",
-                       component=disnake.ui.TextInput(
-                           custom_id="song_input", max_length=150, required=not modal_components
-                       )
-                   ),
-                   disnake.ui.Label(
-                       text="キュー内の位置（番号）。",
-                       component=disnake.ui.TextInput(
-                           custom_id="song_position", max_length=3, required=False
-                       )
-                   )
-                ] + modal_components
+                    disnake.ui.TextInput(
+                        label="曲名またはURL",
+                        placeholder="名前またはyoutube/spotify/soundcloudのリンク...",
+                        custom_id="song_input",
+                        max_length=150,
+                        required=not has_fav
+                    ),
+                    disnake.ui.TextInput(
+                        label="キュー内の位置（番号）",
+                        placeholder="任意: キュー内の位置を指定",
+                        custom_id="song_position",
+                        max_length=3,
+                        required=False
+                    )
+                ]
 
                 await interaction.response.send_modal(
                     title="曲をリクエストする",
