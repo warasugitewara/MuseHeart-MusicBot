@@ -1640,7 +1640,7 @@ class Music(commands.Cog):
                             custom_id=f"track_selection{add_id}",
                             min_values=1,
                             max_values=len(tracks),
-                            required = False,
+
                             options=[
                                 disnake.SelectOption(
                                     label=f"{n+1}. {t.title[:96]}",
@@ -5640,7 +5640,7 @@ class Music(commands.Cog):
                         disnake.ui.Label(
                             text="⭐⠂お気に入り:",
                             component=disnake.ui.StringSelect(
-                                options=fav_opts, required=False, min_values=0, custom_id="fav_links"
+                                options=fav_opts, min_values=0, custom_id="fav_links"
                             )
                         ),
                     )
@@ -5673,7 +5673,7 @@ class Music(commands.Cog):
                         disnake.ui.Label(
                             text="💠⠂連携:",
                             component=disnake.ui.StringSelect(
-                                options=integration_opts, required=False, min_values=0, custom_id="integration_links"
+                                options=integration_opts, min_values=0, custom_id="integration_links"
                             )
                         )
                     )

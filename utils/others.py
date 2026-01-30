@@ -432,7 +432,7 @@ async def send_idle_embed(
             disnake.ui.Select(
                 placeholder="サーバーの曲/プレイリスト",
                 options=opts, custom_id="player_guild_pin",
-                min_values=0, max_values=1, required = False,
+                min_values=0, max_values=1,
             )
         )
 

@@ -111,7 +111,7 @@ class ClassicStaticSkin:
             disnake.ui.Select(
                 placeholder="その他のオプション:",
                 custom_id="musicplayer_dropdown_inter",
-                min_values=0, max_values=1, required = False,
+                min_values=0, max_values=1,
                 options=[
                     disnake.SelectOption(
                         label="曲を追加", emoji="<:add_music:588172015760965654>",
@@ -177,7 +177,7 @@ class ClassicStaticSkin:
                 disnake.ui.Select(
                     placeholder="次の曲:",
                     custom_id="musicplayer_queue_dropdown",
-                    min_values=0, max_values=1, required = False,
+                    min_values=0, max_values=1,
                     options=[
                         disnake.SelectOption(
                             label=fix_characters(f"{n+1}. {t.single_title}", 47),
